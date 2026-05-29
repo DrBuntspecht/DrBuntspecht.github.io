@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Dr. Buntspecht – Mainz</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --cream: #f5f0e8;
+  --warm: #e8dcc8;
+  --red: #c0392b;
+  --red-dark: #922b21;
+  --gold: #c9a84c;
+  --gold-light: #e8c96a;
+  --brown: #5d4037;
+  --ink: #1a1008;
+  --muted: #7a6a58;
+  --surface: rgba(245,240,232,0.92);
+  --glass: rgba(255,255,255,0.08);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--ink);
+  color: var(--ink);
+  font-family: 'Crimson Pro', Georgia, serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── HERO ─── */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* SVG Background */
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.hero-bg svg {
+  width: 100%; height: 100%;
+  position: absolute; inset: 0;
+}
+
+/* Gradient overlay */
+.hero-overlay {
+  position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(
+    to bottom,
+    rgba(26,16,8,0.15) 0%,
+    rgba(26,16,8,0.05) 40%,
+    rgba(26,16,8,0.5) 75%,
+    rgba(26,16,8,0.95) 100%
+  );
+}
+
+/* ─── NAVBAR ─── */
+.navbar {
+  position: relative; z-index: 10;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 24px 32px;
+}
+
+.nav-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--cream);
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+}
+.nav-logo span { color: var(--gold); }
+
+.nav-actions { display: flex; gap: 10px; align-items: center; }
+
+.btn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 9px 18px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.3px;
+}
+.btn:active { transform: scale(0.96); }
+
+.btn-ghost {
+  background: rgba(245,240,232,0.12);
+  color: var(--cream);
+  border: 1px solid rgba(245,240,232,0.25);
+  backdrop-filter: blur(8px);
+}
+.btn-ghost:hover { background: rgba(245,240,232,0.2); }
+
+.btn-primary {
+  background: var(--red);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(192,57,43,0.4);
+}
+.btn-primary:hover { background: var(--red-dark); box-shadow: 0 6px 20px rgba(192,57,43,0.5); }
+
+.btn-gold {
+  background: var(--gold);
+  color: var(--ink);
+  font-weight: 600;
+}
+.btn-gold:hover { background: var(--gold-light); }
+
+/* ─── HERO CONTENT ─── */
+.hero-content {
+  position: relative; z-index: 5;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 32px 48px;
+}
+
+.hero-eyebrow {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+
+.hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(42px, 8vw, 80px);
+  font-weight: 900;
+  line-height: 0.95;
+  color: var(--cream);
+  text-shadow: 0 4px 30px rgba(0,0,0,0.4);
+  margin-bottom: 16px;
+}
+.hero-title em {
+  font-style: italic;
+  color: var(--gold);
+}
+
+.hero-sub {
+  font-size: 18px;
+  font-weight: 300;
+  color: rgba(245,240,232,0.75);
+  max-width: 480px;
+  line-height: 1.5;
+  margin-bottom: 32px;
+}
+
+/* ─── INFO CARDS ROW ─── */
+.info-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  position: relative; z-index: 5;
+  padding: 0 32px;
+  margin-bottom: -60px;
+}
+
+@media (max-width: 600px) {
+  .info-row { grid-template-columns: 1fr; padding: 0 20px; }
+  .hero-content { padding: 0 20px 40px; }
+  .navbar { padding: 20px; }
+}
+
+.info-card {
+  background: var(--surface);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid rgba(201,168,76,0.2);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+}
+
+.info-card-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+/* ─── MAIN CONTENT ─── */
+.main {
+  background: var(--cream);
+  padding-top: 100px;
+  min-height: 60vh;
+}
+
+/* ─── WEATHER ─── */
+.weather-section {
+  padding: 48px 32px 40px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.section-title span { color: var(--red); font-style: italic; }
+
+.section-sub {
+  font-size: 15px;
+  color: var(--muted);
+  margin-bottom: 28px;
+  font-weight: 300;
+}
+
+.weather-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+@media (max-width: 700px) {
+  .weather-grid { grid-template-columns: repeat(4, 1fr); }
+  .weather-day:nth-child(n+5) { display: none; }
+}
+@media (max-width: 400px) {
+  .weather-grid { grid-template-columns: repeat(3, 1fr); }
+  .weather-day:nth-child(n+4) { display: none; }
+}
+
+.weather-day {
+  background: #fff;
+  border-radius: 14px;
+  padding: 14px 8px;
+  text-align: center;
+  border: 1px solid rgba(93,64,55,0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.weather-day:first-child {
+  background: var(--red);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(192,57,43,0.3);
+}
+.weather-day:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+
+.wd-name {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.weather-day:first-child .wd-name { color: rgba(255,255,255,0.75); }
+
+.wd-icon { font-size: 24px; margin-bottom: 8px; display: block; }
+
+.wd-temp {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1;
+}
+.weather-day:first-child .wd-temp { color: #fff; }
+
+.wd-temp-low {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.weather-day:first-child .wd-temp-low { color: rgba(255,255,255,0.6); }
+
+.wd-desc {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.weather-day:first-child .wd-desc { color: rgba(255,255,255,0.7); }
+
+/* ─── MAINZ 05 CARD ─── */
+.match-card {
+  background: var(--ink);
+  border-radius: 16px;
+  padding: 24px;
+  color: var(--cream);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.match-badge {
+  background: var(--red);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.match-teams {
+  flex: 1;
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 700;
+}
+.match-teams span { color: var(--gold); }
+
+.match-meta {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: rgba(245,240,232,0.6);
+  margin-top: 4px;
+}
+
+.match-date {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--gold);
+  text-align: right;
+  flex-shrink: 0;
+}
+.match-date-sub {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  color: rgba(245,240,232,0.5);
+  text-align: right;
+}
+
+/* ─── DIVIDER ─── */
+.divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(93,64,55,0.2), transparent);
+  margin: 0 32px;
+}
+
+/* ─── BLOG ─── */
+.blog-section {
+  padding: 40px 32px 60px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+@media (max-width: 600px) {
+  .weather-section, .blog-section { padding-left: 20px; padding-right: 20px; }
+}
+
+.members-banner {
+  background: linear-gradient(135deg, var(--ink), #2d1a0e);
+  border-radius: 16px;
+  padding: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+  border: 1px solid rgba(201,168,76,0.2);
+}
+
+.members-text { flex: 1; }
+.members-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  color: var(--cream);
+  margin-bottom: 4px;
+}
+.members-sub {
+  font-size: 14px;
+  color: rgba(245,240,232,0.55);
+  font-weight: 300;
+}
+
+/* BLOG POSTS */
+.post-compose {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(93,64,55,0.12);
+  display: none;
+}
+.post-compose.visible { display: block; }
+
+.post-textarea {
+  width: 100%;
+  border: 1px solid rgba(93,64,55,0.2);
+  border-radius: 10px;
+  padding: 14px;
+  font-family: 'Crimson Pro', serif;
+  font-size: 16px;
+  color: var(--ink);
+  resize: none;
+  min-height: 80px;
+  outline: none;
+  transition: border-color 0.2s;
+  background: var(--cream);
+}
+.post-textarea:focus { border-color: var(--red); }
+
+.post-actions {
+  display: flex; justify-content: flex-end; gap: 10px;
+  margin-top: 12px;
+}
+
+.post-feed { display: flex; flex-direction: column; gap: 16px; }
+
+.post-item {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  border: 1px solid rgba(93,64,55,0.1);
+  animation: fadeUp 0.4s ease forwards;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.post-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 12px;
+}
+
+.post-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--red), var(--gold));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.post-author {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink);
+}
+.post-time {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 1px;
+}
+
+.post-body {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #2d1a0e;
+}
+
+.post-footer {
+  display: flex; align-items: center; gap: 16px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(93,64,55,0.08);
+}
+
+.post-like-btn {
+  background: none; border: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.2s, color 0.2s;
+}
+.post-like-btn:hover { background: rgba(192,57,43,0.08); color: var(--red); }
+.post-like-btn.liked { color: var(--red); }
+
+.empty-blog {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--muted);
+  font-style: italic;
+  font-size: 18px;
+}
+.empty-blog-icon { font-size: 48px; display: block; margin-bottom: 12px; }
+
+/* ─── MODAL ─── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(26,16,8,0.85);
+  backdrop-filter: blur(8px);
+  display: flex; align-items: flex-end; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+}
+.modal-overlay.show { opacity: 1; pointer-events: all; }
+
+.modal-sheet {
+  background: var(--cream);
+  border-radius: 24px 24px 0 0;
+  padding: 32px 28px 48px;
+  width: 100%; max-width: 480px;
+  transform: translateY(40px);
+  transition: transform 0.4s cubic-bezier(0.34,1.2,0.64,1);
+}
+.modal-overlay.show .modal-sheet { transform: translateY(0); }
+
+.modal-handle {
+  width: 40px; height: 4px;
+  background: rgba(93,64,55,0.2);
+  border-radius: 2px;
+  margin: 0 auto 24px;
+}
+
+.modal-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.modal-sub {
+  font-size: 15px;
+  color: var(--muted);
+  margin-bottom: 28px;
+  font-weight: 300;
+}
+
+.modal-tabs {
+  display: flex; gap: 0;
+  background: rgba(93,64,55,0.08);
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 24px;
+}
+.modal-tab {
+  flex: 1; text-align: center;
+  padding: 9px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--muted);
+}
+.modal-tab.active {
+  background: var(--cream);
+  color: var(--ink);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.field-group { margin-bottom: 16px; }
+.field-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin-bottom: 6px;
+  display: block;
+}
+
+.field-input {
+  width: 100%;
+  background: #fff;
+  border: 1px solid rgba(93,64,55,0.2);
+  border-radius: 10px;
+  padding: 13px 16px;
+  font-family: 'Crimson Pro', serif;
+  font-size: 16px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.field-input:focus {
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px rgba(192,57,43,0.08);
+}
+
+.modal-error {
+  color: var(--red);
+  font-size: 13px;
+  margin-bottom: 12px;
+  min-height: 18px;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.btn-full { width: 100%; padding: 15px; font-size: 15px; border-radius: 12px; margin-top: 4px; }
+
+.modal-dismiss {
+  text-align: center;
+  margin-top: 16px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+}
+.modal-dismiss:hover { color: var(--ink); }
+
+/* ─── TOAST ─── */
+.toast {
+  position: fixed; bottom: 28px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--ink);
+  color: var(--cream);
+  padding: 13px 22px;
+  border-radius: 50px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  z-index: 2000;
+  transition: transform 0.4s cubic-bezier(0.34,1.4,0.64,1);
+  white-space: nowrap;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  border: 1px solid rgba(245,240,232,0.1);
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ─── USER CHIP ─── */
+.user-chip {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(245,240,232,0.12);
+  border: 1px solid rgba(245,240,232,0.2);
+  border-radius: 20px;
+  padding: 6px 14px 6px 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+  backdrop-filter: blur(8px);
+}
+.user-chip:hover { background: rgba(245,240,232,0.2); }
+.user-chip-avatar {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--red), var(--gold));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700;
+  color: #fff; font-family: 'DM Sans', sans-serif;
+  text-transform: uppercase;
+}
+.user-chip-name {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--cream);
+}
+
+/* loading */
+.loading-dots {
+  display: inline-flex; gap: 4px; align-items: center; justify-content: center;
+  padding: 8px 0;
+}
+.loading-dots span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--red);
+  animation: ldot 1.2s ease-in-out infinite;
+}
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes ldot {
+  0%,80%,100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+/* ─── FOOTER ─── */
+footer {
+  background: var(--ink);
+  color: rgba(245,240,232,0.4);
+  text-align: center;
+  padding: 24px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+footer span { color: var(--gold); }
+</style>
+</head>
+<body>
+
+<!-- ─── HERO ─── -->
+<section class="hero">
+  <div class="hero-bg">
+    <!-- SVG Scene: Doppelrad + Dom Silhouette + Specht -->
+    <svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="skyGrad" cx="50%" cy="30%" r="70%">
+          <stop offset="0%" stop-color="#7b3f1e"/>
+          <stop offset="40%" stop-color="#4a1f0a"/>
+          <stop offset="100%" stop-color="#1a1008"/>
+        </radialGradient>
+        <radialGradient id="sunGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#e8c96a" stop-opacity="0.4"/>
+          <stop offset="100%" stop-color="#e8c96a" stop-opacity="0"/>
+        </radialGradient>
+        <filter id="blur6"><feGaussianBlur stdDeviation="6"/></filter>
+        <filter id="blur3"><feGaussianBlur stdDeviation="3"/></filter>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="4" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <mask id="sceneMask">
+          <rect width="1200" height="800" fill="white"/>
+        </mask>
+      </defs>
+
+      <!-- Sky -->
+      <rect width="1200" height="800" fill="url(#skyGrad)"/>
+
+      <!-- Sun glow haze -->
+      <ellipse cx="600" cy="180" rx="350" ry="250" fill="url(#sunGlow)" filter="url(#blur6)"/>
+
+      <!-- Subtle horizon mist -->
+      <ellipse cx="600" cy="600" rx="700" ry="200" fill="#3d1a06" opacity="0.5" filter="url(#blur6)"/>
+
+      <!-- ═══ DOPPELRAD (Mainz Wheel) — large background element ═══ -->
+      <g opacity="0.18" transform="translate(600,380)">
+        <!-- Outer ring -->
+        <circle cx="0" cy="0" r="290" fill="none" stroke="#c9a84c" stroke-width="14"/>
+        <!-- Inner ring -->
+        <circle cx="0" cy="0" r="220" fill="none" stroke="#c9a84c" stroke-width="8"/>
+        <!-- Hub -->
+        <circle cx="0" cy="0" r="38" fill="none" stroke="#c9a84c" stroke-width="12"/>
+        <!-- 12 spokes — double-wheel style (two sets) -->
+        <!-- Set 1 spokes -->
+        <line x1="0" y1="-38" x2="0" y2="-290" stroke="#c9a84c" stroke-width="10"/>
+        <line x1="0" y1="38" x2="0" y2="290" stroke="#c9a84c" stroke-width="10"/>
+        <line x1="-38" y1="0" x2="-290" y2="0" stroke="#c9a84c" stroke-width="10"/>
+        <line x1="38" y1="0" x2="290" y2="0" stroke="#c9a84c" stroke-width="10"/>
+        <line x1="-27" y1="-27" x2="-205" y2="-205" stroke="#c9a84c" stroke-width="10"/>
+        <line x1="27" y1="-27" x2="205" y2="-205" stroke="#c9a84c" stroke-width="10"/>
+        <line x1="-27" y1="27" x2="-205" y2="205" stroke="#c9a84c" stroke-width="10"/>
+        <line x1="27" y1="27" x2="205" y2="205" stroke="#c9a84c" stroke-width="10"/>
+        <!-- Outer decorative ring details -->
+        <circle cx="0" cy="-290" r="14" fill="#c9a84c"/>
+        <circle cx="0" cy="290" r="14" fill="#c9a84c"/>
+        <circle cx="-290" cy="0" r="14" fill="#c9a84c"/>
+        <circle cx="290" cy="0" r="14" fill="#c9a84c"/>
+        <circle cx="-205" cy="-205" r="14" fill="#c9a84c"/>
+        <circle cx="205" cy="-205" r="14" fill="#c9a84c"/>
+        <circle cx="-205" cy="205" r="14" fill="#c9a84c"/>
+        <circle cx="205" cy="205" r="14" fill="#c9a84c"/>
+      </g>
+
+      <!-- ═══ MAINZER DOM SILHOUETTE ═══ -->
+      <g fill="#1a0a04" opacity="0.92">
+        <!-- Main nave body -->
+        <rect x="370" y="480" width="460" height="220"/>
+        <!-- Side aisle left -->
+        <rect x="320" y="530" width="60" height="170"/>
+        <!-- Side aisle right -->
+        <rect x="820" y="530" width="60" height="170"/>
+
+        <!-- West towers (pair) -->
+        <!-- Left west tower -->
+        <rect x="355" y="320" width="80" height="200"/>
+        <!-- Left west tower octagonal top -->
+        <polygon points="355,320 395,260 435,320"/>
+        <rect x="375" y="240" width="40" height="80"/>
+        <polygon points="375,240 395,190 415,240"/>
+        <!-- Right west tower -->
+        <rect x="765" y="320" width="80" height="200"/>
+        <polygon points="765,320 805,260 845,320"/>
+        <rect x="785" y="240" width="40" height="80"/>
+        <polygon points="785,240 805,190 825,240"/>
+
+        <!-- Central crossing tower (taller, iconic) -->
+        <rect x="550" y="280" width="100" height="240"/>
+        <polygon points="540,280 600,200 660,280"/>
+        <rect x="572" y="175" width="56" height="105"/>
+        <polygon points="565,175 600,118 635,175"/>
+        <!-- Lantern on top -->
+        <rect x="585" y="108" width="30" height="40"/>
+        <polygon points="582,108 600,82 618,108"/>
+        <!-- Cross -->
+        <rect x="597" y="72" width="6" height="22"/>
+        <rect x="590" y="78" width="20" height="4"/>
+
+        <!-- East towers (pair) -->
+        <rect x="375" y="370" width="65" height="150"/>
+        <polygon points="375,370 407,310 440,370"/>
+        <rect x="760" y="370" width="65" height="150"/>
+        <polygon points="760,370 792,310 825,370"/>
+
+        <!-- Romanesque arched windows (light slits) -->
+        <rect x="490" y="510" width="18" height="50" rx="9" fill="#7b3f1e" opacity="0.6"/>
+        <rect x="546" y="510" width="18" height="50" rx="9" fill="#7b3f1e" opacity="0.6"/>
+        <rect x="638" y="510" width="18" height="50" rx="9" fill="#7b3f1e" opacity="0.6"/>
+        <rect x="694" y="510" width="18" height="50" rx="9" fill="#7b3f1e" opacity="0.6"/>
+
+        <!-- Rose window east -->
+        <circle cx="600" cy="460" r="22" fill="none" stroke="#7b3f1e" stroke-width="4" opacity="0.5"/>
+
+        <!-- Buttresses -->
+        <rect x="430" y="530" width="20" height="170"/>
+        <rect x="480" y="530" width="20" height="170"/>
+        <rect x="700" y="530" width="20" height="170"/>
+        <rect x="750" y="530" width="20" height="170"/>
+      </g>
+
+      <!-- Subtle glow behind dom -->
+      <ellipse cx="600" cy="400" rx="280" ry="180" fill="#c9a84c" opacity="0.04" filter="url(#blur6)"/>
+
+      <!-- ═══ SPECHT (Woodpecker) sitting on left tower ═══ -->
+      <g transform="translate(335, 155)" filter="url(#glow)">
+        <!-- Body -->
+        <ellipse cx="60" cy="70" rx="28" ry="22" fill="#1a0a04"/>
+        <!-- Red crest -->
+        <ellipse cx="60" cy="48" rx="12" ry="8" fill="#c0392b"/>
+        <!-- Crest spike up -->
+        <polygon points="55,45 62,20 68,45" fill="#c0392b"/>
+        <!-- Head -->
+        <circle cx="60" cy="52" r="16" fill="#1a0a04"/>
+        <!-- Eye -->
+        <circle cx="65" cy="49" r="4" fill="#e8c96a"/>
+        <circle cx="66" cy="48" r="2" fill="#1a0a04"/>
+        <!-- Beak (long, strong) -->
+        <polygon points="74,52 110,56 74,60" fill="#c9a84c"/>
+        <!-- Wing detail -->
+        <ellipse cx="55" cy="72" rx="20" ry="14" fill="#2d1a0e"/>
+        <!-- White cheek patch -->
+        <ellipse cx="68" cy="54" rx="6" ry="4" fill="#5d4037" opacity="0.5"/>
+        <!-- Tail (pointing down) -->
+        <polygon points="45,88 60,92 55,120 48,118" fill="#1a0a04"/>
+        <polygon points="60,92 75,88 72,115 65,118" fill="#1a0a04"/>
+        <!-- Feet gripping tower edge -->
+        <line x1="48" y1="88" x2="36" y2="100" stroke="#c9a84c" stroke-width="2.5"/>
+        <line x1="36" y1="100" x2="28" y2="106" stroke="#c9a84c" stroke-width="2"/>
+        <line x1="36" y1="100" x2="32" y2="110" stroke="#c9a84c" stroke-width="2"/>
+        <line x1="36" y1="100" x2="42" y2="110" stroke="#c9a84c" stroke-width="2"/>
+        <line x1="62" y1="90" x2="72" y2="102" stroke="#c9a84c" stroke-width="2.5"/>
+        <line x1="72" y1="102" x2="65" y2="110" stroke="#c9a84c" stroke-width="2"/>
+        <line x1="72" y1="102" x2="75" y2="110" stroke="#c9a84c" stroke-width="2"/>
+        <!-- Size indicator — the "GIANT" specht has a big red glow -->
+        <ellipse cx="60" cy="55" rx="40" ry="35" fill="#c0392b" opacity="0.06" filter="url(#blur3)"/>
+      </g>
+
+      <!-- Ground / city silhouette -->
+      <rect x="0" y="690" width="1200" height="110" fill="#1a0a04"/>
+      <!-- Random building shapes for city feel -->
+      <rect x="0" y="650" width="80" height="60" fill="#1a0a04"/>
+      <rect x="90" y="660" width="60" height="50" fill="#1a0a04"/>
+      <rect x="160" y="640" width="45" height="70" fill="#1a0a04"/>
+      <rect x="215" y="668" width="35" height="42" fill="#1a0a04"/>
+      <rect x="900" y="655" width="55" height="55" fill="#1a0a04"/>
+      <rect x="965" y="648" width="40" height="62" fill="#1a0a04"/>
+      <rect x="1015" y="636" width="50" height="74" fill="#1a0a04"/>
+      <rect x="1075" y="660" width="65" height="50" fill="#1a0a04"/>
+      <rect x="1145" y="650" width="55" height="60" fill="#1a0a04"/>
+
+      <!-- Rhein horizon glow -->
+      <rect x="0" y="695" width="1200" height="8" fill="#c9a84c" opacity="0.06"/>
+    </svg>
+  </div>
+
+  <div class="hero-overlay"></div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-logo">Dr.<span>Buntspecht</span></div>
+    <div class="nav-actions" id="nav-actions">
+      <button class="btn btn-ghost" onclick="openModal('login')">Einloggen</button>
+      <button class="btn btn-primary" onclick="openModal('register')">Account erstellen</button>
+    </div>
+  </nav>
+
+  <!-- HERO CONTENT -->
+  <div class="hero-content">
+    <div class="hero-eyebrow">Mainz am Rhein</div>
+    <h1 class="hero-title">Willkommen<br>in <em>Mainz</em></h1>
+    <p class="hero-sub">Nachrichten, Wetter, Fußball und deine Gemeinschaft — alles an einem Ort.</p>
+  </div>
+</section>
+
+<!-- INFO ROW -->
+<div class="info-row" id="info-row-wrap">
+  <div class="info-card" id="weather-today-card">
+    <div class="info-card-label">Heute in Mainz</div>
+    <div class="loading-dots"><span></span><span></span><span></span></div>
+  </div>
+  <div class="info-card" id="match-mini-card">
+    <div class="info-card-label">Nächstes Spiel — FSV Mainz 05</div>
+    <div class="loading-dots"><span></span><span></span><span></span></div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- WEATHER SECTION -->
+  <div class="weather-section">
+    <h2 class="section-title">7-Tage-Wetter <span>Mainz</span></h2>
+    <p class="section-sub">Aktuelle Vorhersage • Open-Meteo</p>
+    <div class="weather-grid" id="weather-grid">
+      <div style="text-align:center;padding:20px;grid-column:1/-1">
+        <div class="loading-dots"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- MAINZ 05 -->
+  <div class="weather-section" style="padding-top:36px; padding-bottom:36px;">
+    <h2 class="section-title">FSV <span>Mainz 05</span></h2>
+    <p class="section-sub">Nächstes Bundesliga-Spiel</p>
+    <div id="match-container">
+      <div class="loading-dots"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- BLOG -->
+  <div class="blog-section">
+    <h2 class="section-title">Mainzer <span>Blog</span></h2>
+    <p class="section-sub">Nur für Mitglieder • Teile deine Gedanken</p>
+
+    <!-- Members banner (shown when logged out) -->
+    <div class="members-banner" id="members-banner">
+      <div class="members-text">
+        <div class="members-title">Werde Teil der Community</div>
+        <div class="members-sub">Kostenlos registrieren und Beiträge lesen & schreiben</div>
+      </div>
+      <button class="btn btn-gold" onclick="openModal('register')">Jetzt beitreten</button>
+    </div>
+
+    <!-- Compose (shown when logged in) -->
+    <div class="post-compose" id="post-compose">
+      <textarea class="post-textarea" id="post-text" placeholder="Was beschäftigt dich heute in Mainz?"></textarea>
+      <div class="post-actions">
+        <button class="btn btn-ghost" style="color:var(--muted);background:rgba(93,64,55,0.08);border-color:transparent;" onclick="document.getElementById('post-text').value=''">Abbrechen</button>
+        <button class="btn btn-primary" onclick="submitPost()">Veröffentlichen</button>
+      </div>
+    </div>
+
+    <!-- Feed -->
+    <div class="post-feed" id="post-feed">
+      <div class="empty-blog" id="blog-empty">
+        <span class="empty-blog-icon">🔒</span>
+        Logge dich ein, um Beiträge zu sehen.
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  © 2025 <span>Dr. Buntspecht</span> · Mainz am Rhein · Mit ♥ für die Fastnachtshauptstadt
+</footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="handleModalClick(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <h2 class="modal-title" id="modal-title">Willkommen zurück</h2>
+    <p class="modal-sub" id="modal-sub">Einloggen in dein Konto</p>
+
+    <div class="modal-tabs">
+      <div class="modal-tab active" id="tab-login" onclick="switchTab('login')">Einloggen</div>
+      <div class="modal-tab" id="tab-register" onclick="switchTab('register')">Registrieren</div>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="form-login">
+      <div class="field-group">
+        <label class="field-label">E-Mail</label>
+        <input class="field-input" type="email" id="login-email" placeholder="deine@email.de" autocomplete="email">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Passwort</label>
+        <input class="field-input" type="password" id="login-pw" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <div class="modal-error" id="login-error"></div>
+      <button class="btn btn-primary btn-full" onclick="doLogin()">Einloggen</button>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div id="form-register" style="display:none">
+      <div class="field-group">
+        <label class="field-label">Anzeigename</label>
+        <input class="field-input" type="text" id="reg-name" placeholder="Mainzer Max" autocomplete="nickname">
+      </div>
+      <div class="field-group">
+        <label class="field-label">E-Mail</label>
+        <input class="field-input" type="email" id="reg-email" placeholder="deine@email.de" autocomplete="email">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Passwort (mind. 6 Zeichen)</label>
+        <input class="field-input" type="password" id="reg-pw" placeholder="••••••••" autocomplete="new-password">
+      </div>
+      <div class="modal-error" id="reg-error"></div>
+      <button class="btn btn-primary btn-full" onclick="doRegister()">Account erstellen</button>
+    </div>
+
+    <p class="modal-dismiss" onclick="closeModal()">Schließen</p>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, onSnapshot, orderBy, query, serverTimestamp, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCTSYRwq9G9inKW-bEnLC90I19J4oTTkp8",
+  authDomain: "drbuntspecht-f92ba.firebaseapp.com",
+  projectId: "drbuntspecht-f92ba",
+  storageBucket: "drbuntspecht-f92ba.firebasestorage.app",
+  messagingSenderId: "1075490932089",
+  appId: "1:1075490932089:web:44f532194f78e41f539ba8"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let currentUser = null;
+let postsUnsub = null;
+
+// ─── AUTH STATE ───
+onAuthStateChanged(auth, user => {
+  currentUser = user;
+  updateNavUI(user);
+  updateBlogUI(user);
+  if (user) {
+    closeModal();
+    showToast('👋 Willkommen, ' + (user.displayName || 'Mainzer!'));
+    loadBlogPosts();
+  } else {
+    if (postsUnsub) { postsUnsub(); postsUnsub = null; }
+    showBlogLocked();
+  }
+});
+
+// ─── NAV UI ───
+function updateNavUI(user) {
+  const nav = document.getElementById('nav-actions');
+  if (user) {
+    const initials = (user.displayName || user.email || 'U').substring(0,2).toUpperCase();
+    nav.innerHTML = `
+      <div class="user-chip" onclick="doSignOut()">
+        <div class="user-chip-avatar">${initials}</div>
+        <span class="user-chip-name">${user.displayName || 'Mitglied'}</span>
+      </div>`;
+  } else {
+    nav.innerHTML = `
+      <button class="btn btn-ghost" onclick="openModal('login')">Einloggen</button>
+      <button class="btn btn-primary" onclick="openModal('register')">Account erstellen</button>`;
+  }
+}
+
+// ─── BLOG UI ───
+function updateBlogUI(user) {
+  document.getElementById('members-banner').style.display = user ? 'none' : 'flex';
+  document.getElementById('post-compose').classList.toggle('visible', !!user);
+}
+
+function showBlogLocked() {
+  document.getElementById('post-feed').innerHTML = `
+    <div class="empty-blog" id="blog-empty">
+      <span class="empty-blog-icon">🔒</span>
+      Logge dich ein, um Beiträge zu sehen.
+    </div>`;
+}
+
+// ─── BLOG POSTS ───
+function loadBlogPosts() {
+  const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
+  postsUnsub = onSnapshot(q, snap => {
+    const feed = document.getElementById('post-feed');
+    if (snap.empty) {
+      feed.innerHTML = `<div class="empty-blog"><span class="empty-blog-icon">✍️</span>Noch keine Beiträge — sei der Erste!</div>`;
+      return;
+    }
+    feed.innerHTML = '';
+    snap.forEach(docSnap => {
+      const p = docSnap.data();
+      const div = document.createElement('div');
+      div.className = 'post-item';
+      div.innerHTML = `
+        <div class="post-header">
+          <div class="post-avatar">${(p.authorName||'?').substring(0,2)}</div>
+          <div>
+            <div class="post-author">${p.authorName || 'Anonym'}</div>
+            <div class="post-time">${formatTime(p.createdAt)}</div>
+          </div>
+        </div>
+        <div class="post-body">${escapeHtml(p.text)}</div>
+        <div class="post-footer">
+          <button class="post-like-btn" onclick="likePost('${docSnap.id}', this)">
+            ♥ <span>${p.likes||0}</span>
+          </button>
+        </div>`;
+      feed.appendChild(div);
+    });
+  });
+}
+
+window.likePost = async (id, btn) => {
+  if (!currentUser) { showToast('Bitte zuerst einloggen'); return; }
+  btn.classList.toggle('liked');
+  const val = btn.classList.contains('liked') ? 1 : -1;
+  await updateDoc(doc(db, 'posts', id), { likes: increment(val) });
+};
+
+window.submitPost = async () => {
+  if (!currentUser) return;
+  const text = document.getElementById('post-text').value.trim();
+  if (!text) { showToast('Bitte Text eingeben'); return; }
+  try {
+    await addDoc(collection(db, 'posts'), {
+      text,
+      authorId: currentUser.uid,
+      authorName: currentUser.displayName || currentUser.email.split('@')[0],
+      createdAt: serverTimestamp(),
+      likes: 0
+    });
+    document.getElementById('post-text').value = '';
+    showToast('✅ Beitrag veröffentlicht!');
+  } catch(e) {
+    showToast('Fehler: ' + e.message);
+  }
+};
+
+// ─── AUTH ───
+window.doLogin = async () => {
+  const email = document.getElementById('login-email').value.trim();
+  const pw = document.getElementById('login-pw').value;
+  const err = document.getElementById('login-error');
+  err.textContent = '';
+  if (!email || !pw) { err.textContent = 'Bitte alle Felder ausfüllen.'; return; }
+  try {
+    await signInWithEmailAndPassword(auth, email, pw);
+  } catch(e) {
+    err.textContent = firebaseError(e.code);
+  }
+};
+
+window.doRegister = async () => {
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pw = document.getElementById('reg-pw').value;
+  const err = document.getElementById('reg-error');
+  err.textContent = '';
+  if (!name || !email || !pw) { err.textContent = 'Bitte alle Felder ausfüllen.'; return; }
+  if (pw.length < 6) { err.textContent = 'Passwort muss mind. 6 Zeichen haben.'; return; }
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, pw);
+    await updateProfile(cred.user, { displayName: name });
+    await cred.user.reload();
+    onAuthStateChanged(auth, () => {});
+  } catch(e) {
+    err.textContent = firebaseError(e.code);
+  }
+};
+
+window.doSignOut = async () => {
+  await signOut(auth);
+  showToast('Bis bald! 👋');
+};
+
+function firebaseError(code) {
+  const map = {
+    'auth/user-not-found': 'Kein Account mit dieser E-Mail.',
+    'auth/wrong-password': 'Falsches Passwort.',
+    'auth/email-already-in-use': 'Diese E-Mail ist bereits registriert.',
+    'auth/invalid-email': 'Ungültige E-Mail-Adresse.',
+    'auth/weak-password': 'Passwort zu schwach.',
+    'auth/too-many-requests': 'Zu viele Versuche. Kurz warten.',
+    'auth/invalid-credential': 'E-Mail oder Passwort falsch.',
+  };
+  return map[code] || 'Fehler: ' + code;
+}
+
+// ─── HELPERS ───
+function formatTime(ts) {
+  if (!ts) return 'gerade eben';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleDateString('de-DE', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+}
+
+function escapeHtml(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+// expose
+window._auth = auth;
+</script>
+
+<!-- WEATHER + MATCH + UI SCRIPT -->
+<script>
+// ─── MODAL ───
+function openModal(tab) {
+  document.getElementById('modal').classList.add('show');
+  switchTab(tab || 'login');
+}
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
+}
+function handleModalClick(e) {
+  if (e.target === document.getElementById('modal')) closeModal();
+}
+function switchTab(tab) {
+  document.getElementById('tab-login').classList.toggle('active', tab==='login');
+  document.getElementById('tab-register').classList.toggle('active', tab==='register');
+  document.getElementById('form-login').style.display = tab==='login' ? 'block' : 'none';
+  document.getElementById('form-register').style.display = tab==='register' ? 'block' : 'none';
+  document.getElementById('modal-title').textContent = tab==='login' ? 'Willkommen zurück' : 'Account erstellen';
+  document.getElementById('modal-sub').textContent = tab==='login' ? 'Einloggen in dein Konto' : 'Kostenlos & in 30 Sekunden';
+  document.getElementById('login-error').textContent = '';
+  document.getElementById('reg-error').textContent = '';
+}
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.switchTab = switchTab;
+window.handleModalClick = handleModalClick;
+
+// ─── TOAST ───
+let toastT;
+function showToast(msg) {
+  clearTimeout(toastT);
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  toastT = setTimeout(() => t.classList.remove('show'), 3000);
+}
+window.showToast = showToast;
+
+// ─── WEATHER ───
+const WMO = {
+  0:'Klar ☀️', 1:'Meist klar 🌤', 2:'Teilweise bewölkt ⛅', 3:'Bedeckt ☁️',
+  45:'Nebel 🌫', 48:'Reifnebel 🌫',
+  51:'Leichter Nieselregen 🌦', 53:'Nieselregen 🌦', 55:'Dichter Nieselregen 🌧',
+  61:'Leichter Regen 🌧', 63:'Regen 🌧', 65:'Starker Regen 🌧',
+  71:'Leichter Schnee ❄️', 73:'Schnee ❄️', 75:'Starker Schnee ❄️',
+  80:'Regenschauer 🌦', 81:'Schauer 🌧', 82:'Starke Schauer ⛈',
+  95:'Gewitter ⛈', 96:'Gewitter mit Hagel ⛈'
+};
+const WMO_ICON = {
+  0:'☀️', 1:'🌤', 2:'⛅', 3:'☁️', 45:'🌫', 48:'🌫',
+  51:'🌦', 53:'🌦', 55:'🌧', 61:'🌧', 63:'🌧', 65:'🌧',
+  71:'❄️', 73:'❄️', 75:'❄️', 80:'🌦', 81:'🌧', 82:'⛈', 95:'⛈', 96:'⛈'
+};
+
+const DAYS_DE = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+const MONTHS_DE = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+
+async function loadWeather() {
+  try {
+    const url = 'https://api.open-meteo.com/v1/forecast?latitude=49.9929&longitude=8.2473&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=Europe%2FBerlin&forecast_days=7';
+    const res = await fetch(url);
+    const data = await res.json();
+    const { time, weathercode, temperature_2m_max, temperature_2m_min } = data.daily;
+
+    // Today mini card
+    const todayCode = weathercode[0];
+    const todayIcon = WMO_ICON[todayCode] || '🌡';
+    const todayDesc = WMO[todayCode] || '';
+    document.getElementById('weather-today-card').innerHTML = `
+      <div class="info-card-label">Heute in Mainz</div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:36px;">${todayIcon}</span>
+        <div>
+          <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--ink);line-height:1">${Math.round(temperature_2m_max[0])}°</div>
+          <div style="font-size:13px;color:var(--muted);">${todayDesc.replace(/[^\w\s]/gu,'').trim() || 'Mainz'}</div>
+        </div>
+      </div>`;
+
+    // 7-day grid
+    const grid = document.getElementById('weather-grid');
+    grid.innerHTML = '';
+    time.forEach((t, i) => {
+      const d = new Date(t);
+      const dayName = i === 0 ? 'Heute' : DAYS_DE[d.getDay()];
+      const icon = WMO_ICON[weathercode[i]] || '🌡';
+      const desc = (WMO[weathercode[i]] || '').replace(/[^\w\säöüÄÖÜß]/gu, '').trim();
+      const card = document.createElement('div');
+      card.className = 'weather-day';
+      card.innerHTML = `
+        <div class="wd-name">${dayName}</div>
+        <span class="wd-icon">${icon}</span>
+        <div class="wd-temp">${Math.round(temperature_2m_max[i])}°</div>
+        <div class="wd-temp-low">${Math.round(temperature_2m_min[i])}°</div>
+        <div class="wd-desc">${desc}</div>`;
+      grid.appendChild(card);
+    });
+  } catch(e) {
+    document.getElementById('weather-grid').innerHTML = '<p style="color:var(--muted);padding:16px;grid-column:1/-1">Wetter konnte nicht geladen werden.</p>';
+  }
+}
+
+// ─── MAINZ 05 ───
+async function loadMatch05() {
+  // Use Open League API (free, no key needed) via API-Football free tier
+  // Fallback: use static upcoming schedule since free APIs have rate limits
+  // We'll use the football-data.org free API
+  try {
+    const res = await fetch('https://api.football-data.org/v4/teams/343/matches?status=SCHEDULED&limit=1', {
+      headers: { 'X-Auth-Token': 'demo' }
+    });
+    // This will likely fail without a key, so we use our fallback
+    throw new Error('use fallback');
+  } catch {
+    // Fallback: fetch from open API
+    await loadMatchFallback();
+  }
+}
+
+async function loadMatchFallback() {
+  // Use open-meteo style free API: api-sports free or thesportsdb
+  try {
+    const res = await fetch('https://www.thesportsdb.com/api/v1/json/3/eventsnext.php?id=133878');
+    const data = await res.json();
+    const events = data.events;
+    if (!events || events.length === 0) throw new Error('no events');
+    const e = events[0];
+    const dateStr = e.dateEvent; // YYYY-MM-DD
+    const timeStr = e.strTime || '15:30:00';
+    const d = new Date(dateStr + 'T' + timeStr);
+    const dateFormatted = d.toLocaleDateString('de-DE', { weekday:'long', day:'numeric', month:'long' });
+    const timeFormatted = d.toLocaleTimeString('de-DE', { hour:'2-digit', minute:'2-digit' }) + ' Uhr';
+
+    const home = e.strHomeTeam;
+    const away = e.strAwayTeam;
+    const isHome = home.toLowerCase().includes('mainz');
+    const opponent = isHome ? away : home;
+    const venue = isHome ? 'Heimspiel' : 'Auswärts';
+
+    renderMatch(home, away, dateFormatted, timeFormatted, e.strLeague || 'Bundesliga', venue);
+  } catch {
+    // Static fallback with known schedule info
+    renderMatchStatic();
+  }
+}
+
+function renderMatch(home, away, date, time, league, venue) {
+  const isHome = home.toLowerCase().includes('mainz');
+  document.getElementById('match-mini-card').innerHTML = `
+    <div class="info-card-label">Nächstes Spiel — FSV Mainz 05</div>
+    <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--ink)">${home} – ${away}</div>
+    <div style="font-size:13px;color:var(--muted);margin-top:4px">${date} · ${time}</div>`;
+
+  document.getElementById('match-container').innerHTML = `
+    <div class="match-card">
+      <div class="match-badge">${venue} · ${league}</div>
+      <div style="flex:1">
+        <div class="match-teams">${isHome ? '<span>' + home + '</span>' : home} – ${!isHome ? '<span>' + away + '</span>' : away}</div>
+        <div class="match-meta">${date}</div>
+      </div>
+      <div>
+        <div class="match-date">${time}</div>
+        <div class="match-date-sub">Anstoß</div>
+      </div>
+    </div>`;
+}
+
+function renderMatchStatic() {
+  // Graceful fallback
+  document.getElementById('match-mini-card').innerHTML = `
+    <div class="info-card-label">Nächstes Spiel — FSV Mainz 05</div>
+    <div style="font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--ink)">Spielplan wird geladen…</div>
+    <div style="font-size:12px;color:var(--muted);margin-top:4px">→ <a href="https://www.mainz05.de/spielplan/" target="_blank" style="color:var(--red)">Offizieller Spielplan</a></div>`;
+
+  document.getElementById('match-container').innerHTML = `
+    <div class="match-card">
+      <div class="match-badge">Bundesliga</div>
+      <div style="flex:1">
+        <div class="match-teams"><span>1. FSV Mainz 05</span></div>
+        <div class="match-meta">Spielplan: mainz05.de</div>
+      </div>
+      <div>
+        <div style="font-size:13px;color:rgba(245,240,232,0.6);text-align:right">
+          <a href="https://www.mainz05.de/spielplan/" target="_blank" style="color:var(--gold)">Alle Spiele →</a>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ─── INIT ───
+loadWeather();
+loadMatch05();
+
+// Enter key support for modal
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'Enter') {
+    const modal = document.getElementById('modal');
+    if (modal.classList.contains('show')) {
+      if (document.getElementById('form-login').style.display !== 'none') window.doLogin && window.doLogin();
+      else window.doRegister && window.doRegister();
+    }
+  }
+});
+</script>
+</body>
+</html>
