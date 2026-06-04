@@ -84,14 +84,15 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
 .palette-item {
   display:flex; align-items:center; gap:8px;
   padding:10px 12px; border-radius:10px;
-  cursor:grab; border:1.5px solid transparent;
+  cursor:pointer; border:1.5px solid transparent;
   transition:all 0.15s; user-select:none;
   background:#fff;
   min-height:44px;
 }
 .palette-item:hover { border-color:var(--border); box-shadow:0 2px 8px var(--shadow); }
-.palette-item:active { cursor:grabbing; transform:scale(0.97); }
+.palette-item:active { transform:scale(0.97); }
 .palette-item.selected-tool { border-color:var(--accent); background:rgba(212,114,106,0.06); }
+.palette-item.placing-mode { border-color:var(--accent); background:rgba(212,114,106,0.12); }
 
 .pi-icon {
   width:28px; height:20px; border-radius:4px; flex-shrink:0;
@@ -321,41 +322,24 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
 ::-webkit-scrollbar-track { background:transparent; }
 ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
 
-/* Drag ghost */
-.drag-ghost {
-  position:fixed; pointer-events:none; z-index:1000;
-  opacity:0.75; border-radius:6px;
-  display:flex; align-items:center; justify-content:center;
-  font-size:11px; font-weight:600; color:#fff;
-  transform:translate(-50%,-50%);
-  box-shadow:0 4px 16px rgba(0,0,0,0.2);
-  transition:opacity 0.1s;
+/* Mobile Hinweis */
+.mobile-hint {
+  position:fixed;
+  bottom:80px;
+  left:50%;
+  transform:translateX(-50%);
+  background:var(--accent);
+  color:#fff;
+  padding:8px 16px;
+  border-radius:20px;
+  font-size:12px;
+  z-index:100;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 0.3s;
+  white-space:nowrap;
 }
-
-/* ── MOBILE OPTIMIZATION ── */
-@media (max-width: 768px) {
-  .topbar-logo { font-size:12px; }
-  .topbar-name { max-width:120px; font-size:11px; padding:5px 8px; }
-  .btn { font-size:10px; padding:5px 8px; }
-  
-  /* Panels fullscreen on mobile */
-  .palette {
-    width:85% !important;
-    max-width:320px;
-  }
-  .shopping-panel {
-    width:85% !important;
-    max-width:340px;
-  }
-  
-  /* Bigger touch targets */
-  .palette-item { min-height:52px; padding:12px 14px; }
-  .sp-item { min-height:54px; padding:12px 14px; }
-  .toggle-btn { width:44px; height:44px; font-size:20px; }
-  
-  /* Canvas full width when panels open */
-  .canvas-wrap { margin-left:0 !important; margin-right:0 !important; }
-}
+.mobile-hint.show { opacity:0.95; }
 </style>
 </head>
 <body>
@@ -388,31 +372,30 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
 
     <div class="palette-divider"></div>
     <div class="palette-title">Bausteine</div>
-
-    <div class="palette-item" draggable="true" data-block="regal" ondragstart="startDrag(event,'regal')">
+    <div class="palette-item" data-block="regal" onclick="selectBlockType('regal',this)">
       <div class="pi-icon" style="background:#a8e0a8;border-radius:3px;width:32px;height:14px;"></div>
       <div><div class="pi-label">Regal</div><div class="pi-sub">grün</div></div>
     </div>
-    <div class="palette-item" draggable="true" data-block="obst" ondragstart="startDrag(event,'obst')">
+    <div class="palette-item" data-block="obst" onclick="selectBlockType('obst',this)">
       <div class="pi-icon" style="background:#f0c080;border-radius:3px;width:24px;height:24px;"></div>
       <div><div class="pi-label">Obst</div><div class="pi-sub">gelb</div></div>
     </div>
-    <div class="palette-item" draggable="true" data-block="kuehl" ondragstart="startDrag(event,'kuehl')">
+    <div class="palette-item" data-block="kuehl" onclick="selectBlockType('kuehl',this)">
       <div class="pi-icon" style="background:#a8c4e0;border-radius:3px;width:28px;height:16px;"></div>
       <div><div class="pi-label">Kühlregal</div><div class="pi-sub">blau</div></div>
     </div>
-    <div class="palette-item" draggable="true" data-block="eingang" ondragstart="startDrag(event,'eingang')">
+    <div class="palette-item" data-block="eingang" onclick="selectBlockType('eingang',this)">
       <div class="pi-icon" style="background:#8a7060;border-radius:3px;width:22px;height:22px;"></div>
       <div><div class="pi-label">Eingang</div><div class="pi-sub">grau</div></div>
     </div>
-    <div class="palette-item" draggable="true" data-block="kasse" ondragstart="startDrag(event,'kasse')">
+    <div class="palette-item" data-block="kasse" onclick="selectBlockType('kasse',this)">
       <div class="pi-icon" style="background:#c8a8e0;border-radius:3px;width:20px;height:20px;"></div>
       <div><div class="pi-label">Kasse</div><div class="pi-sub">lila</div></div>
     </div>
 
     <div class="palette-divider"></div>
     <div class="palette-title">Text</div>
-    <div class="palette-item" draggable="true" data-block="label" ondragstart="startDrag(event,'label')">
+    <div class="palette-item" data-block="label" onclick="selectBlockType('label',this)">
       <div class="pi-icon" style="color:#2d5a8a;font-size:16px;font-weight:700;">T</div>
       <div><div class="pi-label">Label</div><div class="pi-sub">Text-Feld</div></div>
     </div>
@@ -423,9 +406,7 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
   <button class="toggle-btn toggle-right" id="toggle-right" onclick="toggleRightPanel()">🛒</button>
 
   <!-- CANVAS -->
-  <div class="canvas-wrap" id="canvas-wrap"
-    ondragover="event.preventDefault()"
-    ondrop="dropBlock(event)">
+  <div class="canvas-wrap" id="canvas-wrap" onclick="onCanvasClick(event)">
     <canvas id="supermarkt-canvas"></canvas>
   </div>
 
@@ -460,9 +441,6 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
   <a href="index.html" class="btn btn-primary" style="margin-top:8px;">← Zur Startseite</a>
 </div>
 
-<!-- DRAG GHOST -->
-<div class="drag-ghost" id="drag-ghost"></div>
-
 <!-- CONTEXT MENU -->
 <div class="ctx-menu" id="ctx-menu">
   <div class="ctx-item" onclick="ctxEdit()">✏️ Text bearbeiten</div>
@@ -492,6 +470,9 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
+<!-- MOBILE HINT -->
+<div class="mobile-hint" id="mobile-hint">➡️ Klick auf Canvas zum Platzieren</div>
+
 <!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -519,14 +500,12 @@ onAuthStateChanged(auth, async user => {
     document.getElementById('btn-clear').style.display = 'inline-block';
     document.getElementById('btn-load').style.display = 'inline-block';
     
-    // Beide Panels standardmäßig geschlossen auf Mobile
     if (window.innerWidth <= 768) {
       document.getElementById('palette').classList.add('collapsed');
       document.getElementById('shopping-panel').classList.add('collapsed');
       document.getElementById('toggle-left').textContent = '☰';
       document.getElementById('toggle-right').textContent = '🛒';
     } else {
-      // Desktop: Linkes Panel offen, rechtes geschlossen
       document.getElementById('shopping-panel').classList.add('collapsed');
       document.getElementById('toggle-right').textContent = '🛒';
     }
@@ -577,10 +556,10 @@ let blocks = [];
 let shoppingItems = [];
 let selectedBlock = null;
 let placingItem = null;
+let placingBlockType = null; // NEW: Block type selected for placement
 let activeTool = 'select';
 let ctxTarget = null;
 let textEditTarget = null;
-let dragType = null;
 let canvas, ctx;
 let canvasW, canvasH;
 let isDraggingBlock = false;
@@ -595,8 +574,6 @@ function initCanvas() {
   canvas.addEventListener('mousedown', onMouseDown);
   canvas.addEventListener('mousemove', onMouseMove);
   canvas.addEventListener('mouseup', onMouseUp);
-  canvas.addEventListener('contextmenu', onRightClick);
-  canvas.addEventListener('dblclick', onDblClick);
   canvas.addEventListener('touchstart', onTouchStart, {passive:false});
   canvas.addEventListener('touchmove', onTouchMove, {passive:false});
   canvas.addEventListener('touchend', onTouchEnd);
@@ -750,30 +727,108 @@ function hitTestResizeHandle(b, x, y) {
   const handleY = b.y + b.h;
   const dx = x - handleX;
   const dy = y - handleY;
-  return (dx*dx + dy*dy) <= 36; // 6px radius auf Mobile
+  return (dx*dx + dy*dy) <= 36;
 }
 
 function snap(v) { return Math.round(v/15)*15; }
 
+// ════════════════════════════════════════
+//  BLOCK SELECTION & PLACEMENT (NEW!)
+// ════════════════════════════════════════
+function selectBlockType(blockType, el) {
+  if (activeTool !== 'select') return;
+  
+  placingBlockType = blockType;
+  
+  // Alle Palette-Items entfernen
+  document.querySelectorAll('.palette-item').forEach(i => i.classList.remove('placing-mode'));
+  el.classList.add('placing-mode');
+  
+  // Panel auf Mobile schließen
+  if (window.innerWidth <= 768) {
+    document.getElementById('palette').classList.add('collapsed');
+    document.getElementById('toggle-left').textContent = '☰';
+  }
+  
+  showToast('🎯 Klick auf Canvas zum Platzieren von ' + BLOCK_DEFS[blockType].label);
+  
+  // Canvas Cursor ändern
+  canvas.style.cursor = 'crosshair';
+  
+  // Mobile Hinweis zeigen
+  const hint = document.getElementById('mobile-hint');
+  hint.textContent = '➡️ Klick zum Platzieren: ' + (BLOCK_DEFS[blockType].label || blockType);
+  hint.classList.add('show');
+  setTimeout(() => hint.classList.remove('show'), 2500);
+}
+
+function placeBlockAt(x, y) {
+  if (!placingBlockType) return;
+  
+  const def = BLOCK_DEFS[placingBlockType];
+  const block = {
+    id: nextId++,
+    type: placingBlockType,
+    x: snap(x - def.w/2),
+    y: snap(y - def.h/2),
+    w: def.w,
+    h: def.h,
+    color: def.color,
+    customLabel: def.isLabel ? 'Label' : undefined
+  };
+  
+  blocks.push(block);
+  selectedBlock = block;
+  render();
+  
+  // Text bearbeiten wenn Label
+  if (def.isLabel || def.label) {
+    setTimeout(() => openTextEdit(block, x, y), 50);
+  }
+  
+  showToast('✅ ' + (def.label || placingBlockType) + ' platziert');
+}
+
+// ════════════════════════════════════════
+//  CANVAS CLICK (NEW!)
+// ════════════════════════════════════════
+function onCanvasClick(e) {
+  if (placingBlockType) {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    placeBlockAt(x, y);
+    
+    // Reset placement mode
+    placingBlockType = null;
+    document.querySelectorAll('.palette-item').forEach(i => i.classList.remove('placing-mode'));
+    canvas.style.cursor = 'default';
+  }
+}
+
+// ════════════════════════════════════════
+//  MOUSE/TOUCH INTERACTION
+// ════════════════════════════════════════
 function onMouseDown(e) {
   if (e.button === 2) return;
   closeCtxMenu(); closeTextPopup();
   const {x,y} = getPos(e);
-  if (placingItem) {
-    placingItem.x = x; placingItem.y = y;
-    placingItem.placed = true;
-    placingItem = null;
+  
+  if (placingBlockType) {
+    placeBlockAt(x, y);
+    placingBlockType = null;
+    document.querySelectorAll('.palette-item').forEach(i => i.classList.remove('placing-mode'));
     canvas.style.cursor = 'default';
-    updateShoppingUI();
     render();
-    showToast('📍 Produkt platziert');
     return;
   }
+  
   if (activeTool === 'delete') {
     const b = hitTest(x,y);
     if (b) { blocks = blocks.filter(bl => bl.id !== b.id); selectedBlock = null; render(); }
     return;
   }
+  
   const b = hitTest(x,y);
   if (b) {
     selectedBlock = b;
@@ -791,7 +846,7 @@ function onMouseDown(e) {
 
 function onMouseMove(e) {
   const {x,y} = getPos(e);
-  if (placingItem) { canvas.style.cursor = 'crosshair'; return; }
+  
   if (!isDraggingBlock || !selectedBlock) {
     const b = hitTest(x,y);
     if (b && hitTestResizeHandle(b, x, y)) { canvas.style.cursor = 'se-resize'; }
@@ -799,7 +854,9 @@ function onMouseMove(e) {
     else { canvas.style.cursor = 'default'; }
     return;
   }
+  
   canvas.style.cursor = isDraggingBlock === 'resize' ? 'se-resize' : 'grabbing';
+  
   if (isDraggingBlock === 'move') {
     selectedBlock.x = snap(x - dragOffX);
     selectedBlock.y = snap(y - dragOffY);
@@ -820,28 +877,6 @@ function onMouseUp() {
   }
 }
 
-function onRightClick(e) {
-  e.preventDefault();
-  const {x,y} = getPos(e);
-  const b = hitTest(x,y);
-  if (b) {
-    ctxTarget = b; selectedBlock = b;
-    const menu = document.getElementById('ctx-menu');
-    menu.style.left = e.clientX+'px'; menu.style.top = e.clientY+'px';
-    menu.classList.add('show');
-    menu.querySelector('.ctx-item').style.display = (BLOCK_DEFS[b.type].isLabel || BLOCK_DEFS[b.type].label) ? 'flex' : 'none';
-    render();
-  }
-}
-
-function onDblClick(e) {
-  const {x,y} = getPos(e);
-  const b = hitTest(x,y);
-  if (b && (BLOCK_DEFS[b.type].label !== '' || BLOCK_DEFS[b.type].isLabel)) {
-    openTextEdit(b, e.clientX, e.clientY);
-  }
-}
-
 let touchDragging = false;
 function onTouchStart(e) {
   e.preventDefault();
@@ -857,55 +892,13 @@ function onTouchMove(e) {
 }
 function onTouchEnd(e) { touchDragging = false; onMouseUp(); }
 
-function startDrag(e, blockType) {
-  dragType = blockType;
-  const def = BLOCK_DEFS[blockType];
-  const ghost = document.getElementById('drag-ghost');
-  ghost.style.width = Math.min(def.w,80)+'px';
-  ghost.style.height = Math.min(def.h,40)+'px';
-  ghost.style.background = def.isLabel ? 'rgba(212,114,106,0.3)' : def.color;
-  ghost.textContent = def.emoji || def.label.substring(0,6) || '';
-  e.dataTransfer.effectAllowed = 'copy';
-  e.dataTransfer.setDragImage(document.createElement('div'), 0, 0);
-  document.addEventListener('dragover', updateGhost);
-}
-
-function updateGhost(e) {
-  const g = document.getElementById('drag-ghost');
-  g.style.left = e.clientX+'px'; g.style.top = e.clientY+'px';
-  g.style.opacity = '0.75';
-}
-
-function dropBlock(e) {
-  e.preventDefault();
-  document.removeEventListener('dragover', updateGhost);
-  document.getElementById('drag-ghost').style.opacity = '0';
-  if (!dragType) return;
-  const rect = canvas.getBoundingClientRect();
-  const def = BLOCK_DEFS[dragType];
-  const x = snap(e.clientX - rect.left - def.w/2);
-  const y = snap(e.clientY - rect.top - def.h/2);
-  const block = {
-    id: nextId++,
-    type: dragType,
-    x, y,
-    w: def.w, h: def.h,
-    color: def.color,
-    customLabel: def.isLabel ? 'Label' : undefined
-  };
-  blocks.push(block);
-  selectedBlock = block;
-  dragType = null;
-  render();
-  if (def.isLabel || def.label) setTimeout(() => openTextEdit(block, e.clientX, e.clientY), 50);
-}
-
 function selectTool(tool, el) {
   activeTool = tool;
   document.querySelectorAll('.palette-item[data-tool]').forEach(i => i.classList.remove('selected-tool'));
   el.classList.add('selected-tool');
+  document.querySelectorAll('.palette-item[data-block]').forEach(i => i.classList.remove('placing-mode'));
+  placingBlockType = null;
   canvas.style.cursor = tool === 'delete' ? 'not-allowed' : 'default';
-  // Auf Mobile: Panel nach Auswahl schließen
   if (window.innerWidth <= 768) {
     document.getElementById('palette').classList.add('collapsed');
     document.getElementById('toggle-left').textContent = '☰';
@@ -1044,7 +1037,6 @@ function startPlacingItem(item) {
   canvas.style.cursor = 'crosshair';
   showToast('🖱 Klick zum Platzieren von "' + item.name + '"');
   updateShoppingUI();
-  // Auf Mobile: Panel schließen
   if (window.innerWidth <= 768) {
     document.getElementById('shopping-panel').classList.add('collapsed');
     document.getElementById('toggle-right').textContent = '🛒';
@@ -1117,13 +1109,18 @@ window.loadMap = async () => {
   showToast('📂 "' + data.name + '" geladen!');
 };
 
-window.startDrag = startDrag;
-window.dropBlock = dropBlock;
-
 canvas && canvas.addEventListener('contextmenu', e=>e.preventDefault());
 
 document.addEventListener('keydown', e => {
-  if (e.key==='Escape') { closeCtxMenu(); closeTextPopup(); placingItem=null; canvas.style.cursor='default'; updateShoppingUI(); }
+  if (e.key==='Escape') { 
+    closeCtxMenu(); 
+    closeTextPopup(); 
+    placingItem=null; 
+    placingBlockType=null;
+    document.querySelectorAll('.palette-item').forEach(i => i.classList.remove('placing-mode'));
+    canvas.style.cursor='default'; 
+    updateShoppingUI(); 
+  }
   if ((e.key==='Delete'||e.key==='Backspace') && selectedBlock && document.activeElement===document.body) {
     blocks = blocks.filter(b=>b.id!==selectedBlock.id);
     selectedBlock=null; render();
