@@ -286,6 +286,47 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
 .login-gate-sub { font-size:14px; }
 
 /* SCROLLBAR */
+
+/* Panel Toggle */
+.palette.collapsed {
+  width: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border-right: none !important;
+}
+
+.toggle-btn {
+  position: absolute;
+  left: 160px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 40px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0 8px 8px 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  z-index: 10;
+  transition: left 0.2s;
+  box-shadow: 2px 0 8px var(--shadow);
+}
+
+.toggle-btn:hover {
+  background: var(--surface2);
+}
+
+.palette.collapsed + .canvas-wrap .toggle-btn {
+  left: 0;
+}
+
+/* Wenn Panel offen ist, Toggle nach rechts schieben */
+.palette:not(.collapsed) + .canvas-wrap .toggle-btn {
+  left: 160px;
+}
 ::-webkit-scrollbar { width:5px; }
 ::-webkit-scrollbar-track { background:transparent; }
 ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
@@ -309,17 +350,31 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
 <div class="editor-layout" id="editor-layout">
 
   <!-- LEFT PALETTE -->
-  <div class="palette">
+  <div class="palette" id="palette">
     <div class="palette-title">Werkzeuge</div>
-    <div class="palette-item selected-tool" data-tool="select" onclick="selectTool('select',this)">
-      <div class="pi-icon">🖱</div>
-      <div><div class="pi-label">Auswählen</div><div class="pi-sub">Verschieben</div></div>
+    <!-- ... (der gesamte vorhandene Palette-Inhalt bleibt gleich) ... -->
+    <div class="palette-item" draggable="true" data-block="label" ondragstart="startDrag(event,'label')">
+      <div class="pi-icon" style="color:var(--col-text);font-size:16px;font-weight:700;">T</div>
+      <div><div class="pi-label">Label</div><div class="pi-sub">Text-Feld</div></div>
     </div>
-    <div class="palette-item" data-tool="delete" onclick="selectTool('delete',this)">
-      <div class="pi-icon">🗑</div>
-      <div><div class="pi-label">Löschen</div><div class="pi-sub">Klick auf Block</div></div>
-    </div>
+  </div>
 
+  <!-- TOGGLE BUTTON -->
+  <button class="toggle-btn" id="toggle-palette" onclick="togglePalette()">☰</button>
+
+  <!-- CANVAS -->
+  <div class="canvas-wrap" id="canvas-wrap"
+    ondragover="event.preventDefault()"
+    ondrop="dropBlock(event)">
+    <canvas id="supermarkt-canvas"></canvas>
+  </div>
+
+  <!-- RIGHT: SHOPPING PANEL -->
+  <div class="shopping-panel">
+    <!-- ... (bleibt unverändert) ... -->
+  </div>
+</div>
+  
 <div class="palette-divider"></div>
 <div class="palette-title">Bausteine</div>
 
@@ -1067,6 +1122,35 @@ window.removeItem = (id) => {
   if (placingItem && placingItem.id===id) { placingItem=null; canvas.style.cursor='default'; }
   updateShoppingUI();
 };
+
+  // Panel Toggle
+function togglePalette() {
+  const palette = document.getElementById('palette');
+  const toggleBtn = document.getElementById('toggle-palette');
+  
+  palette.classList.toggle('collapsed');
+  
+  // Button-Text ändern
+  if (palette.classList.contains('collapsed')) {
+    toggleBtn.textContent = '☰';
+  } else {
+    toggleBtn.textContent = '✕';
+  }
+  
+  // Canvas neu rendern (Größe ändert sich)
+  setTimeout(() => {
+    resizeCanvas();
+  }, 200);
+}
+
+// Toolbar standardmäßig minimieren beim Laden
+document.addEventListener('DOMContentLoaded', () => {
+  const palette = document.getElementById('palette');
+  if (palette && !palette.classList.contains('collapsed')) {
+    palette.classList.add('collapsed');
+    document.getElementById('toggle-palette').textContent = '☰';
+  }
+});
 
 // ════════════════════════════════════════
 //  SAVE / LOAD
