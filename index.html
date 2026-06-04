@@ -1123,11 +1123,14 @@ window.doRegister = async () => {
         photoURL = await getDownloadURL(r);
       } catch(se) { console.warn('Avatar upload failed',se); }
     }
-    await updateProfile(cred.user, { displayName: name, photoURL });
-    showToast('🎉 Willkommen, ' + name + '!');
+await updateProfile(cred.user, { displayName: name, photoURL });
+await cred.user.reload();
+currentUser = auth.currentUser;
+updateNavUI(currentUser);
+updateBlogUI(currentUser);
+showToast('🎉 Willkommen, ' + name + '!');
   } catch(ex) { err.textContent = fbErr(ex.code); }
 };
-
 window.doSignOut = async () => {
   await signOut(auth);
   closeModal();
