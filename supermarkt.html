@@ -17,16 +17,6 @@
   --muted: #8a7060;
   --border: rgba(180,140,120,0.18);
   --shadow: rgba(180,120,100,0.12);
-
-  /* block colors */
-  --col-regal: #a8c4e0;
-  --col-kasse: #f0c080;
-  --col-kuehl: #a8d4c0;
-  --col-eingang: #c8a8e0;
-  --col-obst: #a8e0a8;
-  --col-wand: #8a7060;
-  --col-text: #d4726a;
-  --col-boden: #e8dcc8;
 }
 
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
@@ -61,7 +51,6 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
 .btn-sage { background:var(--accent2); color:#fff; }
 .btn-ghost { background:transparent; border:1px solid var(--border); color:var(--muted); }
 .btn-ghost:hover { background:var(--surface2); color:var(--ink); }
-.btn-gold { background:var(--gold); color:#fff; }
 
 /* ── MAIN LAYOUT ── */
 .editor-layout {
@@ -75,6 +64,13 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
   border-right:1px solid var(--border);
   overflow-y:auto; padding:10px 8px;
   display:flex; flex-direction:column; gap:4px;
+  transition:width 0.2s;
+}
+.palette.collapsed {
+  width:0 !important;
+  padding:0 !important;
+  overflow:hidden !important;
+  border-right:none !important;
 }
 .palette-title {
   font-size:10px; font-weight:700; text-transform:uppercase;
@@ -281,23 +277,16 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
   align-items:center; justify-content:center; gap:16px;
   color:var(--muted);
 }
-.login-gate-icon { font-size:48px; }
-.login-gate-title { font-family:'Playfair Display',serif; font-size:22px; color:var(--ink); }
-.login-gate-sub { font-size:14px; }
 
 /* SCROLLBAR */
+::-webkit-scrollbar { width:5px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
 
 /* Panel Toggle */
-.palette.collapsed {
-  width: 0 !important;
-  padding: 0 !important;
-  overflow: hidden !important;
-  border-right: none !important;
-}
-
 .toggle-btn {
   position: absolute;
-  left: 160px;
+  left: 0;
   top: 50%;
   transform: translateY(-50%);
   width: 24px;
@@ -311,25 +300,9 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
   justify-content: center;
   font-size: 14px;
   z-index: 10;
-  transition: left 0.2s;
   box-shadow: 2px 0 8px var(--shadow);
 }
-
-.toggle-btn:hover {
-  background: var(--surface2);
-}
-
-.palette.collapsed + .canvas-wrap .toggle-btn {
-  left: 0;
-}
-
-/* Wenn Panel offen ist, Toggle nach rechts schieben */
-.palette:not(.collapsed) + .canvas-wrap .toggle-btn {
-  left: 160px;
-}
-::-webkit-scrollbar { width:5px; }
-::-webkit-scrollbar-track { background:transparent; }
-::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+.toggle-btn:hover { background: var(--surface2); }
 </style>
 </head>
 <body>
@@ -346,73 +319,55 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
   </div>
 </div>
 
-<!-- EDITOR (shown when logged in) -->
+<!-- EDITOR -->
 <div class="editor-layout" id="editor-layout">
 
   <!-- LEFT PALETTE -->
   <div class="palette" id="palette">
     <div class="palette-title">Werkzeuge</div>
-    <!-- ... (der gesamte vorhandene Palette-Inhalt bleibt gleich) ... -->
+    <div class="palette-item selected-tool" data-tool="select" onclick="selectTool('select',this)">
+      <div class="pi-icon">🖱</div>
+      <div><div class="pi-label">Auswählen</div><div class="pi-sub">Verschieben</div></div>
+    </div>
+    <div class="palette-item" data-tool="delete" onclick="selectTool('delete',this)">
+      <div class="pi-icon">🗑</div>
+      <div><div class="pi-label">Löschen</div><div class="pi-sub">Klick auf Block</div></div>
+    </div>
+
+    <div class="palette-divider"></div>
+    <div class="palette-title">Bausteine</div>
+
+    <div class="palette-item" draggable="true" data-block="regal" ondragstart="startDrag(event,'regal')">
+      <div class="pi-icon" style="background:#a8e0a8;border-radius:3px;width:32px;height:14px;"></div>
+      <div><div class="pi-label">Regal</div><div class="pi-sub">grün</div></div>
+    </div>
+    <div class="palette-item" draggable="true" data-block="obst" ondragstart="startDrag(event,'obst')">
+      <div class="pi-icon" style="background:#f0c080;border-radius:3px;width:24px;height:24px;"></div>
+      <div><div class="pi-label">Obstabteilung</div><div class="pi-sub">gelb</div></div>
+    </div>
+    <div class="palette-item" draggable="true" data-block="kuehl" ondragstart="startDrag(event,'kuehl')">
+      <div class="pi-icon" style="background:#a8c4e0;border-radius:3px;width:28px;height:16px;"></div>
+      <div><div class="pi-label">Kühlregal</div><div class="pi-sub">blau</div></div>
+    </div>
+    <div class="palette-item" draggable="true" data-block="eingang" ondragstart="startDrag(event,'eingang')">
+      <div class="pi-icon" style="background:#8a7060;border-radius:3px;width:22px;height:22px;"></div>
+      <div><div class="pi-label">Eingang</div><div class="pi-sub">grau</div></div>
+    </div>
+    <div class="palette-item" draggable="true" data-block="kasse" ondragstart="startDrag(event,'kasse')">
+      <div class="pi-icon" style="background:#c8a8e0;border-radius:3px;width:20px;height:20px;"></div>
+      <div><div class="pi-label">Kasse</div><div class="pi-sub">lila</div></div>
+    </div>
+
+    <div class="palette-divider"></div>
+    <div class="palette-title">Text</div>
     <div class="palette-item" draggable="true" data-block="label" ondragstart="startDrag(event,'label')">
-      <div class="pi-icon" style="color:var(--col-text);font-size:16px;font-weight:700;">T</div>
+      <div class="pi-icon" style="color:#2d5a8a;font-size:16px;font-weight:700;">T</div>
       <div><div class="pi-label">Label</div><div class="pi-sub">Text-Feld</div></div>
     </div>
   </div>
 
   <!-- TOGGLE BUTTON -->
   <button class="toggle-btn" id="toggle-palette" onclick="togglePalette()">☰</button>
-
-  <!-- CANVAS -->
-  <div class="canvas-wrap" id="canvas-wrap"
-    ondragover="event.preventDefault()"
-    ondrop="dropBlock(event)">
-    <canvas id="supermarkt-canvas"></canvas>
-  </div>
-
-  <!-- RIGHT: SHOPPING PANEL -->
-  <div class="shopping-panel">
-    <!-- ... (bleibt unverändert) ... -->
-  </div>
-</div>
-  
-<div class="palette-divider"></div>
-<div class="palette-title">Bausteine</div>
-
-<div class="palette-item" draggable="true" data-block="regal" ondragstart="startDrag(event,'regal')">
-  <div class="pi-icon" style="background:#a8e0a8;border-radius:3px;width:32px;height:14px;"></div>
-  <div><div class="pi-label">Regal</div><div class="pi-sub">grün</div></div>
-</div>
-<div class="palette-item" draggable="true" data-block="obst" ondragstart="startDrag(event,'obst')">
-  <div class="pi-icon" style="background:#f0c080;border-radius:3px;width:24px;height:24px;"></div>
-  <div><div class="pi-label">Obstabteilung</div><div class="pi-sub">gelb</div></div>
-</div>
-<div class="palette-item" draggable="true" data-block="kuehl" ondragstart="startDrag(event,'kuehl')">
-  <div class="pi-icon" style="background:#a8c4e0;border-radius:3px;width:28px;height:16px;"></div>
-  <div><div class="pi-label">Kühlregal</div><div class="pi-sub">blau</div></div>
-</div>
-<div class="palette-item" draggable="true" data-block="eingang" ondragstart="startDrag(event,'eingang')">
-  <div class="pi-icon" style="background:#8a7060;border-radius:3px;width:22px;height:22px;"></div>
-  <div><div class="pi-label">Eingang</div><div class="pi-sub">grau</div></div>
-</div>
-<div class="palette-item" draggable="true" data-block="kasse" ondragstart="startDrag(event,'kasse')">
-  <div class="pi-icon" style="background:#c8a8e0;border-radius:3px;width:20px;height:20px;"></div>
-  <div><div class="pi-label">Kasse</div><div class="pi-sub">lila</div></div>
-</div>
-
-<div class="palette-divider"></div>
-<div class="palette-title">Text</div>
-<div class="palette-item" draggable="true" data-block="label" ondragstart="startDrag(event,'label')">
-  <div class="pi-icon" style="color:#2d5a8a;font-size:16px;font-weight:700;">T</div>
-  <div><div class="pi-label">Label</div><div class="pi-sub">Text-Feld</div></div>
-</div>
-    
-    <div class="palette-divider"></div>
-    <div class="palette-title">Text</div>
-    <div class="palette-item" draggable="true" data-block="label" ondragstart="startDrag(event,'label')">
-      <div class="pi-icon" style="color:var(--col-text);font-size:16px;font-weight:700;">T</div>
-      <div><div class="pi-label">Label</div><div class="pi-sub">Text-Feld</div></div>
-    </div>
-  </div>
 
   <!-- CANVAS -->
   <div class="canvas-wrap" id="canvas-wrap"
@@ -444,7 +399,7 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
   </div>
 </div>
 
-<!-- LOGIN GATE (shown when not logged in) -->
+<!-- LOGIN GATE -->
 <div id="login-gate" style="display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
   <div style="font-size:48px;">🔒</div>
   <div style="font-family:'Playfair Display',serif;font-size:22px;color:var(--ink);">Bitte einloggen</div>
@@ -473,7 +428,7 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
 <div class="modal-overlay" id="modal">
   <div class="modal-box">
     <div class="modal-title" id="modal-title">Karte leeren?</div>
-    <div class="modal-text" id="modal-text">Alle Blöcke werden entfernt. Diese Aktion kann nicht rückgängig gemacht werden.</div>
+    <div class="modal-text" id="modal-text">Alle Blöcke werden entfernt.</div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal()">Abbrechen</button>
       <button class="btn btn-primary" id="modal-confirm-btn">Leeren</button>
@@ -509,6 +464,13 @@ onAuthStateChanged(auth, async user => {
     document.getElementById('editor-layout').style.display = 'flex';
     document.getElementById('login-gate').style.display = 'none';
     document.getElementById('btn-load').style.display = 'block';
+    
+    const palette = document.getElementById('palette');
+    if (palette) {
+      palette.classList.add('collapsed');
+      document.getElementById('toggle-palette').textContent = '☰';
+    }
+    
     initCanvas();
     await loadMapFromFirebase(user, db);
   } else {
@@ -540,24 +502,21 @@ async function loadMapFromFirebase(user, db) {
 
 <script>
 // ════════════════════════════════════════
-//  BLOCK DEFINITIONS (angepasst)
+//  BLOCK DEFINITIONS
 // ════════════════════════════════════════
 const BLOCK_DEFS = {
-  'regal':     { w:120, h:28,  color:'#a8e0a8', label:'', emoji:'', labelColor:'#2d5a8a' },     // grün
-  'obst':      { w:70,  h:70,  color:'#f0c080', label:'', emoji:'', labelColor:'#2d5a8a' },     // gelb
-  'kuehl':     { w:130, h:32,  color:'#a8c4e0', label:'', emoji:'', labelColor:'#2d5a8a' },     // blau
-  'eingang':   { w:50,  h:50,  color:'#8a7060', label:'', emoji:'', labelColor:'#2d5a8a' },     // grau
-  'kasse':     { w:50,  h:50,  color:'#c8a8e0', label:'', emoji:'', labelColor:'#2d5a8a' },     // lila
-  'label':     { w:80,  h:28,  color:'rgba(212,114,106,0.12)', label:'Label', emoji:'', labelColor:'#2d5a8a', isLabel:true }  // dunkelblau
+  'regal':     { w:120, h:28,  color:'#a8e0a8', label:'', emoji:'', labelColor:'#2d5a8a' },
+  'obst':      { w:70,  h:70,  color:'#f0c080', label:'', emoji:'', labelColor:'#2d5a8a' },
+  'kuehl':     { w:130, h:32,  color:'#a8c4e0', label:'', emoji:'', labelColor:'#2d5a8a' },
+  'eingang':   { w:50,  h:50,  color:'#8a7060', label:'', emoji:'', labelColor:'#2d5a8a' },
+  'kasse':     { w:50,  h:50,  color:'#c8a8e0', label:'', emoji:'', labelColor:'#2d5a8a' },
+  'label':     { w:80,  h:28,  color:'rgba(212,114,106,0.12)', label:'Label', emoji:'', labelColor:'#2d5a8a', isLabel:true }
 };
 
-// ════════════════════════════════════════
-//  STATE
-// ════════════════════════════════════════
 let blocks = [];
 let shoppingItems = [];
 let selectedBlock = null;
-let placingItem = null; // shopping item being placed
+let placingItem = null;
 let activeTool = 'select';
 let ctxTarget = null;
 let textEditTarget = null;
@@ -568,26 +527,19 @@ let isDraggingBlock = false;
 let dragOffX = 0, dragOffY = 0;
 let nextId = 1;
 
-// ════════════════════════════════════════
-//  CANVAS INIT
-// ════════════════════════════════════════
 function initCanvas() {
   canvas = document.getElementById('supermarkt-canvas');
   ctx = canvas.getContext('2d');
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
-
   canvas.addEventListener('mousedown', onMouseDown);
   canvas.addEventListener('mousemove', onMouseMove);
   canvas.addEventListener('mouseup', onMouseUp);
   canvas.addEventListener('contextmenu', onRightClick);
   canvas.addEventListener('dblclick', onDblClick);
-
-  // Touch
   canvas.addEventListener('touchstart', onTouchStart, {passive:false});
   canvas.addEventListener('touchmove', onTouchMove, {passive:false});
   canvas.addEventListener('touchend', onTouchEnd);
-
   render();
 }
 
@@ -600,43 +552,24 @@ function resizeCanvas() {
   render();
 }
 
-// ════════════════════════════════════════
-//  RENDER
-// ════════════════════════════════════════
 function render() {
   if (!ctx) return;
   ctx.clearRect(0, 0, canvasW, canvasH);
-
-  // Grid
   ctx.strokeStyle = 'rgba(180,140,120,0.12)';
   ctx.lineWidth = 1;
   for (let x = 0; x < canvasW; x += 30) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvasH); ctx.stroke(); }
   for (let y = 0; y < canvasH; y += 30) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvasW,y); ctx.stroke(); }
-
-  // Blocks
   blocks.forEach(b => drawBlock(b));
-
-  // Shopping pins
   shoppingItems.forEach(item => {
-    if (item.x !== undefined && item.y !== undefined && !item.done) {
-      drawPin(item.x, item.y, item.name, item.color);
-    }
+    if (item.x !== undefined && item.y !== undefined && !item.done) drawPin(item.x, item.y, item.name, item.color);
   });
 }
 
 function drawBlock(b) {
   const def = BLOCK_DEFS[b.type];
   const isSelected = selectedBlock && selectedBlock.id === b.id;
-
   ctx.save();
-
-  // Shadow
-  if (isSelected) {
-    ctx.shadowColor = 'rgba(212,114,106,0.4)';
-    ctx.shadowBlur = 12;
-  }
-
-  // Fill
+  if (isSelected) { ctx.shadowColor = 'rgba(212,114,106,0.4)'; ctx.shadowBlur = 12; }
   if (def.isLabel) {
     ctx.fillStyle = 'rgba(212,114,106,0.1)';
     ctx.strokeStyle = 'rgba(212,114,106,0.4)';
@@ -649,23 +582,17 @@ function drawBlock(b) {
     ctx.fillStyle = b.color || def.color;
     roundRect(b.x, b.y, b.w, b.h, 6);
     ctx.fill();
-    // Border
     ctx.strokeStyle = isSelected ? '#d4726a' : 'rgba(0,0,0,0.08)';
     ctx.lineWidth = isSelected ? 2 : 1;
     ctx.stroke();
   }
-
   ctx.shadowBlur = 0;
-
-  // Emoji
   if (def.emoji && b.w > 30) {
     ctx.font = `${Math.min(b.h*0.55, 20)}px serif`;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
     ctx.fillText(def.emoji, b.x + 6, b.y + b.h/2);
   }
-
-  // Label text
   const labelText = b.customLabel !== undefined ? b.customLabel : def.label;
   if (labelText && b.w > 20) {
     ctx.fillStyle = def.isLabel ? '#d4726a' : def.labelColor;
@@ -678,8 +605,6 @@ function drawBlock(b) {
     const tx = b.x + emojiOffset + (b.w - emojiOffset)/2;
     ctx.fillText(truncate(labelText, availW, ctx), tx, b.y + b.h/2);
   }
-
-  // Selected indicator
   if (isSelected) {
     ctx.strokeStyle = '#d4726a';
     ctx.lineWidth = 2;
@@ -687,20 +612,17 @@ function drawBlock(b) {
     roundRect(b.x-2, b.y-2, b.w+4, b.h+4, 8);
     ctx.stroke();
     ctx.setLineDash([]);
-    // Resize handle
     ctx.fillStyle = '#d4726a';
     ctx.beginPath();
     ctx.arc(b.x+b.w, b.y+b.h, 5, 0, Math.PI*2);
     ctx.fill();
   }
-
   ctx.restore();
 }
 
 function drawPin(x, y, name, color) {
   const c = color || '#d4726a';
   ctx.save();
-  // Pin
   ctx.fillStyle = c;
   ctx.beginPath();
   ctx.arc(x, y-14, 9, 0, Math.PI*2);
@@ -710,14 +632,12 @@ function drawPin(x, y, name, color) {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText('📍', x, y-14);
-  // Line
   ctx.strokeStyle = c;
   ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.moveTo(x, y-5);
   ctx.lineTo(x, y);
   ctx.stroke();
-  // Label
   const metrics = ctx.measureText(name);
   const lw = metrics.width + 12;
   ctx.fillStyle = c;
@@ -752,16 +672,12 @@ function truncate(text, maxW, ctx) {
   return text+'…';
 }
 
-// ════════════════════════════════════════
-//  INTERACTION (angepasst - Resizeimmer möglich)
-// ════════════════════════════════════════
 function getPos(e) {
   const rect = canvas.getBoundingClientRect();
   return { x: e.clientX - rect.left, y: e.clientY - rect.top };
 }
 
 function hitTest(x, y) {
-  // reverse order so top blocks are selected first
   for (let i = blocks.length-1; i >= 0; i--) {
     const b = blocks[i];
     if (x >= b.x && x <= b.x+b.w && y >= b.y && y <= b.y+b.h) return b;
@@ -770,12 +686,11 @@ function hitTest(x, y) {
 }
 
 function hitTestResizeHandle(b, x, y) {
-  // Resize handle in der rechten unteren Ecke (5pxRadius)
   const handleX = b.x + b.w;
   const handleY = b.y + b.h;
   const dx = x - handleX;
   const dy = y - handleY;
-  return (dx*dx + dy*dy) <= 25; // 5px radius
+  return (dx*dx + dy*dy) <= 25;
 }
 
 function snap(v) { return Math.round(v/15)*15; }
@@ -784,8 +699,6 @@ function onMouseDown(e) {
   if (e.button === 2) return;
   closeCtxMenu(); closeTextPopup();
   const {x,y} = getPos(e);
-
-  // Placing shopping item
   if (placingItem) {
     placingItem.x = x; placingItem.y = y;
     placingItem.placed = true;
@@ -796,25 +709,18 @@ function onMouseDown(e) {
     showToast('📍 Produkt platziert');
     return;
   }
-
   if (activeTool === 'delete') {
     const b = hitTest(x,y);
     if (b) { blocks = blocks.filter(bl => bl.id !== b.id); selectedBlock = null; render(); }
     return;
   }
-
   const b = hitTest(x,y);
   if (b) {
     selectedBlock = b;
-    // check resize handle (für alle Blöcke)
-    if (hitTestResizeHandle(b, x, y)) {
-      isDraggingBlock = 'resize';
-    } else {
-      isDraggingBlock = 'move';
-    }
+    if (hitTestResizeHandle(b, x, y)) { isDraggingBlock = 'resize'; }
+    else { isDraggingBlock = 'move'; }
     dragOffX = x - b.x;
     dragOffY = y - b.y;
-    // bring to front
     blocks = blocks.filter(bl => bl.id !== b.id);
     blocks.push(b);
   } else {
@@ -826,31 +732,21 @@ function onMouseDown(e) {
 function onMouseMove(e) {
   const {x,y} = getPos(e);
   if (placingItem) { canvas.style.cursor = 'crosshair'; return; }
-  
   if (!isDraggingBlock || !selectedBlock) {
-    // Cursor ändern, wenn man über den Resize-Handle fährt
     const b = hitTest(x,y);
-    if (b && hitTestResizeHandle(b, x, y)) {
-      canvas.style.cursor = 'se-resize';
-    } else if (b) {
-      canvas.style.cursor = 'grab';
-    } else {
-      canvas.style.cursor = 'default';
-    }
+    if (b && hitTestResizeHandle(b, x, y)) { canvas.style.cursor = 'se-resize'; }
+    else if (b) { canvas.style.cursor = 'grab'; }
+    else { canvas.style.cursor = 'default'; }
     return;
   }
-  
   canvas.style.cursor = isDraggingBlock === 'resize' ? 'se-resize' : 'grabbing';
-  
   if (isDraggingBlock === 'move') {
     selectedBlock.x = snap(x - dragOffX);
     selectedBlock.y = snap(y - dragOffY);
   } else {
-    // Resize: Mindestgrößen beachten
     const def = BLOCK_DEFS[selectedBlock.type];
     const minWidth = def.isLabel ? 40 : 20;
     const minHeight = def.isLabel ? 20 : 14;
-    
     selectedBlock.w = Math.max(minWidth, snap(x - selectedBlock.x));
     selectedBlock.h = Math.max(minHeight, snap(y - selectedBlock.y));
   }
@@ -859,7 +755,6 @@ function onMouseMove(e) {
 
 function onMouseUp() { 
   isDraggingBlock = false; 
-  // Speichern nach Resize
   if (selectedBlock) {
     window._saveToFirebase && window._saveToFirebase({ blocks, shoppingItems, marketName: document.getElementById('market-name').value });
   }
@@ -874,7 +769,6 @@ function onRightClick(e) {
     const menu = document.getElementById('ctx-menu');
     menu.style.left = e.clientX+'px'; menu.style.top = e.clientY+'px';
     menu.classList.add('show');
-    // only show text edit for label/non-wall blocks
     menu.querySelector('.ctx-item').style.display = (BLOCK_DEFS[b.type].isLabel || BLOCK_DEFS[b.type].label) ? 'flex' : 'none';
     render();
   }
@@ -888,7 +782,6 @@ function onDblClick(e) {
   }
 }
 
-// Touch
 let touchDragging = false;
 function onTouchStart(e) {
   e.preventDefault();
@@ -904,9 +797,6 @@ function onTouchMove(e) {
 }
 function onTouchEnd(e) { touchDragging = false; onMouseUp(); }
 
-// ════════════════════════════════════════
-//  DRAG & DROP FROM PALETTE
-// ════════════════════════════════════════
 function startDrag(e, blockType) {
   dragType = blockType;
   const def = BLOCK_DEFS[blockType];
@@ -919,6 +809,7 @@ function startDrag(e, blockType) {
   e.dataTransfer.setDragImage(document.createElement('div'), 0, 0);
   document.addEventListener('dragover', updateGhost);
 }
+
 function updateGhost(e) {
   const g = document.getElementById('drag-ghost');
   g.style.left = e.clientX+'px'; g.style.top = e.clientY+'px';
@@ -946,16 +837,9 @@ function dropBlock(e) {
   selectedBlock = block;
   dragType = null;
   render();
-  if (def.isLabel || def.label) {
-    const cx = e.clientX;
-    const cy = e.clientY;
-    setTimeout(() => openTextEdit(block, cx, cy), 50);
-  }
+  if (def.isLabel || def.label) setTimeout(() => openTextEdit(block, e.clientX, e.clientY), 50);
 }
 
-// ════════════════════════════════════════
-//  TOOL SELECT
-// ════════════════════════════════════════
 function selectTool(tool, el) {
   activeTool = tool;
   document.querySelectorAll('.palette-item[data-tool]').forEach(i => i.classList.remove('selected-tool'));
@@ -964,37 +848,30 @@ function selectTool(tool, el) {
 }
 window.selectTool = selectTool;
 
-// ════════════════════════════════════════
-//  CONTEXT MENU
-// ════════════════════════════════════════
+function togglePalette() {
+  const palette = document.getElementById('palette');
+  palette.classList.toggle('collapsed');
+  if (palette.classList.contains('collapsed')) {
+    document.getElementById('toggle-palette').textContent = '☰';
+  } else {
+    document.getElementById('toggle-palette').textContent = '✕';
+  }
+  setTimeout(() => resizeCanvas(), 200);
+}
+window.togglePalette = togglePalette;
+
 function closeCtxMenu() { document.getElementById('ctx-menu').classList.remove('show'); }
 window.closeCtxMenu = closeCtxMenu;
 
-window.ctxEdit = () => {
-  closeCtxMenu();
-  if (ctxTarget) openTextEdit(ctxTarget, window.innerWidth/2, window.innerHeight/2);
-};
-window.ctxDuplicate = () => {
-  closeCtxMenu();
-  if (!ctxTarget) return;
-  const copy = {...ctxTarget, id:nextId++, x:ctxTarget.x+20, y:ctxTarget.y+20};
-  blocks.push(copy); selectedBlock = copy; render();
-};
-window.ctxDelete = () => {
-  closeCtxMenu();
-  if (!ctxTarget) return;
-  blocks = blocks.filter(b => b.id !== ctxTarget.id);
-  selectedBlock = null; render();
-};
+window.ctxEdit = () => { closeCtxMenu(); if (ctxTarget) openTextEdit(ctxTarget, window.innerWidth/2, window.innerHeight/2); };
+window.ctxDuplicate = () => { closeCtxMenu(); if (!ctxTarget) return; const copy = {...ctxTarget, id:nextId++, x:ctxTarget.x+20, y:ctxTarget.y+20}; blocks.push(copy); selectedBlock = copy; render(); };
+window.ctxDelete = () => { closeCtxMenu(); if (!ctxTarget) return; blocks = blocks.filter(b => b.id !== ctxTarget.id); selectedBlock = null; render(); };
 
 document.addEventListener('click', e => {
   if (!e.target.closest('.ctx-menu')) closeCtxMenu();
   if (!e.target.closest('.text-popup') && !e.target.closest('#supermarkt-canvas')) closeTextPopup();
 });
 
-// ════════════════════════════════════════
-//  TEXT EDIT
-// ════════════════════════════════════════
 function openTextEdit(block, cx, cy) {
   textEditTarget = block;
   const popup = document.getElementById('text-popup');
@@ -1011,7 +888,6 @@ function confirmTextEdit() {
   if (!textEditTarget) return;
   const val = document.getElementById('text-popup-input').value.trim();
   textEditTarget.customLabel = val;
-  // auto-resize label width
   if (BLOCK_DEFS[textEditTarget.type].isLabel) {
     const tmp = ctx.font; ctx.font='600 13px DM Sans';
     textEditTarget.w = Math.max(60, ctx.measureText(val).width + 16);
@@ -1030,9 +906,6 @@ function closeTextPopup() {
 window.confirmTextEdit = confirmTextEdit;
 window.cancelTextEdit = cancelTextEdit;
 
-// ════════════════════════════════════════
-//  SHOPPING LIST
-// ════════════════════════════════════════
 const ITEM_COLORS = ['#d4726a','#7a9e8a','#c9a05a','#a070c0','#4090c0','#e08050'];
 let colorIdx = 0;
 
@@ -1051,7 +924,6 @@ function updateShoppingUI() {
   const list = document.getElementById('sp-list');
   const marketName = document.getElementById('market-name').value || 'Kein Supermarkt';
   document.getElementById('sp-market-name').textContent = marketName;
-
   if (shoppingItems.length === 0) {
     list.innerHTML = '<div class="sp-empty">Produkte hinzufügen und auf der Karte platzieren</div>';
     document.getElementById('sp-progress-bar').style.width = '0%';
@@ -1060,12 +932,10 @@ function updateShoppingUI() {
     render();
     return;
   }
-
   list.innerHTML = '';
   shoppingItems.forEach(item => {
     const div = document.createElement('div');
     div.className = 'sp-item' + (item.placed&&!item.done?' placed':'') + (item.done?' done':'') + (placingItem&&placingItem.id===item.id?' placing':'');
-
     div.innerHTML = `
       <div class="sp-item-dot" style="${item.placed?'background:'+item.color+';border-color:'+item.color:''}"></div>
       <div style="flex:1;min-width:0;">
@@ -1079,20 +949,10 @@ function updateShoppingUI() {
         ${item.done?`<button class="sp-icon-btn" title="Rückgängig" onclick="undoDone(${item.id})">↩</button>`:''}
         <button class="sp-icon-btn" title="Löschen" onclick="removeItem(${item.id})">✕</button>
       </div>`;
-
-    if (!item.placed && !item.done) div.onclick = (e) => {
-      if (e.target.closest('.sp-icon-btn')) return;
-      startPlacingItem(item);
-    };
-    else if (item.placed && !item.done) div.onclick = (e) => {
-      if (e.target.closest('.sp-icon-btn')) return;
-      // pan to item
-      showToast('📍 ' + item.name);
-    };
-
+    if (!item.placed && !item.done) div.onclick = (e) => { if (e.target.closest('.sp-icon-btn')) return; startPlacingItem(item); };
+    else if (item.placed && !item.done) div.onclick = (e) => { if (e.target.closest('.sp-icon-btn')) return; showToast('📍 ' + item.name); };
     list.appendChild(div);
   });
-
   const total = shoppingItems.length;
   const done = shoppingItems.filter(i=>i.done).length;
   const pct = total > 0 ? (done/total*100) : 0;
@@ -1109,53 +969,30 @@ function startPlacingItem(item) {
   updateShoppingUI();
 }
 
-window.markDone = (id) => {
-  const item = shoppingItems.find(i=>i.id===id);
-  if (item) { item.done = true; updateShoppingUI(); }
-};
-window.undoDone = (id) => {
-  const item = shoppingItems.find(i=>i.id===id);
-  if (item) { item.done = false; updateShoppingUI(); }
-};
-window.removeItem = (id) => {
-  shoppingItems = shoppingItems.filter(i=>i.id!==id);
-  if (placingItem && placingItem.id===id) { placingItem=null; canvas.style.cursor='default'; }
-  updateShoppingUI();
-};
+window.markDone = (id) => { const item = shoppingItems.find(i=>i.id===id); if (item) { item.done = true; updateShoppingUI(); } };
+window.undoDone = (id) => { const item = shoppingItems.find(i=>i.id===id); if (item) { item.done = false; updateShoppingUI(); } };
+window.removeItem = (id) => { shoppingItems = shoppingItems.filter(i=>i.id!==id); if (placingItem && placingItem.id===id) { placingItem=null; canvas.style.cursor='default'; } updateShoppingUI(); };
+window.addShoppingItem = addShoppingItem;
 
-  // Panel Toggle
-function togglePalette() {
-  const palette = document.getElementById('palette');
-  const toggleBtn = document.getElementById('toggle-palette');
-  
-  palette.classList.toggle('collapsed');
-  
-  // Button-Text ändern
-  if (palette.classList.contains('collapsed')) {
-    toggleBtn.textContent = '☰';
-  } else {
-    toggleBtn.textContent = '✕';
-  }
-  
-  // Canvas neu rendern (Größe ändert sich)
-  setTimeout(() => {
-    resizeCanvas();
-  }, 200);
+let toastT;
+function showToast(msg) {
+  clearTimeout(toastT);
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  toastT = setTimeout(()=>t.classList.remove('show'), 3000);
 }
+window.showToast = showToast;
 
-// Toolbar standardmäßig minimieren beim Laden
-document.addEventListener('DOMContentLoaded', () => {
-  const palette = document.getElementById('palette');
-  if (palette && !palette.classList.contains('collapsed')) {
-    palette.classList.add('collapsed');
-    document.getElementById('toggle-palette').textContent = '☰';
-  }
-});
+function closeModal() { document.getElementById('modal').classList.remove('show'); }
+window.closeModal = closeModal;
 
-// ════════════════════════════════════════
-//  SAVE / LOAD
-// ════════════════════════════════════════
-// Remove all undefined values recursively so Firestore doesn't choke
+window.confirmClear = () => {
+  document.getElementById('modal-title').textContent = 'Karte leeren?';
+  document.getElementById('modal-text').textContent = 'Alle Blöcke und platzierten Produkte werden entfernt.';
+  document.getElementById('modal-confirm-btn').onclick = () => { blocks=[]; selectedBlock=null; render(); closeModal(); showToast('🗑 Karte geleert'); };
+  document.getElementById('modal').classList.add('show');
+};
+
 function cleanForFirestore(obj) {
   if (Array.isArray(obj)) return obj.map(cleanForFirestore);
   if (obj !== null && typeof obj === 'object') {
@@ -1198,32 +1035,11 @@ window.loadMap = async () => {
   showToast('📂 "' + data.name + '" geladen!');
 };
 
-// ════════════════════════════════════════
-//  CLEAR
-// ════════════════════════════════════════
-window.confirmClear = () => {
-  document.getElementById('modal-title').textContent = 'Karte leeren?';
-  document.getElementById('modal-text').textContent = 'Alle Blöcke und platzierten Produkte werden entfernt.';
-  document.getElementById('modal-confirm-btn').onclick = () => { blocks=[]; selectedBlock=null; render(); closeModal(); showToast('🗑 Karte geleert'); };
-  document.getElementById('modal').classList.add('show');
-};
+window.startDrag = startDrag;
+window.dropBlock = dropBlock;
 
-function closeModal() { document.getElementById('modal').classList.remove('show'); }
-window.closeModal = closeModal;
+canvas && canvas.addEventListener('contextmenu', e=>e.preventDefault());
 
-// ════════════════════════════════════════
-//  TOAST
-// ════════════════════════════════════════
-let toastT;
-function showToast(msg) {
-  clearTimeout(toastT);
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  toastT = setTimeout(()=>t.classList.remove('show'), 3000);
-}
-window.showToast = showToast;
-
-// Keyboard shortcuts
 document.addEventListener('keydown', e => {
   if (e.key==='Escape') { closeCtxMenu(); closeTextPopup(); placingItem=null; canvas.style.cursor='default'; updateShoppingUI(); }
   if ((e.key==='Delete'||e.key==='Backspace') && selectedBlock && document.activeElement===document.body) {
@@ -1232,13 +1048,6 @@ document.addEventListener('keydown', e => {
   }
   if (e.key==='s' && (e.ctrlKey||e.metaKey)) { e.preventDefault(); window.saveMap(); }
 });
-
-// Drag events
-window.startDrag = startDrag;
-window.dropBlock = dropBlock;
-
-// Prevent right-click default on canvas
-canvas && canvas.addEventListener('contextmenu', e=>e.preventDefault());
 </script>
 </body>
 </html>
