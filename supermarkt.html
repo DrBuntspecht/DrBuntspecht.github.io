@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Supermarkt-Planer – Dr. Buntspecht</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #fdf6f0;
+  --surface: #fff8f3;
+  --surface2: #ffeee3;
+  --accent: #d4726a;
+  --accent2: #7a9e8a;
+  --gold: #c9a05a;
+  --ink: #2d1f1a;
+  --muted: #8a7060;
+  --border: rgba(180,140,120,0.18);
+  --shadow: rgba(180,120,100,0.12);
+
+  /* block colors */
+  --col-regal: #a8c4e0;
+  --col-kasse: #f0c080;
+  --col-kuehl: #a8d4c0;
+  --col-eingang: #c8a8e0;
+  --col-obst: #a8e0a8;
+  --col-wand: #8a7060;
+  --col-text: #d4726a;
+  --col-boden: #e8dcc8;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif; height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+
+/* ── TOPBAR ── */
+.topbar {
+  height:54px; background:var(--surface);
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 16px; flex-shrink:0; gap:8px;
+  box-shadow:0 2px 8px var(--shadow);
+}
+.topbar-logo {
+  font-family:'Playfair Display',serif;
+  font-size:16px; font-weight:900; color:var(--ink); white-space:nowrap;
+}
+.topbar-logo span { color:var(--accent); font-style:italic; }
+.topbar-name {
+  flex:1; border:1px solid var(--border); border-radius:8px;
+  padding:7px 12px; font-family:'DM Sans',sans-serif; font-size:13px;
+  color:var(--ink); background:#fff; outline:none; max-width:220px;
+  transition:border-color 0.2s;
+}
+.topbar-name:focus { border-color:var(--accent); }
+.topbar-actions { display:flex; gap:6px; flex-shrink:0; }
+
+.btn { font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; padding:7px 13px; border-radius:8px; border:none; cursor:pointer; transition:all 0.15s; white-space:nowrap; }
+.btn:active { transform:scale(0.95); }
+.btn-primary { background:var(--accent); color:#fff; }
+.btn-primary:hover { filter:brightness(1.08); }
+.btn-sage { background:var(--accent2); color:#fff; }
+.btn-ghost { background:transparent; border:1px solid var(--border); color:var(--muted); }
+.btn-ghost:hover { background:var(--surface2); color:var(--ink); }
+.btn-gold { background:var(--gold); color:#fff; }
+
+/* ── MAIN LAYOUT ── */
+.editor-layout {
+  display:flex; flex:1; overflow:hidden;
+}
+
+/* ── LEFT PANEL (Palette) ── */
+.palette {
+  width:160px; flex-shrink:0;
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  overflow-y:auto; padding:10px 8px;
+  display:flex; flex-direction:column; gap:4px;
+}
+.palette-title {
+  font-size:10px; font-weight:700; text-transform:uppercase;
+  letter-spacing:1.5px; color:var(--muted); padding:6px 4px 4px;
+}
+.palette-divider { height:1px; background:var(--border); margin:6px 0; }
+
+.palette-item {
+  display:flex; align-items:center; gap:8px;
+  padding:8px 10px; border-radius:10px;
+  cursor:grab; border:1.5px solid transparent;
+  transition:all 0.15s; user-select:none;
+  background:#fff;
+}
+.palette-item:hover { border-color:var(--border); box-shadow:0 2px 8px var(--shadow); transform:translateY(-1px); }
+.palette-item:active { cursor:grabbing; transform:scale(0.97); }
+.palette-item.selected-tool { border-color:var(--accent); background:rgba(212,114,106,0.06); }
+
+.pi-icon {
+  width:28px; height:20px; border-radius:4px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px;
+}
+.pi-label { font-size:11px; font-weight:500; color:var(--ink); }
+.pi-sub { font-size:9px; color:var(--muted); margin-top:1px; }
+
+/* ── CANVAS AREA ── */
+.canvas-wrap {
+  flex:1; position:relative; overflow:hidden;
+  background: repeating-linear-gradient(0deg, transparent, transparent 29px, rgba(180,140,120,0.08) 30px),
+              repeating-linear-gradient(90deg, transparent, transparent 29px, rgba(180,140,120,0.08) 30px);
+  background-color: #f9f2ea;
+  cursor:default;
+}
+
+#supermarkt-canvas {
+  position:absolute; top:0; left:0;
+  touch-action:none;
+}
+
+/* Drag ghost */
+.drag-ghost {
+  position:fixed; pointer-events:none; z-index:1000;
+  opacity:0.75; border-radius:6px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:600; color:#fff;
+  transform:translate(-50%,-50%);
+  box-shadow:0 4px 16px rgba(0,0,0,0.2);
+  transition:opacity 0.1s;
+}
+
+/* ── RIGHT PANEL (Shopping) ── */
+.shopping-panel {
+  width:220px; flex-shrink:0;
+  background:var(--surface);
+  border-left:1px solid var(--border);
+  display:flex; flex-direction:column;
+  overflow:hidden;
+}
+.sp-header {
+  padding:12px 14px 8px;
+  border-bottom:1px solid var(--border);
+}
+.sp-title {
+  font-family:'Playfair Display',serif;
+  font-size:15px; font-weight:700; color:var(--ink); margin-bottom:2px;
+}
+.sp-sub { font-size:11px; color:var(--muted); }
+
+.sp-add {
+  display:flex; gap:6px; padding:10px 12px;
+  border-bottom:1px solid var(--border);
+}
+.sp-input {
+  flex:1; border:1px solid var(--border); border-radius:8px;
+  padding:7px 10px; font-family:'DM Sans',sans-serif; font-size:12px;
+  color:var(--ink); background:#fff; outline:none;
+  transition:border-color 0.2s;
+}
+.sp-input:focus { border-color:var(--accent); }
+.sp-add-btn {
+  background:var(--accent); color:#fff; border:none;
+  border-radius:8px; width:30px; height:30px;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; font-size:16px; flex-shrink:0;
+  transition:filter 0.15s;
+}
+.sp-add-btn:hover { filter:brightness(1.1); }
+
+.sp-list {
+  flex:1; overflow-y:auto; padding:8px;
+  display:flex; flex-direction:column; gap:4px;
+}
+.sp-item {
+  display:flex; align-items:center; gap:8px;
+  padding:8px 10px; border-radius:10px;
+  background:#fff; border:1.5px solid var(--border);
+  cursor:pointer; transition:all 0.15s;
+  animation:fadeUp 0.25s ease;
+}
+@keyframes fadeUp { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+.sp-item:hover { border-color:var(--accent); }
+.sp-item.placing { border-color:var(--accent); background:rgba(212,114,106,0.06); box-shadow:0 2px 8px var(--shadow); }
+.sp-item.placed { border-color:var(--accent2); background:rgba(122,158,138,0.06); }
+.sp-item.done { opacity:0.45; }
+.sp-item.done .sp-item-name { text-decoration:line-through; }
+
+.sp-item-dot {
+  width:10px; height:10px; border-radius:50%; flex-shrink:0;
+  border:2px solid var(--muted);
+  transition:all 0.2s;
+}
+.sp-item.placed .sp-item-dot { background:var(--accent2); border-color:var(--accent2); }
+.sp-item.done .sp-item-dot { background:var(--muted); border-color:var(--muted); }
+
+.sp-item-name { flex:1; font-size:12px; font-weight:500; color:var(--ink); }
+.sp-item-loc { font-size:10px; color:var(--accent2); margin-top:1px; }
+
+.sp-item-actions { display:flex; gap:3px; }
+.sp-icon-btn {
+  background:none; border:none; cursor:pointer;
+  font-size:13px; padding:2px; border-radius:4px;
+  color:var(--muted); transition:color 0.15s;
+}
+.sp-icon-btn:hover { color:var(--accent); }
+
+.sp-empty { text-align:center; padding:28px 12px; color:var(--muted); font-size:12px; font-style:italic; }
+
+.sp-footer { padding:10px 12px; border-top:1px solid var(--border); }
+.sp-progress { height:4px; background:var(--surface2); border-radius:2px; margin-bottom:6px; overflow:hidden; }
+.sp-progress-bar { height:100%; background:var(--accent2); border-radius:2px; transition:width 0.4s ease; }
+.sp-stats { font-size:11px; color:var(--muted); display:flex; justify-content:space-between; }
+
+/* ── CONTEXT MENU ── */
+.ctx-menu {
+  position:fixed; z-index:500;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:6px;
+  box-shadow:0 8px 32px var(--shadow);
+  min-width:160px;
+  opacity:0; pointer-events:none;
+  transform:scale(0.95);
+  transition:all 0.15s;
+}
+.ctx-menu.show { opacity:1; pointer-events:all; transform:scale(1); }
+.ctx-item {
+  padding:9px 12px; border-radius:8px;
+  cursor:pointer; font-size:13px; color:var(--ink);
+  display:flex; align-items:center; gap:8px;
+  transition:background 0.1s;
+}
+.ctx-item:hover { background:var(--surface2); }
+.ctx-item.danger { color:var(--accent); }
+.ctx-item.danger:hover { background:rgba(212,114,106,0.1); }
+
+/* ── TEXT EDIT POPUP ── */
+.text-popup {
+  position:fixed; z-index:600;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:12px;
+  box-shadow:0 8px 32px var(--shadow);
+  display:none; gap:8px; align-items:center;
+}
+.text-popup.show { display:flex; }
+.text-popup input {
+  border:1px solid var(--border); border-radius:8px;
+  padding:7px 10px; font-family:'DM Sans',sans-serif; font-size:13px;
+  color:var(--ink); background:#fff; outline:none; width:160px;
+}
+.text-popup input:focus { border-color:var(--accent); }
+
+/* ── MODAL ── */
+.modal-overlay {
+  position:fixed; inset:0; z-index:1000;
+  background:rgba(45,31,26,0.5); backdrop-filter:blur(6px);
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none; transition:opacity 0.25s;
+  padding:20px;
+}
+.modal-overlay.show { opacity:1; pointer-events:all; }
+.modal-box {
+  background:var(--surface); border-radius:20px;
+  padding:28px; max-width:380px; width:100%;
+  box-shadow:0 16px 48px rgba(0,0,0,0.15);
+  transform:translateY(10px);
+  transition:transform 0.3s;
+}
+.modal-overlay.show .modal-box { transform:translateY(0); }
+.modal-title { font-family:'Playfair Display',serif; font-size:22px; font-weight:700; margin-bottom:8px; }
+.modal-text { font-size:14px; color:var(--muted); line-height:1.6; margin-bottom:20px; }
+.modal-actions { display:flex; gap:8px; justify-content:flex-end; }
+
+/* ── TOAST ── */
+.toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(60px); background:var(--ink); color:#fff; padding:10px 18px; border-radius:50px; font-size:13px; z-index:2000; transition:transform 0.35s cubic-bezier(0.34,1.4,0.64,1); white-space:nowrap; box-shadow:0 4px 20px rgba(0,0,0,0.2); }
+.toast.show { transform:translateX(-50%) translateY(0); }
+
+/* ── LOADING ── */
+.login-gate {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:16px;
+  color:var(--muted);
+}
+.login-gate-icon { font-size:48px; }
+.login-gate-title { font-family:'Playfair Display',serif; font-size:22px; color:var(--ink); }
+.login-gate-sub { font-size:14px; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width:5px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-logo">Dr.<span>Buntspecht</span> <span style="color:var(--muted);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:400;">· Marktplaner</span></div>
+  <input class="topbar-name" id="market-name" placeholder="Name des Supermarkts…" maxlength="40">
+  <div class="topbar-actions">
+    <button class="btn btn-ghost" id="btn-clear" onclick="confirmClear()">🗑 Leeren</button>
+    <button class="btn btn-sage" id="btn-load" onclick="loadMap()" style="display:none">📂 Laden</button>
+    <button class="btn btn-primary" id="btn-save" onclick="saveMap()">💾 Speichern</button>
+    <a href="index.html" class="btn btn-ghost">← Zurück</a>
+  </div>
+</div>
+
+<!-- EDITOR (shown when logged in) -->
+<div class="editor-layout" id="editor-layout">
+
+  <!-- LEFT PALETTE -->
+  <div class="palette">
+    <div class="palette-title">Werkzeuge</div>
+    <div class="palette-item selected-tool" data-tool="select" onclick="selectTool('select',this)">
+      <div class="pi-icon">🖱</div>
+      <div><div class="pi-label">Auswählen</div><div class="pi-sub">Verschieben</div></div>
+    </div>
+    <div class="palette-item" data-tool="delete" onclick="selectTool('delete',this)">
+      <div class="pi-icon">🗑</div>
+      <div><div class="pi-label">Löschen</div><div class="pi-sub">Klick auf Block</div></div>
+    </div>
+
+    <div class="palette-divider"></div>
+    <div class="palette-title">Bausteine</div>
+
+    <div class="palette-item" draggable="true" data-block="regal-h" ondragstart="startDrag(event,'regal-h')">
+      <div class="pi-icon" style="background:var(--col-regal);border-radius:3px;width:32px;height:14px;"></div>
+      <div><div class="pi-label">Regal ↔</div><div class="pi-sub">horizontal</div></div>
+    </div>
+    <div class="palette-item" draggable="true" data-block="regal-v" ondragstart="startDrag(event,'regal-v')">
+      <div class="pi-icon" style="background:var(--col-regal);border-radius:3px;width:14px;height:28px;"></div>
+      <div><div class="pi-label">Regal ↕</div><div class="pi-sub">vertikal</div></div>
+    </div>
+    <div class="palette-item" draggable="true" data-block="kasse" ondragstart="startDrag(event,'kasse')">
+      <div class="pi-icon" style="background:var(--col-kasse);border-radius:3px;width:20px;height:20px;">🛒</div>
+      <div><div class="pi-label">Kasse</div><div class="pi-sub">Checkout</div></div>
+    </div>
+    <div class="palette-item" draggable="true" data-block="kuehl" ondragstart="startDrag(event,'kuehl')">
+      <div class="pi-icon" style="background:var(--col-kuehl);border-radius:3px;width:28px;height:16px;">❄️</div>
+      <div><div class="pi-label">Kühlregal</div><div class="pi-sub">Kühlung</div></div>
+    </div>
+    <div class="palette-item" draggable="true" data-block="eingang" ondragstart="startDrag(event,'eingang')">
+      <div class="pi-icon" style="background:var(--col-eingang);border-radius:3px;width:22px;height:22px;">🚪</div>
+      <div><div class="pi-label">Eingang</div><div class="pi-sub">Tür</div></div>
+    </div>
+    <div class="palette-item" draggable="true" data-block="obst" ondragstart="startDrag(event,'obst')">
+      <div class="pi-icon" style="background:var(--col-obst);border-radius:3px;width:24px;height:24px;">🍎</div>
+      <div><div class="pi-label">Obst/Gemüse</div><div class="pi-sub">Frische</div></div>
+    </div>
+    <div class="palette-item" draggable="true" data-block="wand-h" ondragstart="startDrag(event,'wand-h')">
+      <div class="pi-icon" style="background:var(--col-wand);border-radius:2px;width:36px;height:8px;"></div>
+      <div><div class="pi-label">Wand ↔</div><div class="pi-sub">horizontal</div></div>
+    </div>
+    <div class="palette-item" draggable="true" data-block="wand-v" ondragstart="startDrag(event,'wand-v')">
+      <div class="pi-icon" style="background:var(--col-wand);border-radius:2px;width:8px;height:36px;"></div>
+      <div><div class="pi-label">Wand ↕</div><div class="pi-sub">vertikal</div></div>
+    </div>
+
+    <div class="palette-divider"></div>
+    <div class="palette-title">Text</div>
+    <div class="palette-item" draggable="true" data-block="label" ondragstart="startDrag(event,'label')">
+      <div class="pi-icon" style="color:var(--col-text);font-size:16px;font-weight:700;">T</div>
+      <div><div class="pi-label">Label</div><div class="pi-sub">Text-Feld</div></div>
+    </div>
+  </div>
+
+  <!-- CANVAS -->
+  <div class="canvas-wrap" id="canvas-wrap"
+    ondragover="event.preventDefault()"
+    ondrop="dropBlock(event)">
+    <canvas id="supermarkt-canvas"></canvas>
+  </div>
+
+  <!-- RIGHT: SHOPPING PANEL -->
+  <div class="shopping-panel">
+    <div class="sp-header">
+      <div class="sp-title">🛒 Einkaufsliste</div>
+      <div class="sp-sub" id="sp-market-name">Kein Supermarkt geladen</div>
+    </div>
+    <div class="sp-add">
+      <input class="sp-input" id="sp-new-item" placeholder="Produkt hinzufügen…" onkeydown="if(event.key==='Enter')addShoppingItem()">
+      <button class="sp-add-btn" onclick="addShoppingItem()">+</button>
+    </div>
+    <div class="sp-list" id="sp-list">
+      <div class="sp-empty">Produkte hinzufügen und auf der Karte platzieren</div>
+    </div>
+    <div class="sp-footer">
+      <div class="sp-progress"><div class="sp-progress-bar" id="sp-progress-bar" style="width:0%"></div></div>
+      <div class="sp-stats">
+        <span id="sp-stats-text">0 Produkte</span>
+        <span id="sp-done-text">0 erledigt</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN GATE (shown when not logged in) -->
+<div id="login-gate" style="display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
+  <div style="font-size:48px;">🔒</div>
+  <div style="font-family:'Playfair Display',serif;font-size:22px;color:var(--ink);">Bitte einloggen</div>
+  <div style="font-size:14px;color:var(--muted);">Der Marktplaner ist nur für angemeldete Nutzer verfügbar.</div>
+  <a href="index.html" class="btn btn-primary" style="margin-top:8px;">← Zur Startseite</a>
+</div>
+
+<!-- DRAG GHOST -->
+<div class="drag-ghost" id="drag-ghost"></div>
+
+<!-- CONTEXT MENU -->
+<div class="ctx-menu" id="ctx-menu">
+  <div class="ctx-item" onclick="ctxEdit()">✏️ Text bearbeiten</div>
+  <div class="ctx-item" onclick="ctxDuplicate()">📋 Duplizieren</div>
+  <div class="ctx-item danger" onclick="ctxDelete()">🗑 Löschen</div>
+</div>
+
+<!-- TEXT POPUP -->
+<div class="text-popup" id="text-popup">
+  <input id="text-popup-input" placeholder="Beschriftung…" onkeydown="if(event.key==='Enter')confirmTextEdit()">
+  <button class="btn btn-primary" style="padding:7px 12px;" onclick="confirmTextEdit()">OK</button>
+  <button class="btn btn-ghost" style="padding:7px 10px;" onclick="cancelTextEdit()">✕</button>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title">Karte leeren?</div>
+    <div class="modal-text" id="modal-text">Alle Blöcke werden entfernt. Diese Aktion kann nicht rückgängig gemacht werden.</div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Abbrechen</button>
+      <button class="btn btn-primary" id="modal-confirm-btn">Leeren</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyCTSYRwq9G9inKW-bEnLC90I19J4oTTkp8",
+  authDomain: "drbuntspecht-f92ba.firebaseapp.com",
+  projectId: "drbuntspecht-f92ba",
+  storageBucket: "drbuntspecht-f92ba.firebasestorage.app",
+  messagingSenderId: "1075490932089",
+  appId: "1:1075490932089:web:44f532194f78e41f539ba8"
+});
+
+const auth = getAuth(app);
+const db = getFirestore(app);
+let currentUser = null;
+
+onAuthStateChanged(auth, async user => {
+  currentUser = user;
+  if (user) {
+    document.getElementById('editor-layout').style.display = 'flex';
+    document.getElementById('login-gate').style.display = 'none';
+    document.getElementById('btn-load').style.display = 'block';
+    initCanvas();
+    await loadMapFromFirebase(user, db);
+  } else {
+    document.getElementById('editor-layout').style.display = 'none';
+    document.getElementById('login-gate').style.display = 'flex';
+  }
+});
+
+window._saveToFirebase = async (data) => {
+  if (!currentUser) return;
+  await setDoc(doc(db, 'supermarkets', currentUser.uid), data);
+};
+
+window._loadFromFirebase = async () => {
+  if (!currentUser) return null;
+  const snap = await getDoc(doc(db, 'supermarkets', currentUser.uid));
+  return snap.exists() ? snap.data() : null;
+};
+
+async function loadMapFromFirebase(user, db) {
+  const snap = await getDoc(doc(db, 'supermarkets', user.uid));
+  if (snap.exists()) {
+    const data = snap.data();
+    window._pendingLoad = data;
+    showToast('📂 Gespeicherte Karte gefunden — klick "Laden"');
+  }
+}
+</script>
+
+<script>
+// ════════════════════════════════════════
+//  BLOCK DEFINITIONS
+// ════════════════════════════════════════
+const BLOCK_DEFS = {
+  'regal-h':  { w:120, h:28, color:'#a8c4e0', label:'Regal', emoji:'', labelColor:'#2d5a8a' },
+  'regal-v':  { w:28,  h:120, color:'#a8c4e0', label:'Regal', emoji:'', labelColor:'#2d5a8a' },
+  'kasse':    { w:50,  h:50,  color:'#f0c080', label:'Kasse', emoji:'🛒', labelColor:'#6a4a10' },
+  'kuehl':    { w:130, h:32,  color:'#a8d4c0', label:'Kühlregal', emoji:'❄️', labelColor:'#1a5a40' },
+  'eingang':  { w:50,  h:50,  color:'#c8a8e0', label:'Eingang', emoji:'🚪', labelColor:'#4a2a6a' },
+  'obst':     { w:70,  h:70,  color:'#a8e0a8', label:'Obst', emoji:'🍎', labelColor:'#1a5a1a' },
+  'wand-h':   { w:140, h:14,  color:'#8a7060', label:'', emoji:'', labelColor:'#fff' },
+  'wand-v':   { w:14,  h:140, color:'#8a7060', label:'', emoji:'', labelColor:'#fff' },
+  'label':    { w:80,  h:28,  color:'rgba(212,114,106,0.12)', label:'Label', emoji:'', labelColor:'#d4726a', isLabel:true }
+};
+
+// ════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════
+let blocks = [];
+let shoppingItems = [];
+let selectedBlock = null;
+let placingItem = null; // shopping item being placed
+let activeTool = 'select';
+let ctxTarget = null;
+let textEditTarget = null;
+let dragType = null;
+let canvas, ctx;
+let canvasW, canvasH;
+let isDraggingBlock = false;
+let dragOffX = 0, dragOffY = 0;
+let nextId = 1;
+
+// ════════════════════════════════════════
+//  CANVAS INIT
+// ════════════════════════════════════════
+function initCanvas() {
+  canvas = document.getElementById('supermarkt-canvas');
+  ctx = canvas.getContext('2d');
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  canvas.addEventListener('mousedown', onMouseDown);
+  canvas.addEventListener('mousemove', onMouseMove);
+  canvas.addEventListener('mouseup', onMouseUp);
+  canvas.addEventListener('contextmenu', onRightClick);
+  canvas.addEventListener('dblclick', onDblClick);
+
+  // Touch
+  canvas.addEventListener('touchstart', onTouchStart, {passive:false});
+  canvas.addEventListener('touchmove', onTouchMove, {passive:false});
+  canvas.addEventListener('touchend', onTouchEnd);
+
+  render();
+}
+
+function resizeCanvas() {
+  const wrap = document.getElementById('canvas-wrap');
+  canvasW = wrap.clientWidth;
+  canvasH = wrap.clientHeight;
+  canvas.width = canvasW;
+  canvas.height = canvasH;
+  render();
+}
+
+// ════════════════════════════════════════
+//  RENDER
+// ════════════════════════════════════════
+function render() {
+  if (!ctx) return;
+  ctx.clearRect(0, 0, canvasW, canvasH);
+
+  // Grid
+  ctx.strokeStyle = 'rgba(180,140,120,0.12)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < canvasW; x += 30) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvasH); ctx.stroke(); }
+  for (let y = 0; y < canvasH; y += 30) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvasW,y); ctx.stroke(); }
+
+  // Blocks
+  blocks.forEach(b => drawBlock(b));
+
+  // Shopping pins
+  shoppingItems.forEach(item => {
+    if (item.x !== undefined && item.y !== undefined && !item.done) {
+      drawPin(item.x, item.y, item.name, item.color);
+    }
+  });
+}
+
+function drawBlock(b) {
+  const def = BLOCK_DEFS[b.type];
+  const isSelected = selectedBlock && selectedBlock.id === b.id;
+
+  ctx.save();
+
+  // Shadow
+  if (isSelected) {
+    ctx.shadowColor = 'rgba(212,114,106,0.4)';
+    ctx.shadowBlur = 12;
+  }
+
+  // Fill
+  if (def.isLabel) {
+    ctx.fillStyle = 'rgba(212,114,106,0.1)';
+    ctx.strokeStyle = 'rgba(212,114,106,0.4)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4,3]);
+    roundRect(b.x, b.y, b.w, b.h, 4);
+    ctx.fill(); ctx.stroke();
+    ctx.setLineDash([]);
+  } else {
+    ctx.fillStyle = b.color || def.color;
+    roundRect(b.x, b.y, b.w, b.h, 6);
+    ctx.fill();
+    // Border
+    ctx.strokeStyle = isSelected ? '#d4726a' : 'rgba(0,0,0,0.08)';
+    ctx.lineWidth = isSelected ? 2 : 1;
+    ctx.stroke();
+  }
+
+  ctx.shadowBlur = 0;
+
+  // Emoji
+  if (def.emoji && b.w > 30) {
+    ctx.font = `${Math.min(b.h*0.55, 20)}px serif`;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(def.emoji, b.x + 6, b.y + b.h/2);
+  }
+
+  // Label text
+  const labelText = b.customLabel !== undefined ? b.customLabel : def.label;
+  if (labelText && b.w > 20) {
+    ctx.fillStyle = def.isLabel ? '#d4726a' : def.labelColor;
+    const emojiOffset = def.emoji ? 22 : 0;
+    const availW = b.w - 10 - emojiOffset;
+    const fontSize = def.isLabel ? 13 : Math.min(Math.min(b.h * 0.42, 12), 13);
+    ctx.font = `${def.isLabel ? '600 ' : ''}${fontSize}px DM Sans, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const tx = b.x + emojiOffset + (b.w - emojiOffset)/2;
+    ctx.fillText(truncate(labelText, availW, ctx), tx, b.y + b.h/2);
+  }
+
+  // Selected indicator
+  if (isSelected) {
+    ctx.strokeStyle = '#d4726a';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([4,3]);
+    roundRect(b.x-2, b.y-2, b.w+4, b.h+4, 8);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    // Resize handle
+    ctx.fillStyle = '#d4726a';
+    ctx.beginPath();
+    ctx.arc(b.x+b.w, b.y+b.h, 5, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+function drawPin(x, y, name, color) {
+  const c = color || '#d4726a';
+  ctx.save();
+  // Pin
+  ctx.fillStyle = c;
+  ctx.beginPath();
+  ctx.arc(x, y-14, 9, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.font = '600 11px DM Sans';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('📍', x, y-14);
+  // Line
+  ctx.strokeStyle = c;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(x, y-5);
+  ctx.lineTo(x, y);
+  ctx.stroke();
+  // Label
+  const metrics = ctx.measureText(name);
+  const lw = metrics.width + 12;
+  ctx.fillStyle = c;
+  ctx.beginPath();
+  roundRect(x - lw/2, y - 36, lw, 16, 4);
+  ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.font = '600 10px DM Sans';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(name, x, y - 28);
+  ctx.restore();
+}
+
+function roundRect(x,y,w,h,r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);
+  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+}
+
+function truncate(text, maxW, ctx) {
+  if (ctx.measureText(text).width <= maxW) return text;
+  while (text.length > 1 && ctx.measureText(text+'…').width > maxW) text = text.slice(0,-1);
+  return text+'…';
+}
+
+// ════════════════════════════════════════
+//  INTERACTION
+// ════════════════════════════════════════
+function getPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+}
+
+function hitTest(x, y) {
+  // reverse order so top blocks are selected first
+  for (let i = blocks.length-1; i >= 0; i--) {
+    const b = blocks[i];
+    if (x >= b.x && x <= b.x+b.w && y >= b.y && y <= b.y+b.h) return b;
+  }
+  return null;
+}
+
+function snap(v) { return Math.round(v/15)*15; }
+
+function onMouseDown(e) {
+  if (e.button === 2) return;
+  closeCtxMenu(); closeTextPopup();
+  const {x,y} = getPos(e);
+
+  // Placing shopping item
+  if (placingItem) {
+    placingItem.x = x; placingItem.y = y;
+    placingItem.placed = true;
+    placingItem = null;
+    canvas.style.cursor = 'default';
+    updateShoppingUI();
+    render();
+    showToast('📍 Produkt platziert');
+    return;
+  }
+
+  if (activeTool === 'delete') {
+    const b = hitTest(x,y);
+    if (b) { blocks = blocks.filter(bl => bl.id !== b.id); selectedBlock = null; render(); }
+    return;
+  }
+
+  const b = hitTest(x,y);
+  if (b) {
+    selectedBlock = b;
+    // check resize handle
+    if (Math.abs(x - (b.x+b.w)) < 10 && Math.abs(y - (b.y+b.h)) < 10) {
+      isDraggingBlock = 'resize';
+    } else {
+      isDraggingBlock = 'move';
+    }
+    dragOffX = x - b.x;
+    dragOffY = y - b.y;
+    // bring to front
+    blocks = blocks.filter(bl => bl.id !== b.id);
+    blocks.push(b);
+  } else {
+    selectedBlock = null;
+  }
+  render();
+}
+
+function onMouseMove(e) {
+  const {x,y} = getPos(e);
+  if (placingItem) { canvas.style.cursor = 'crosshair'; return; }
+  if (!isDraggingBlock || !selectedBlock) {
+    canvas.style.cursor = hitTest(x,y) ? 'grab' : 'default';
+    return;
+  }
+  canvas.style.cursor = isDraggingBlock === 'resize' ? 'se-resize' : 'grabbing';
+  if (isDraggingBlock === 'move') {
+    selectedBlock.x = snap(x - dragOffX);
+    selectedBlock.y = snap(y - dragOffY);
+  } else {
+    selectedBlock.w = Math.max(20, snap(x - selectedBlock.x));
+    selectedBlock.h = Math.max(14, snap(y - selectedBlock.y));
+  }
+  render();
+}
+
+function onMouseUp() { isDraggingBlock = false; }
+
+function onRightClick(e) {
+  e.preventDefault();
+  const {x,y} = getPos(e);
+  const b = hitTest(x,y);
+  if (b) {
+    ctxTarget = b; selectedBlock = b;
+    const menu = document.getElementById('ctx-menu');
+    menu.style.left = e.clientX+'px'; menu.style.top = e.clientY+'px';
+    menu.classList.add('show');
+    // only show text edit for label/non-wall blocks
+    menu.querySelector('.ctx-item').style.display = (BLOCK_DEFS[b.type].isLabel || BLOCK_DEFS[b.type].label) ? 'flex' : 'none';
+    render();
+  }
+}
+
+function onDblClick(e) {
+  const {x,y} = getPos(e);
+  const b = hitTest(x,y);
+  if (b && (BLOCK_DEFS[b.type].label !== '' || BLOCK_DEFS[b.type].isLabel)) {
+    openTextEdit(b, e.clientX, e.clientY);
+  }
+}
+
+// Touch
+let touchDragging = false;
+function onTouchStart(e) {
+  e.preventDefault();
+  const t = e.touches[0];
+  onMouseDown({button:0, clientX:t.clientX, clientY:t.clientY});
+  touchDragging = true;
+}
+function onTouchMove(e) {
+  e.preventDefault();
+  if (!touchDragging) return;
+  const t = e.touches[0];
+  onMouseMove({clientX:t.clientX, clientY:t.clientY});
+}
+function onTouchEnd(e) { touchDragging = false; onMouseUp(); }
+
+// ════════════════════════════════════════
+//  DRAG & DROP FROM PALETTE
+// ════════════════════════════════════════
+function startDrag(e, blockType) {
+  dragType = blockType;
+  const def = BLOCK_DEFS[blockType];
+  const ghost = document.getElementById('drag-ghost');
+  ghost.style.width = Math.min(def.w,80)+'px';
+  ghost.style.height = Math.min(def.h,40)+'px';
+  ghost.style.background = def.isLabel ? 'rgba(212,114,106,0.3)' : def.color;
+  ghost.textContent = def.emoji || def.label.substring(0,6) || '';
+  e.dataTransfer.effectAllowed = 'copy';
+  e.dataTransfer.setDragImage(document.createElement('div'), 0, 0);
+  document.addEventListener('dragover', updateGhost);
+}
+function updateGhost(e) {
+  const g = document.getElementById('drag-ghost');
+  g.style.left = e.clientX+'px'; g.style.top = e.clientY+'px';
+  g.style.opacity = '0.75';
+}
+
+function dropBlock(e) {
+  e.preventDefault();
+  document.removeEventListener('dragover', updateGhost);
+  document.getElementById('drag-ghost').style.opacity = '0';
+  if (!dragType) return;
+  const rect = canvas.getBoundingClientRect();
+  const def = BLOCK_DEFS[dragType];
+  const x = snap(e.clientX - rect.left - def.w/2);
+  const y = snap(e.clientY - rect.top - def.h/2);
+  const block = {
+    id: nextId++,
+    type: dragType,
+    x, y,
+    w: def.w, h: def.h,
+    color: def.color,
+    customLabel: def.isLabel ? 'Label' : undefined
+  };
+  blocks.push(block);
+  selectedBlock = block;
+  dragType = null;
+  render();
+  if (def.isLabel || def.label) {
+    const cx = e.clientX;
+    const cy = e.clientY;
+    setTimeout(() => openTextEdit(block, cx, cy), 50);
+  }
+}
+
+// ════════════════════════════════════════
+//  TOOL SELECT
+// ════════════════════════════════════════
+function selectTool(tool, el) {
+  activeTool = tool;
+  document.querySelectorAll('.palette-item[data-tool]').forEach(i => i.classList.remove('selected-tool'));
+  el.classList.add('selected-tool');
+  canvas.style.cursor = tool === 'delete' ? 'not-allowed' : 'default';
+}
+window.selectTool = selectTool;
+
+// ════════════════════════════════════════
+//  CONTEXT MENU
+// ════════════════════════════════════════
+function closeCtxMenu() { document.getElementById('ctx-menu').classList.remove('show'); }
+window.closeCtxMenu = closeCtxMenu;
+
+window.ctxEdit = () => {
+  closeCtxMenu();
+  if (ctxTarget) openTextEdit(ctxTarget, window.innerWidth/2, window.innerHeight/2);
+};
+window.ctxDuplicate = () => {
+  closeCtxMenu();
+  if (!ctxTarget) return;
+  const copy = {...ctxTarget, id:nextId++, x:ctxTarget.x+20, y:ctxTarget.y+20};
+  blocks.push(copy); selectedBlock = copy; render();
+};
+window.ctxDelete = () => {
+  closeCtxMenu();
+  if (!ctxTarget) return;
+  blocks = blocks.filter(b => b.id !== ctxTarget.id);
+  selectedBlock = null; render();
+};
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.ctx-menu')) closeCtxMenu();
+  if (!e.target.closest('.text-popup') && !e.target.closest('#supermarkt-canvas')) closeTextPopup();
+});
+
+// ════════════════════════════════════════
+//  TEXT EDIT
+// ════════════════════════════════════════
+function openTextEdit(block, cx, cy) {
+  textEditTarget = block;
+  const popup = document.getElementById('text-popup');
+  const input = document.getElementById('text-popup-input');
+  const def = BLOCK_DEFS[block.type];
+  input.value = block.customLabel !== undefined ? block.customLabel : def.label;
+  popup.style.left = Math.min(cx, window.innerWidth-230)+'px';
+  popup.style.top = Math.max(10, cy-60)+'px';
+  popup.classList.add('show');
+  input.focus(); input.select();
+}
+
+function confirmTextEdit() {
+  if (!textEditTarget) return;
+  const val = document.getElementById('text-popup-input').value.trim();
+  textEditTarget.customLabel = val;
+  // auto-resize label width
+  if (BLOCK_DEFS[textEditTarget.type].isLabel) {
+    const tmp = ctx.font; ctx.font='600 13px DM Sans';
+    textEditTarget.w = Math.max(60, ctx.measureText(val).width + 16);
+    ctx.font = tmp;
+  }
+  closeTextPopup(); render();
+}
+
+function cancelTextEdit() { closeTextPopup(); }
+
+function closeTextPopup() {
+  document.getElementById('text-popup').classList.remove('show');
+  textEditTarget = null;
+}
+
+window.confirmTextEdit = confirmTextEdit;
+window.cancelTextEdit = cancelTextEdit;
+
+// ════════════════════════════════════════
+//  SHOPPING LIST
+// ════════════════════════════════════════
+const ITEM_COLORS = ['#d4726a','#7a9e8a','#c9a05a','#a070c0','#4090c0','#e08050'];
+let colorIdx = 0;
+
+function addShoppingItem() {
+  const input = document.getElementById('sp-new-item');
+  const name = input.value.trim();
+  if (!name) return;
+  const item = { id: Date.now(), name, color: ITEM_COLORS[colorIdx++ % ITEM_COLORS.length], placed:false, done:false };
+  shoppingItems.push(item);
+  input.value = '';
+  updateShoppingUI();
+  showToast('➕ ' + name + ' hinzugefügt — auf Karte platzieren');
+}
+
+function updateShoppingUI() {
+  const list = document.getElementById('sp-list');
+  const marketName = document.getElementById('market-name').value || 'Kein Supermarkt';
+  document.getElementById('sp-market-name').textContent = marketName;
+
+  if (shoppingItems.length === 0) {
+    list.innerHTML = '<div class="sp-empty">Produkte hinzufügen und auf der Karte platzieren</div>';
+    document.getElementById('sp-progress-bar').style.width = '0%';
+    document.getElementById('sp-stats-text').textContent = '0 Produkte';
+    document.getElementById('sp-done-text').textContent = '0 erledigt';
+    render();
+    return;
+  }
+
+  list.innerHTML = '';
+  shoppingItems.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'sp-item' + (item.placed&&!item.done?' placed':'') + (item.done?' done':'') + (placingItem&&placingItem.id===item.id?' placing':'');
+
+    div.innerHTML = `
+      <div class="sp-item-dot" style="${item.placed?'background:'+item.color+';border-color:'+item.color:''}"></div>
+      <div style="flex:1;min-width:0;">
+        <div class="sp-item-name">${item.name}</div>
+        ${item.placed&&!item.done?'<div class="sp-item-loc" style="color:'+item.color+'">📍 Platziert</div>':''}
+        ${!item.placed?'<div class="sp-item-loc">Klick → platzieren</div>':''}
+        ${item.done?'<div class="sp-item-loc">✓ Erledigt</div>':''}
+      </div>
+      <div class="sp-item-actions">
+        ${item.placed&&!item.done?`<button class="sp-icon-btn" title="Erledigt" onclick="markDone(${item.id})">✓</button>`:''}
+        ${item.done?`<button class="sp-icon-btn" title="Rückgängig" onclick="undoDone(${item.id})">↩</button>`:''}
+        <button class="sp-icon-btn" title="Löschen" onclick="removeItem(${item.id})">✕</button>
+      </div>`;
+
+    if (!item.placed && !item.done) div.onclick = (e) => {
+      if (e.target.closest('.sp-icon-btn')) return;
+      startPlacingItem(item);
+    };
+    else if (item.placed && !item.done) div.onclick = (e) => {
+      if (e.target.closest('.sp-icon-btn')) return;
+      // pan to item
+      showToast('📍 ' + item.name);
+    };
+
+    list.appendChild(div);
+  });
+
+  const total = shoppingItems.length;
+  const done = shoppingItems.filter(i=>i.done).length;
+  const pct = total > 0 ? (done/total*100) : 0;
+  document.getElementById('sp-progress-bar').style.width = pct+'%';
+  document.getElementById('sp-stats-text').textContent = total + ' Produkt' + (total!==1?'e':'');
+  document.getElementById('sp-done-text').textContent = done + ' erledigt';
+  render();
+}
+
+function startPlacingItem(item) {
+  placingItem = item;
+  canvas.style.cursor = 'crosshair';
+  showToast('🖱 Klick auf Karte zum Platzieren von "' + item.name + '"');
+  updateShoppingUI();
+}
+
+window.markDone = (id) => {
+  const item = shoppingItems.find(i=>i.id===id);
+  if (item) { item.done = true; updateShoppingUI(); }
+};
+window.undoDone = (id) => {
+  const item = shoppingItems.find(i=>i.id===id);
+  if (item) { item.done = false; updateShoppingUI(); }
+};
+window.removeItem = (id) => {
+  shoppingItems = shoppingItems.filter(i=>i.id!==id);
+  if (placingItem && placingItem.id===id) { placingItem=null; canvas.style.cursor='default'; }
+  updateShoppingUI();
+};
+
+// ════════════════════════════════════════
+//  SAVE / LOAD
+// ════════════════════════════════════════
+window.saveMap = async () => {
+  const name = document.getElementById('market-name').value.trim();
+  if (!name) { showToast('⚠️ Bitte erst einen Namen eingeben'); document.getElementById('market-name').focus(); return; }
+  const data = { name, blocks, shoppingItems, nextId, savedAt: new Date().toISOString() };
+  try {
+    if (window._saveToFirebase) {
+      await window._saveToFirebase(data);
+      showToast('💾 "' + name + '" gespeichert!');
+    } else {
+      localStorage.setItem('supermarkt_backup', JSON.stringify(data));
+      showToast('💾 Lokal gespeichert');
+    }
+  } catch(e) { showToast('❌ Fehler: ' + e.message); }
+};
+
+window.loadMap = async () => {
+  let data = window._pendingLoad;
+  if (!data && window._loadFromFirebase) data = await window._loadFromFirebase();
+  if (!data) { showToast('Keine gespeicherte Karte gefunden'); return; }
+  blocks = data.blocks || [];
+  shoppingItems = data.shoppingItems || [];
+  nextId = data.nextId || blocks.length + 1;
+  document.getElementById('market-name').value = data.name || '';
+  window._pendingLoad = null;
+  updateShoppingUI();
+  render();
+  showToast('📂 "' + data.name + '" geladen!');
+};
+
+// ════════════════════════════════════════
+//  CLEAR
+// ════════════════════════════════════════
+window.confirmClear = () => {
+  document.getElementById('modal-title').textContent = 'Karte leeren?';
+  document.getElementById('modal-text').textContent = 'Alle Blöcke und platzierten Produkte werden entfernt.';
+  document.getElementById('modal-confirm-btn').onclick = () => { blocks=[]; selectedBlock=null; render(); closeModal(); showToast('🗑 Karte geleert'); };
+  document.getElementById('modal').classList.add('show');
+};
+
+function closeModal() { document.getElementById('modal').classList.remove('show'); }
+window.closeModal = closeModal;
+
+// ════════════════════════════════════════
+//  TOAST
+// ════════════════════════════════════════
+let toastT;
+function showToast(msg) {
+  clearTimeout(toastT);
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  toastT = setTimeout(()=>t.classList.remove('show'), 3000);
+}
+window.showToast = showToast;
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.key==='Escape') { closeCtxMenu(); closeTextPopup(); placingItem=null; canvas.style.cursor='default'; updateShoppingUI(); }
+  if ((e.key==='Delete'||e.key==='Backspace') && selectedBlock && document.activeElement===document.body) {
+    blocks = blocks.filter(b=>b.id!==selectedBlock.id);
+    selectedBlock=null; render();
+  }
+  if (e.key==='s' && (e.ctrlKey||e.metaKey)) { e.preventDefault(); window.saveMap(); }
+});
+
+// Drag events
+window.startDrag = startDrag;
+window.dropBlock = dropBlock;
+
+// Prevent right-click default on canvas
+canvas && canvas.addEventListener('contextmenu', e=>e.preventDefault());
+</script>
+</body>
+</html>
