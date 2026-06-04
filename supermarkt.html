@@ -698,7 +698,7 @@ function truncate(text, maxW, ctx) {
 }
 
 // ════════════════════════════════════════
-//  INTERACTION
+//  INTERACTION (angepasst - Resizeimmer möglich)
 // ════════════════════════════════════════
 function getPos(e) {
   const rect = canvas.getBoundingClientRect();
@@ -712,6 +712,15 @@ function hitTest(x, y) {
     if (x >= b.x && x <= b.x+b.w && y >= b.y && y <= b.y+b.h) return b;
   }
   return null;
+}
+
+function hitTestResizeHandle(b, x, y) {
+  // Resize handle in der rechten unteren Ecke (5pxRadius)
+  const handleX = b.x + b.w;
+  const handleY = b.y + b.h;
+  const dx = x - handleX;
+  const dy = y - handleY;
+  return (dx*dx + dy*dy) <= 25; // 5px radius
 }
 
 function snap(v) { return Math.round(v/15)*15; }
@@ -742,8 +751,8 @@ function onMouseDown(e) {
   const b = hitTest(x,y);
   if (b) {
     selectedBlock = b;
-    // check resize handle
-    if (Math.abs(x - (b.x+b.w)) < 10 && Math.abs(y - (b.y+b.h)) < 10) {
+    // check resize handle (für alle Blöcke)
+    if (hitTestResizeHandle(b, x, y)) {
       isDraggingBlock = 'resize';
     } else {
       isDraggingBlock = 'move';
@@ -762,22 +771,44 @@ function onMouseDown(e) {
 function onMouseMove(e) {
   const {x,y} = getPos(e);
   if (placingItem) { canvas.style.cursor = 'crosshair'; return; }
+  
   if (!isDraggingBlock || !selectedBlock) {
-    canvas.style.cursor = hitTest(x,y) ? 'grab' : 'default';
+    // Cursor ändern, wenn man über den Resize-Handle fährt
+    const b = hitTest(x,y);
+    if (b && hitTestResizeHandle(b, x, y)) {
+      canvas.style.cursor = 'se-resize';
+    } else if (b) {
+      canvas.style.cursor = 'grab';
+    } else {
+      canvas.style.cursor = 'default';
+    }
     return;
   }
+  
   canvas.style.cursor = isDraggingBlock === 'resize' ? 'se-resize' : 'grabbing';
+  
   if (isDraggingBlock === 'move') {
     selectedBlock.x = snap(x - dragOffX);
     selectedBlock.y = snap(y - dragOffY);
   } else {
-    selectedBlock.w = Math.max(20, snap(x - selectedBlock.x));
-    selectedBlock.h = Math.max(14, snap(y - selectedBlock.y));
+    // Resize: Mindestgrößen beachten
+    const def = BLOCK_DEFS[selectedBlock.type];
+    const minWidth = def.isLabel ? 40 : 20;
+    const minHeight = def.isLabel ? 20 : 14;
+    
+    selectedBlock.w = Math.max(minWidth, snap(x - selectedBlock.x));
+    selectedBlock.h = Math.max(minHeight, snap(y - selectedBlock.y));
   }
   render();
 }
 
-function onMouseUp() { isDraggingBlock = false; }
+function onMouseUp() { 
+  isDraggingBlock = false; 
+  // Speichern nach Resize
+  if (selectedBlock) {
+    window._saveToFirebase && window._saveToFirebase({ blocks, shoppingItems, marketName: document.getElementById('market-name').value });
+  }
+}
 
 function onRightClick(e) {
   e.preventDefault();
