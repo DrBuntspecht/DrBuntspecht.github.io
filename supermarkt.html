@@ -320,42 +320,37 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
       <div><div class="pi-label">Löschen</div><div class="pi-sub">Klick auf Block</div></div>
     </div>
 
-    <div class="palette-divider"></div>
-    <div class="palette-title">Bausteine</div>
+<div class="palette-divider"></div>
+<div class="palette-title">Bausteine</div>
 
-    <div class="palette-item" draggable="true" data-block="regal-h" ondragstart="startDrag(event,'regal-h')">
-      <div class="pi-icon" style="background:var(--col-regal);border-radius:3px;width:32px;height:14px;"></div>
-      <div><div class="pi-label">Regal ↔</div><div class="pi-sub">horizontal</div></div>
-    </div>
-    <div class="palette-item" draggable="true" data-block="regal-v" ondragstart="startDrag(event,'regal-v')">
-      <div class="pi-icon" style="background:var(--col-regal);border-radius:3px;width:14px;height:28px;"></div>
-      <div><div class="pi-label">Regal ↕</div><div class="pi-sub">vertikal</div></div>
-    </div>
-    <div class="palette-item" draggable="true" data-block="kasse" ondragstart="startDrag(event,'kasse')">
-      <div class="pi-icon" style="background:var(--col-kasse);border-radius:3px;width:20px;height:20px;">🛒</div>
-      <div><div class="pi-label">Kasse</div><div class="pi-sub">Checkout</div></div>
-    </div>
-    <div class="palette-item" draggable="true" data-block="kuehl" ondragstart="startDrag(event,'kuehl')">
-      <div class="pi-icon" style="background:var(--col-kuehl);border-radius:3px;width:28px;height:16px;">❄️</div>
-      <div><div class="pi-label">Kühlregal</div><div class="pi-sub">Kühlung</div></div>
-    </div>
-    <div class="palette-item" draggable="true" data-block="eingang" ondragstart="startDrag(event,'eingang')">
-      <div class="pi-icon" style="background:var(--col-eingang);border-radius:3px;width:22px;height:22px;">🚪</div>
-      <div><div class="pi-label">Eingang</div><div class="pi-sub">Tür</div></div>
-    </div>
-    <div class="palette-item" draggable="true" data-block="obst" ondragstart="startDrag(event,'obst')">
-      <div class="pi-icon" style="background:var(--col-obst);border-radius:3px;width:24px;height:24px;">🍎</div>
-      <div><div class="pi-label">Obst/Gemüse</div><div class="pi-sub">Frische</div></div>
-    </div>
-    <div class="palette-item" draggable="true" data-block="wand-h" ondragstart="startDrag(event,'wand-h')">
-      <div class="pi-icon" style="background:var(--col-wand);border-radius:2px;width:36px;height:8px;"></div>
-      <div><div class="pi-label">Wand ↔</div><div class="pi-sub">horizontal</div></div>
-    </div>
-    <div class="palette-item" draggable="true" data-block="wand-v" ondragstart="startDrag(event,'wand-v')">
-      <div class="pi-icon" style="background:var(--col-wand);border-radius:2px;width:8px;height:36px;"></div>
-      <div><div class="pi-label">Wand ↕</div><div class="pi-sub">vertikal</div></div>
-    </div>
+<div class="palette-item" draggable="true" data-block="regal" ondragstart="startDrag(event,'regal')">
+  <div class="pi-icon" style="background:#a8e0a8;border-radius:3px;width:32px;height:14px;"></div>
+  <div><div class="pi-label">Regal</div><div class="pi-sub">grün</div></div>
+</div>
+<div class="palette-item" draggable="true" data-block="obst" ondragstart="startDrag(event,'obst')">
+  <div class="pi-icon" style="background:#f0c080;border-radius:3px;width:24px;height:24px;"></div>
+  <div><div class="pi-label">Obstabteilung</div><div class="pi-sub">gelb</div></div>
+</div>
+<div class="palette-item" draggable="true" data-block="kuehl" ondragstart="startDrag(event,'kuehl')">
+  <div class="pi-icon" style="background:#a8c4e0;border-radius:3px;width:28px;height:16px;"></div>
+  <div><div class="pi-label">Kühlregal</div><div class="pi-sub">blau</div></div>
+</div>
+<div class="palette-item" draggable="true" data-block="eingang" ondragstart="startDrag(event,'eingang')">
+  <div class="pi-icon" style="background:#8a7060;border-radius:3px;width:22px;height:22px;"></div>
+  <div><div class="pi-label">Eingang</div><div class="pi-sub">grau</div></div>
+</div>
+<div class="palette-item" draggable="true" data-block="kasse" ondragstart="startDrag(event,'kasse')">
+  <div class="pi-icon" style="background:#c8a8e0;border-radius:3px;width:20px;height:20px;"></div>
+  <div><div class="pi-label">Kasse</div><div class="pi-sub">lila</div></div>
+</div>
 
+<div class="palette-divider"></div>
+<div class="palette-title">Text</div>
+<div class="palette-item" draggable="true" data-block="label" ondragstart="startDrag(event,'label')">
+  <div class="pi-icon" style="color:#2d5a8a;font-size:16px;font-weight:700;">T</div>
+  <div><div class="pi-label">Label</div><div class="pi-sub">Text-Feld</div></div>
+</div>
+    
     <div class="palette-divider"></div>
     <div class="palette-title">Text</div>
     <div class="palette-item" draggable="true" data-block="label" ondragstart="startDrag(event,'label')">
@@ -490,18 +485,15 @@ async function loadMapFromFirebase(user, db) {
 
 <script>
 // ════════════════════════════════════════
-//  BLOCK DEFINITIONS
+//  BLOCK DEFINITIONS (angepasst)
 // ════════════════════════════════════════
 const BLOCK_DEFS = {
-  'regal-h':  { w:120, h:28, color:'#a8c4e0', label:'Regal', emoji:'', labelColor:'#2d5a8a' },
-  'regal-v':  { w:28,  h:120, color:'#a8c4e0', label:'Regal', emoji:'', labelColor:'#2d5a8a' },
-  'kasse':    { w:50,  h:50,  color:'#f0c080', label:'Kasse', emoji:'🛒', labelColor:'#6a4a10' },
-  'kuehl':    { w:130, h:32,  color:'#a8d4c0', label:'Kühlregal', emoji:'❄️', labelColor:'#1a5a40' },
-  'eingang':  { w:50,  h:50,  color:'#c8a8e0', label:'Eingang', emoji:'🚪', labelColor:'#4a2a6a' },
-  'obst':     { w:70,  h:70,  color:'#a8e0a8', label:'Obst', emoji:'🍎', labelColor:'#1a5a1a' },
-  'wand-h':   { w:140, h:14,  color:'#8a7060', label:'', emoji:'', labelColor:'#fff' },
-  'wand-v':   { w:14,  h:140, color:'#8a7060', label:'', emoji:'', labelColor:'#fff' },
-  'label':    { w:80,  h:28,  color:'rgba(212,114,106,0.12)', label:'Label', emoji:'', labelColor:'#d4726a', isLabel:true }
+  'regal':     { w:120, h:28,  color:'#a8e0a8', label:'', emoji:'', labelColor:'#2d5a8a' },     // grün
+  'obst':      { w:70,  h:70,  color:'#f0c080', label:'', emoji:'', labelColor:'#2d5a8a' },     // gelb
+  'kuehl':     { w:130, h:32,  color:'#a8c4e0', label:'', emoji:'', labelColor:'#2d5a8a' },     // blau
+  'eingang':   { w:50,  h:50,  color:'#8a7060', label:'', emoji:'', labelColor:'#2d5a8a' },     // grau
+  'kasse':     { w:50,  h:50,  color:'#c8a8e0', label:'', emoji:'', labelColor:'#2d5a8a' },     // lila
+  'label':     { w:80,  h:28,  color:'rgba(212,114,106,0.12)', label:'Label', emoji:'', labelColor:'#2d5a8a', isLabel:true }  // dunkelblau
 };
 
 // ════════════════════════════════════════
