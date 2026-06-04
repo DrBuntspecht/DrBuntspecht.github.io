@@ -1048,10 +1048,24 @@ window.removeItem = (id) => {
 // ════════════════════════════════════════
 //  SAVE / LOAD
 // ════════════════════════════════════════
+// Remove all undefined values recursively so Firestore doesn't choke
+function cleanForFirestore(obj) {
+  if (Array.isArray(obj)) return obj.map(cleanForFirestore);
+  if (obj !== null && typeof obj === 'object') {
+    const out = {};
+    for (const [k, v] of Object.entries(obj)) {
+      if (v !== undefined) out[k] = cleanForFirestore(v);
+    }
+    return out;
+  }
+  return obj;
+}
+
 window.saveMap = async () => {
   const name = document.getElementById('market-name').value.trim();
   if (!name) { showToast('⚠️ Bitte erst einen Namen eingeben'); document.getElementById('market-name').focus(); return; }
-  const data = { name, blocks, shoppingItems, nextId, savedAt: new Date().toISOString() };
+  const raw = { name, blocks, shoppingItems, nextId, savedAt: new Date().toISOString() };
+  const data = cleanForFirestore(raw);
   try {
     if (window._saveToFirebase) {
       await window._saveToFirebase(data);
