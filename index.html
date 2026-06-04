@@ -585,6 +585,7 @@ footer span { color:var(--pastel-peach); }
     <button class="nav-tab active" onclick="showPage('home', this)">🏠 Start</button>
     <button class="nav-tab" onclick="showPage('bloedes', this)">😂 Region</button>
     <button class="nav-tab" onclick="showPage('info', this)">ℹ️ Info</button>
+    <button class="nav-tab" onclick="window.location='supermarkt.html'">🛒 Markt</button>
   </div>
   <div class="nav-right">
     <div class="dropdown" id="pages-dropdown">
@@ -594,6 +595,7 @@ footer span { color:var(--pastel-peach); }
       <div class="dropdown-menu" id="pages-dd">
         <div class="dropdown-item active-page" onclick="showPage('home',null);closeDropdowns()">🏠 Startseite</div>
         <div class="dropdown-item" onclick="showPage('bloedes',null);closeDropdowns()">😂 Blödes aus der Region</div>
+        <div class="dropdown-item" onclick="window.location='supermarkt.html';closeDropdowns()">🛒 Marktplaner</div>
         <div class="dropdown-item" onclick="showPage('info',null);closeDropdowns()">ℹ️ Allgemeine Info</div>
       </div>
     </div>
