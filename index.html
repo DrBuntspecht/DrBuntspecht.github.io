@@ -585,7 +585,6 @@ footer span { color:var(--pastel-peach); }
     <button class="nav-tab active" onclick="showPage('home', this)">🏠 Start</button>
     <button class="nav-tab" onclick="showPage('bloedes', this)">😂 Region</button>
     <button class="nav-tab" onclick="showPage('info', this)">ℹ️ Info</button>
-    <button class="nav-tab" onclick="window.location='supermarkt.html'">🛒 Markt</button>
   </div>
   <div class="nav-right">
     <div class="dropdown" id="pages-dropdown">
@@ -595,7 +594,6 @@ footer span { color:var(--pastel-peach); }
       <div class="dropdown-menu" id="pages-dd">
         <div class="dropdown-item active-page" onclick="showPage('home',null);closeDropdowns()">🏠 Startseite</div>
         <div class="dropdown-item" onclick="showPage('bloedes',null);closeDropdowns()">😂 Blödes aus der Region</div>
-        <div class="dropdown-item" onclick="window.location='supermarkt.html';closeDropdowns()">🛒 Marktplaner</div>
         <div class="dropdown-item" onclick="showPage('info',null);closeDropdowns()">ℹ️ Allgemeine Info</div>
       </div>
     </div>
@@ -716,7 +714,7 @@ footer span { color:var(--pastel-peach); }
     <div class="hero-content">
       <div class="hero-eyebrow">Mainz am Rhein</div>
       <h1 class="hero-title">Willkommen<br>in <em>Mainz</em></h1>
-      <p class="hero-sub">Hier wird ganz sicher eine mords Website entstehen.</p>
+      <p class="hero-sub">Dein lokales Zuhause — Wetter, Fußball und deine Gemeinschaft.</p>
     </div>
   </section>
 
@@ -755,7 +753,7 @@ footer span { color:var(--pastel-peach); }
     <!-- BLOG -->
     <div class="section-wrap">
       <h2 class="section-title">Mainzer <span>Blog</span></h2>
-      <p class="section-sub">Nur für Mitglieder. Hier könnte demnächst eine tatsächlich sinnvolle Anwendung zu finden sein.</p>
+      <p class="section-sub">Nur für Mitglieder · Teile deine Gedanken</p>
 
       <div class="members-banner" id="members-banner">
         <div class="members-text">
@@ -787,8 +785,10 @@ footer span { color:var(--pastel-peach); }
 <div class="page" id="page-bloedes" style="padding-top:60px;">
   <div class="section-wrap" style="padding-top:44px;">
     <h2 class="section-title">😂 Blödes aus <span>der Region</span></h2>
-    <p class="section-sub">PLATZHALTER-SEITE...</p>
-    <div class="news-grid" id="news-grid"></div>
+    <p class="section-sub">Zufällig generierte Kurioskeiten aus Mainz & Umgebung der letzten 50 Tage</p>
+    <div class="news-grid" id="news-grid">
+      <div class="news-loading"><div class="loading-dots"><span></span><span></span><span></span></div><p style="margin-top:12px;font-size:14px;">KI sucht nach regionalen Absurditäten…</p></div>
+    </div>
   </div>
 </div>
 
@@ -798,21 +798,21 @@ footer span { color:var(--pastel-peach); }
     <span class="info-page-icon">🗑️</span>
     <h2 class="info-page-title">Allgemeine <em>Info</em></h2>
     <p class="info-page-text">
-      Diese Seite erfüllt aktuell <strong>absolut gar keinen Nutzen</strong>. Sorry dafür.
+      Diese Seite erfüllt aktuell <strong>absolut gar keinen Nutzen</strong>. Sie existiert. Sie ist da. Sie schaut dich an. Und du schaust sie an. Das war's auch schon.
     </p>
 
     <div class="info-highlight">
       <p>
-        <strong>Voraussichtlich </strong> wird diese Seite in ferner Zukunft zu einer Verkaufsplattform für Krempel aller Art (überteuerte Schachbretter!).
+        <strong>Voraussichtlich jedoch</strong> — und das ist eine Prognose von unerschütterlicher Zuversicht — wird diese Seite in nicht allzu ferner Zukunft der <strong>Grundstein einer Verkaufsplattform für Krempel von unfassbarem Wert</strong> werden.
       </p>
     </div>
 
     <p class="info-page-text">
-      Gedacht ist eine Art Schaufenster, aber warten wir ab, in welchem Jahrzehnt es soweit sein wird...
+      Gedacht ist an eine Art Marktplatz, auf dem Mainzerinnen und Mainzer ihre wertvollsten Besitztümer feilbieten können: angebissene Brezel vom Wochenmarkt, leicht angeknickte Fastnachtsnarrhalla-Orden, halbvolle Flaschen Riesling deren Inhalt "noch gut sein könnte", und ähnliche Schätze.
     </p>
 
     <p class="info-page-text" style="font-style:italic;font-size:15px;color:var(--muted);">
-      Bis dahin: Checkt die Seite am besten täglich auf Neuerungen! Man weiß ja nie.
+      Bis dahin: herzlich willkommen im Nichts. Es ist angenehm leer hier.
     </p>
 
     <div style="margin-top:32px;">
@@ -823,7 +823,7 @@ footer span { color:var(--pastel-peach); }
   </div>
 </div>
 
-<footer>© 2025 <span>Dr. Buntspecht</span> · Mainz am Rhein </footer>
+<footer>© 2025 <span>Dr. Buntspecht</span> · Mainz am Rhein · Mit ♥ für die Fastnachtshauptstadt</footer>
 
 <!-- MODAL -->
 <div class="modal-overlay" id="modal" onclick="handleModalBg(event)">
@@ -889,8 +889,8 @@ footer span { color:var(--pastel-peach); }
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, orderBy, query, serverTimestamp, doc, updateDoc, increment, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+import { getFirestore, collection, addDoc, onSnapshot, orderBy, query, serverTimestamp, doc, updateDoc, increment, deleteDoc, getDocs, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+// Storage entfernt — Avatare als Base64 in Firestore
 
 const ADMIN_EMAIL = "admin@drbuntspecht.de"; // ← HIER DEINE E-MAIL EINTRAGEN
 
@@ -905,7 +905,7 @@ const app = initializeApp({
 
 const auth = getAuth(app);
 const db = getFirestore(app);
-const storage = getStorage(app);
+// storage entfernt
 
 let currentUser = null;
 let postsUnsub = null;
@@ -1114,21 +1114,20 @@ window.doRegister = async () => {
   try {
     const cred = await createUserWithEmailAndPassword(auth,e,p);
     let photoURL = null;
-    if (pendingAvatarFile) {
-      try {
-        const r = ref(storage,`avatars/${cred.user.uid}`);
-        await uploadBytes(r, pendingAvatarFile);
-        photoURL = await getDownloadURL(r);
-      } catch(se) { console.warn('Avatar upload failed',se); }
+    if (pendingAvatarDataUrl) {
+      photoURL = pendingAvatarDataUrl; // Base64 direkt verwenden
+      // In Firestore speichern
+      await setDoc(doc(db, 'userProfiles', cred.user.uid), { photoBase64: pendingAvatarDataUrl }, { merge: true });
     }
-await updateProfile(cred.user, { displayName: name, photoURL });
-await cred.user.reload();
-currentUser = auth.currentUser;
-updateNavUI(currentUser);
-updateBlogUI(currentUser);
-showToast('🎉 Willkommen, ' + name + '!');
+    await updateProfile(cred.user, { displayName: name, photoURL });
+    await cred.user.reload();
+    currentUser = auth.currentUser;
+    updateNavUI(currentUser);
+    updateBlogUI(currentUser);
+    showToast('🎉 Willkommen, ' + name + '!');
   } catch(ex) { err.textContent = fbErr(ex.code); }
 };
+
 window.doSignOut = async () => {
   await signOut(auth);
   closeModal();
@@ -1138,19 +1137,40 @@ window.doSignOut = async () => {
 window.updateAvatar = async (input) => {
   if (!currentUser || !input.files[0]) return;
   const file = input.files[0];
-  if (file.size > 1024*1024) { showToast('Bild max. 1MB'); return; }
+  if (file.size > 3*1024*1024) { showToast('Bild max. 3MB'); return; }
   try {
-    showToast('⏳ Wird hochgeladen…');
-    const r = ref(storage,`avatars/${currentUser.uid}`);
-    await uploadBytes(r, file);
-    const url = await getDownloadURL(r);
-    await updateProfile(currentUser, { photoURL: url });
+    showToast('⏳ Wird verarbeitet…');
+    const base64 = await compressAndBase64(file, 200, 0.7);
+    await updateProfile(currentUser, { photoURL: base64 });
+    await setDoc(doc(db, 'userProfiles', currentUser.uid), { photoBase64: base64 }, { merge: true });
+    await currentUser.reload();
+    currentUser = auth.currentUser;
     updateNavUI(currentUser);
     updateBlogUI(currentUser);
     renderProfileInfo(currentUser);
-    showToast('✅ Profilbild aktualisiert!');
+    showToast('✅ Profilbild gespeichert!');
   } catch(ex) { showToast('Fehler: ' + ex.message); }
 };
+
+// Bild auf maxSize px verkleinern und als Base64 zurückgeben
+function compressAndBase64(file, maxSize, quality) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
+      const w = Math.round(img.width * scale);
+      const h = Math.round(img.height * scale);
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
+}
 
 // ── PROFILE MODAL ──
 window.openProfile = () => {
@@ -1170,18 +1190,16 @@ function renderProfileInfo(user) {
 }
 
 // ── AVATAR PREVIEW (register) ──
-window.previewAvatar = (input) => {
+window.previewAvatar = async (input) => {
   if (!input.files[0]) return;
   const file = input.files[0];
-  if (file.size > 1024*1024) { showToast('Max. 1MB'); return; }
-  pendingAvatarFile = file;
-  const reader = new FileReader();
-  reader.onload = e => {
-    pendingAvatarDataUrl = e.target.result;
+  if (file.size > 3*1024*1024) { showToast('Max. 3MB'); return; }
+  try {
+    const base64 = await compressAndBase64(file, 200, 0.7);
+    pendingAvatarDataUrl = base64;
     const wrap = document.getElementById('avatar-preview-wrap');
-    wrap.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
-  };
-  reader.readAsDataURL(file);
+    wrap.innerHTML = `<img src="${base64}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+  } catch(e) { showToast('Fehler beim Lesen des Bildes'); }
 };
 
 // ── E-MAIL NOTIFICATION (via EmailJS) ──
@@ -1426,4 +1444,3 @@ loadMatch05();
 </script>
 </body>
 </html>
-
