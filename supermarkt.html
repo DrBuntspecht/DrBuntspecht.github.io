@@ -27,24 +27,24 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
   height:54px; background:var(--surface);
   border-bottom:1px solid var(--border);
   display:flex; align-items:center; justify-content:space-between;
-  padding:0 16px; flex-shrink:0; gap:8px;
+  padding:0 12px; flex-shrink:0; gap:6px;
   box-shadow:0 2px 8px var(--shadow);
 }
 .topbar-logo {
   font-family:'Playfair Display',serif;
-  font-size:16px; font-weight:900; color:var(--ink); white-space:nowrap;
+  font-size:14px; font-weight:900; color:var(--ink); white-space:nowrap;
 }
 .topbar-logo span { color:var(--accent); font-style:italic; }
 .topbar-name {
   flex:1; border:1px solid var(--border); border-radius:8px;
-  padding:7px 12px; font-family:'DM Sans',sans-serif; font-size:13px;
-  color:var(--ink); background:#fff; outline:none; max-width:220px;
+  padding:6px 10px; font-family:'DM Sans',sans-serif; font-size:12px;
+  color:var(--ink); background:#fff; outline:none; max-width:180px;
   transition:border-color 0.2s;
 }
 .topbar-name:focus { border-color:var(--accent); }
-.topbar-actions { display:flex; gap:6px; flex-shrink:0; }
+.topbar-actions { display:flex; gap:4px; flex-shrink:0; }
 
-.btn { font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; padding:7px 13px; border-radius:8px; border:none; cursor:pointer; transition:all 0.15s; white-space:nowrap; }
+.btn { font-family:'DM Sans',sans-serif; font-size:11px; font-weight:600; padding:6px 10px; border-radius:8px; border:none; cursor:pointer; transition:all 0.15s; white-space:nowrap; }
 .btn:active { transform:scale(0.95); }
 .btn-primary { background:var(--accent); color:#fff; }
 .btn-primary:hover { filter:brightness(1.08); }
@@ -55,6 +55,7 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
 /* ── MAIN LAYOUT ── */
 .editor-layout {
   display:flex; flex:1; overflow:hidden;
+  position:relative;
 }
 
 /* ── LEFT PANEL (Palette) ── */
@@ -64,13 +65,15 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
   border-right:1px solid var(--border);
   overflow-y:auto; padding:10px 8px;
   display:flex; flex-direction:column; gap:4px;
-  transition:width 0.2s;
+  transition:transform 0.3s ease, width 0.3s ease;
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  z-index:20;
 }
 .palette.collapsed {
-  width:0 !important;
-  padding:0 !important;
-  overflow:hidden !important;
-  border-right:none !important;
+  transform:translateX(-100%);
 }
 .palette-title {
   font-size:10px; font-weight:700; text-transform:uppercase;
@@ -80,12 +83,13 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
 
 .palette-item {
   display:flex; align-items:center; gap:8px;
-  padding:8px 10px; border-radius:10px;
+  padding:10px 12px; border-radius:10px;
   cursor:grab; border:1.5px solid transparent;
   transition:all 0.15s; user-select:none;
   background:#fff;
+  min-height:44px;
 }
-.palette-item:hover { border-color:var(--border); box-shadow:0 2px 8px var(--shadow); transform:translateY(-1px); }
+.palette-item:hover { border-color:var(--border); box-shadow:0 2px 8px var(--shadow); }
 .palette-item:active { cursor:grabbing; transform:scale(0.97); }
 .palette-item.selected-tool { border-color:var(--accent); background:rgba(212,114,106,0.06); }
 
@@ -94,7 +98,7 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
   display:flex; align-items:center; justify-content:center;
   font-size:13px;
 }
-.pi-label { font-size:11px; font-weight:500; color:var(--ink); }
+.pi-label { font-size:12px; font-weight:500; color:var(--ink); }
 .pi-sub { font-size:9px; color:var(--muted); margin-top:1px; }
 
 /* ── CANVAS AREA ── */
@@ -104,6 +108,8 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
               repeating-linear-gradient(90deg, transparent, transparent 29px, rgba(180,140,120,0.08) 30px);
   background-color: #f9f2ea;
   cursor:default;
+  margin-left:0;
+  transition:margin-left 0.3s ease;
 }
 
 #supermarkt-canvas {
@@ -111,24 +117,52 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
   touch-action:none;
 }
 
-/* Drag ghost */
-.drag-ghost {
-  position:fixed; pointer-events:none; z-index:1000;
-  opacity:0.75; border-radius:6px;
-  display:flex; align-items:center; justify-content:center;
-  font-size:11px; font-weight:600; color:#fff;
-  transform:translate(-50%,-50%);
-  box-shadow:0 4px 16px rgba(0,0,0,0.2);
-  transition:opacity 0.1s;
+/* Toggle Buttons */
+.toggle-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 44px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  z-index: 30;
+  box-shadow: 0 2px 8px var(--shadow);
+  transition: all 0.2s;
+  min-width: 44px;
+}
+.toggle-btn:hover { background: var(--surface2); }
+.toggle-btn:active { transform: translateY(-50%) scale(0.95); }
+
+.toggle-left {
+  left: 8px;
+}
+.toggle-right {
+  right: 8px;
 }
 
 /* ── RIGHT PANEL (Shopping) ── */
 .shopping-panel {
-  width:220px; flex-shrink:0;
+  width:240px; flex-shrink:0;
   background:var(--surface);
   border-left:1px solid var(--border);
   display:flex; flex-direction:column;
   overflow:hidden;
+  position:absolute;
+  right:0;
+  top:0;
+  bottom:0;
+  z-index:20;
+  transition:transform 0.3s ease;
+}
+.shopping-panel.collapsed {
+  transform:translateX(100%);
 }
 .sp-header {
   padding:12px 14px 8px;
@@ -146,16 +180,16 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
 }
 .sp-input {
   flex:1; border:1px solid var(--border); border-radius:8px;
-  padding:7px 10px; font-family:'DM Sans',sans-serif; font-size:12px;
+  padding:8px 10px; font-family:'DM Sans',sans-serif; font-size:13px;
   color:var(--ink); background:#fff; outline:none;
-  transition:border-color 0.2s;
+  min-height:44px;
 }
 .sp-input:focus { border-color:var(--accent); }
 .sp-add-btn {
   background:var(--accent); color:#fff; border:none;
-  border-radius:8px; width:30px; height:30px;
+  border-radius:8px; width:44px; height:44px;
   display:flex; align-items:center; justify-content:center;
-  cursor:pointer; font-size:16px; flex-shrink:0;
+  cursor:pointer; font-size:20px; flex-shrink:0;
   transition:filter 0.15s;
 }
 .sp-add-btn:hover { filter:brightness(1.1); }
@@ -166,38 +200,42 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
 }
 .sp-item {
   display:flex; align-items:center; gap:8px;
-  padding:8px 10px; border-radius:10px;
+  padding:10px 12px; border-radius:10px;
   background:#fff; border:1.5px solid var(--border);
   cursor:pointer; transition:all 0.15s;
-  animation:fadeUp 0.25s ease;
+  min-height:48px;
 }
-@keyframes fadeUp { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+.sp-item:active { transform:scale(0.98); }
 .sp-item:hover { border-color:var(--accent); }
 .sp-item.placing { border-color:var(--accent); background:rgba(212,114,106,0.06); box-shadow:0 2px 8px var(--shadow); }
 .sp-item.placed { border-color:var(--accent2); background:rgba(122,158,138,0.06); }
-.sp-item.done { opacity:0.45; }
+.sp-item.done { opacity:0.5; }
 .sp-item.done .sp-item-name { text-decoration:line-through; }
 
 .sp-item-dot {
-  width:10px; height:10px; border-radius:50%; flex-shrink:0;
+  width:12px; height:12px; border-radius:50%; flex-shrink:0;
   border:2px solid var(--muted);
   transition:all 0.2s;
 }
 .sp-item.placed .sp-item-dot { background:var(--accent2); border-color:var(--accent2); }
 .sp-item.done .sp-item-dot { background:var(--muted); border-color:var(--muted); }
 
-.sp-item-name { flex:1; font-size:12px; font-weight:500; color:var(--ink); }
+.sp-item-name { flex:1; font-size:13px; font-weight:500; color:var(--ink); min-width:0; }
 .sp-item-loc { font-size:10px; color:var(--accent2); margin-top:1px; }
 
-.sp-item-actions { display:flex; gap:3px; }
+.sp-item-actions { display:flex; gap:4px; }
 .sp-icon-btn {
   background:none; border:none; cursor:pointer;
-  font-size:13px; padding:2px; border-radius:4px;
+  font-size:16px; padding:6px; border-radius:6px;
   color:var(--muted); transition:color 0.15s;
+  min-width:36px;
+  min-height:36px;
+  display:flex; align-items:center; justify-content:center;
 }
+.sp-icon-btn:active { background:var(--surface2); }
 .sp-icon-btn:hover { color:var(--accent); }
 
-.sp-empty { text-align:center; padding:28px 12px; color:var(--muted); font-size:12px; font-style:italic; }
+.sp-empty { text-align:center; padding:32px 12px; color:var(--muted); font-size:13px; font-style:italic; }
 
 .sp-footer { padding:10px 12px; border-top:1px solid var(--border); }
 .sp-progress { height:4px; background:var(--surface2); border-radius:2px; margin-bottom:6px; overflow:hidden; }
@@ -219,14 +257,15 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
 }
 .ctx-menu.show { opacity:1; pointer-events:all; transform:scale(1); }
 .ctx-item {
-  padding:9px 12px; border-radius:8px;
-  cursor:pointer; font-size:13px; color:var(--ink);
+  padding:12px 14px; border-radius:8px;
+  cursor:pointer; font-size:14px; color:var(--ink);
   display:flex; align-items:center; gap:8px;
   transition:background 0.1s;
+  min-height:44px;
 }
+.ctx-item:active { background:var(--surface2); }
 .ctx-item:hover { background:var(--surface2); }
 .ctx-item.danger { color:var(--accent); }
-.ctx-item.danger:hover { background:rgba(212,114,106,0.1); }
 
 /* ── TEXT EDIT POPUP ── */
 .text-popup {
@@ -237,12 +276,14 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
   padding:12px;
   box-shadow:0 8px 32px var(--shadow);
   display:none; gap:8px; align-items:center;
+  min-width:280px;
 }
 .text-popup.show { display:flex; }
 .text-popup input {
   border:1px solid var(--border); border-radius:8px;
-  padding:7px 10px; font-family:'DM Sans',sans-serif; font-size:13px;
-  color:var(--ink); background:#fff; outline:none; width:160px;
+  padding:8px 10px; font-family:'DM Sans',sans-serif; font-size:14px;
+  color:var(--ink); background:#fff; outline:none; flex:1;
+  min-height:44px;
 }
 .text-popup input:focus { border-color:var(--accent); }
 
@@ -257,25 +298,22 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
 .modal-overlay.show { opacity:1; pointer-events:all; }
 .modal-box {
   background:var(--surface); border-radius:20px;
-  padding:28px; max-width:380px; width:100%;
+  padding:24px; max-width:340px; width:100%;
   box-shadow:0 16px 48px rgba(0,0,0,0.15);
-  transform:translateY(10px);
-  transition:transform 0.3s;
 }
-.modal-overlay.show .modal-box { transform:translateY(0); }
-.modal-title { font-family:'Playfair Display',serif; font-size:22px; font-weight:700; margin-bottom:8px; }
+.modal-title { font-family:'Playfair Display',serif; font-size:20px; font-weight:700; margin-bottom:8px; }
 .modal-text { font-size:14px; color:var(--muted); line-height:1.6; margin-bottom:20px; }
 .modal-actions { display:flex; gap:8px; justify-content:flex-end; }
 
 /* ── TOAST ── */
-.toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(60px); background:var(--ink); color:#fff; padding:10px 18px; border-radius:50px; font-size:13px; z-index:2000; transition:transform 0.35s cubic-bezier(0.34,1.4,0.64,1); white-space:nowrap; box-shadow:0 4px 20px rgba(0,0,0,0.2); }
+.toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(60px); background:var(--ink); color:#fff; padding:12px 20px; border-radius:50px; font-size:14px; z-index:2000; transition:transform 0.35s cubic-bezier(0.34,1.4,0.64,1); white-space:nowrap; box-shadow:0 4px 20px rgba(0,0,0,0.2); max-width:90%; text-align:center; }
 .toast.show { transform:translateX(-50%) translateY(0); }
 
-/* ── LOADING ── */
+/* ── LOGIN GATE ── */
 .login-gate {
   flex:1; display:flex; flex-direction:column;
   align-items:center; justify-content:center; gap:16px;
-  color:var(--muted);
+  color:var(--muted); padding:20px;
 }
 
 /* SCROLLBAR */
@@ -283,46 +321,60 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
 ::-webkit-scrollbar-track { background:transparent; }
 ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
 
-/* Panel Toggle */
-.toggle-btn {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 24px;
-  height: 40px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 0 8px 8px 0;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  z-index: 10;
-  box-shadow: 2px 0 8px var(--shadow);
+/* Drag ghost */
+.drag-ghost {
+  position:fixed; pointer-events:none; z-index:1000;
+  opacity:0.75; border-radius:6px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-weight:600; color:#fff;
+  transform:translate(-50%,-50%);
+  box-shadow:0 4px 16px rgba(0,0,0,0.2);
+  transition:opacity 0.1s;
 }
-.toggle-btn:hover { background: var(--surface2); }
+
+/* ── MOBILE OPTIMIZATION ── */
+@media (max-width: 768px) {
+  .topbar-logo { font-size:12px; }
+  .topbar-name { max-width:120px; font-size:11px; padding:5px 8px; }
+  .btn { font-size:10px; padding:5px 8px; }
+  
+  /* Panels fullscreen on mobile */
+  .palette {
+    width:85% !important;
+    max-width:320px;
+  }
+  .shopping-panel {
+    width:85% !important;
+    max-width:340px;
+  }
+  
+  /* Bigger touch targets */
+  .palette-item { min-height:52px; padding:12px 14px; }
+  .sp-item { min-height:54px; padding:12px 14px; }
+  .toggle-btn { width:44px; height:44px; font-size:20px; }
+  
+  /* Canvas full width when panels open */
+  .canvas-wrap { margin-left:0 !important; margin-right:0 !important; }
+}
 </style>
 </head>
 <body>
 
 <!-- TOPBAR -->
 <div class="topbar">
-  <div class="topbar-logo">Dr.<span>Buntspecht</span> <span style="color:var(--muted);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:400;">· Marktplaner</span></div>
-  <input class="topbar-name" id="market-name" placeholder="Name des Supermarkts…" maxlength="40">
+  <div class="topbar-logo">Dr.<span>Buntspecht</span> <span style="color:var(--muted);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:400;">· Marktplaner</span></div>
+  <input class="topbar-name" id="market-name" placeholder="Supermarkt…" maxlength="40">
   <div class="topbar-actions">
-    <button class="btn btn-ghost" id="btn-clear" onclick="confirmClear()">🗑 Leeren</button>
-    <button class="btn btn-sage" id="btn-load" onclick="loadMap()" style="display:none">📂 Laden</button>
-    <button class="btn btn-primary" id="btn-save" onclick="saveMap()">💾 Speichern</button>
-    <a href="index.html" class="btn btn-ghost">← Zurück</a>
+    <button class="btn btn-ghost" id="btn-clear" onclick="confirmClear()" style="display:none">🗑</button>
+    <button class="btn btn-sage" id="btn-load" onclick="loadMap()" style="display:none">📂</button>
+    <button class="btn btn-primary" id="btn-save" onclick="saveMap()">💾</button>
   </div>
 </div>
 
 <!-- EDITOR -->
 <div class="editor-layout" id="editor-layout">
 
-  <!-- LEFT PALETTE -->
+  <!-- LEFT PANEL -->
   <div class="palette" id="palette">
     <div class="palette-title">Werkzeuge</div>
     <div class="palette-item selected-tool" data-tool="select" onclick="selectTool('select',this)">
@@ -343,7 +395,7 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
     </div>
     <div class="palette-item" draggable="true" data-block="obst" ondragstart="startDrag(event,'obst')">
       <div class="pi-icon" style="background:#f0c080;border-radius:3px;width:24px;height:24px;"></div>
-      <div><div class="pi-label">Obstabteilung</div><div class="pi-sub">gelb</div></div>
+      <div><div class="pi-label">Obst</div><div class="pi-sub">gelb</div></div>
     </div>
     <div class="palette-item" draggable="true" data-block="kuehl" ondragstart="startDrag(event,'kuehl')">
       <div class="pi-icon" style="background:#a8c4e0;border-radius:3px;width:28px;height:16px;"></div>
@@ -366,8 +418,9 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
     </div>
   </div>
 
-  <!-- TOGGLE BUTTON -->
-  <button class="toggle-btn" id="toggle-palette" onclick="togglePalette()">☰</button>
+  <!-- TOGGLE BUTTONS -->
+  <button class="toggle-btn toggle-left" id="toggle-left" onclick="toggleLeftPanel()">☰</button>
+  <button class="toggle-btn toggle-right" id="toggle-right" onclick="toggleRightPanel()">🛒</button>
 
   <!-- CANVAS -->
   <div class="canvas-wrap" id="canvas-wrap"
@@ -376,18 +429,18 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
     <canvas id="supermarkt-canvas"></canvas>
   </div>
 
-  <!-- RIGHT: SHOPPING PANEL -->
-  <div class="shopping-panel">
+  <!-- RIGHT PANEL -->
+  <div class="shopping-panel" id="shopping-panel">
     <div class="sp-header">
       <div class="sp-title">🛒 Einkaufsliste</div>
-      <div class="sp-sub" id="sp-market-name">Kein Supermarkt geladen</div>
+      <div class="sp-sub" id="sp-market-name">Kein Supermarkt</div>
     </div>
     <div class="sp-add">
-      <input class="sp-input" id="sp-new-item" placeholder="Produkt hinzufügen…" onkeydown="if(event.key==='Enter')addShoppingItem()">
+      <input class="sp-input" id="sp-new-item" placeholder="Produkt…" onkeydown="if(event.key==='Enter')addShoppingItem()">
       <button class="sp-add-btn" onclick="addShoppingItem()">+</button>
     </div>
     <div class="sp-list" id="sp-list">
-      <div class="sp-empty">Produkte hinzufügen und auf der Karte platzieren</div>
+      <div class="sp-empty">Produkte hinzufügen</div>
     </div>
     <div class="sp-footer">
       <div class="sp-progress"><div class="sp-progress-bar" id="sp-progress-bar" style="width:0%"></div></div>
@@ -403,7 +456,7 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
 <div id="login-gate" style="display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
   <div style="font-size:48px;">🔒</div>
   <div style="font-family:'Playfair Display',serif;font-size:22px;color:var(--ink);">Bitte einloggen</div>
-  <div style="font-size:14px;color:var(--muted);">Der Marktplaner ist nur für angemeldete Nutzer verfügbar.</div>
+  <div style="font-size:14px;color:var(--muted); text-align:center;">Der Marktplaner ist nur für angemeldete Nutzer verfügbar.</div>
   <a href="index.html" class="btn btn-primary" style="margin-top:8px;">← Zur Startseite</a>
 </div>
 
@@ -420,8 +473,8 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
 <!-- TEXT POPUP -->
 <div class="text-popup" id="text-popup">
   <input id="text-popup-input" placeholder="Beschriftung…" onkeydown="if(event.key==='Enter')confirmTextEdit()">
-  <button class="btn btn-primary" style="padding:7px 12px;" onclick="confirmTextEdit()">OK</button>
-  <button class="btn btn-ghost" style="padding:7px 10px;" onclick="cancelTextEdit()">✕</button>
+  <button class="btn btn-primary" style="padding:8px 14px;" onclick="confirmTextEdit()">OK</button>
+  <button class="btn btn-ghost" style="padding:8px 12px;" onclick="cancelTextEdit()">✕</button>
 </div>
 
 <!-- MODAL -->
@@ -463,12 +516,19 @@ onAuthStateChanged(auth, async user => {
   if (user) {
     document.getElementById('editor-layout').style.display = 'flex';
     document.getElementById('login-gate').style.display = 'none';
-    document.getElementById('btn-load').style.display = 'block';
+    document.getElementById('btn-clear').style.display = 'inline-block';
+    document.getElementById('btn-load').style.display = 'inline-block';
     
-    const palette = document.getElementById('palette');
-    if (palette) {
-      palette.classList.add('collapsed');
-      document.getElementById('toggle-palette').textContent = '☰';
+    // Beide Panels standardmäßig geschlossen auf Mobile
+    if (window.innerWidth <= 768) {
+      document.getElementById('palette').classList.add('collapsed');
+      document.getElementById('shopping-panel').classList.add('collapsed');
+      document.getElementById('toggle-left').textContent = '☰';
+      document.getElementById('toggle-right').textContent = '🛒';
+    } else {
+      // Desktop: Linkes Panel offen, rechtes geschlossen
+      document.getElementById('shopping-panel').classList.add('collapsed');
+      document.getElementById('toggle-right').textContent = '🛒';
     }
     
     initCanvas();
@@ -690,7 +750,7 @@ function hitTestResizeHandle(b, x, y) {
   const handleY = b.y + b.h;
   const dx = x - handleX;
   const dy = y - handleY;
-  return (dx*dx + dy*dy) <= 25;
+  return (dx*dx + dy*dy) <= 36; // 6px radius auf Mobile
 }
 
 function snap(v) { return Math.round(v/15)*15; }
@@ -845,20 +905,37 @@ function selectTool(tool, el) {
   document.querySelectorAll('.palette-item[data-tool]').forEach(i => i.classList.remove('selected-tool'));
   el.classList.add('selected-tool');
   canvas.style.cursor = tool === 'delete' ? 'not-allowed' : 'default';
+  // Auf Mobile: Panel nach Auswahl schließen
+  if (window.innerWidth <= 768) {
+    document.getElementById('palette').classList.add('collapsed');
+    document.getElementById('toggle-left').textContent = '☰';
+  }
 }
 window.selectTool = selectTool;
 
-function togglePalette() {
+function toggleLeftPanel() {
   const palette = document.getElementById('palette');
   palette.classList.toggle('collapsed');
   if (palette.classList.contains('collapsed')) {
-    document.getElementById('toggle-palette').textContent = '☰';
+    document.getElementById('toggle-left').textContent = '☰';
   } else {
-    document.getElementById('toggle-palette').textContent = '✕';
+    document.getElementById('toggle-left').textContent = '✕';
   }
-  setTimeout(() => resizeCanvas(), 200);
+  setTimeout(() => resizeCanvas(), 300);
 }
-window.togglePalette = togglePalette;
+window.toggleLeftPanel = toggleLeftPanel;
+
+function toggleRightPanel() {
+  const panel = document.getElementById('shopping-panel');
+  panel.classList.toggle('collapsed');
+  if (panel.classList.contains('collapsed')) {
+    document.getElementById('toggle-right').textContent = '🛒';
+  } else {
+    document.getElementById('toggle-right').textContent = '✕';
+  }
+  setTimeout(() => resizeCanvas(), 300);
+}
+window.toggleRightPanel = toggleRightPanel;
 
 function closeCtxMenu() { document.getElementById('ctx-menu').classList.remove('show'); }
 window.closeCtxMenu = closeCtxMenu;
@@ -878,7 +955,7 @@ function openTextEdit(block, cx, cy) {
   const input = document.getElementById('text-popup-input');
   const def = BLOCK_DEFS[block.type];
   input.value = block.customLabel !== undefined ? block.customLabel : def.label;
-  popup.style.left = Math.min(cx, window.innerWidth-230)+'px';
+  popup.style.left = Math.max(10, Math.min(cx, window.innerWidth-290))+'px';
   popup.style.top = Math.max(10, cy-60)+'px';
   popup.classList.add('show');
   input.focus(); input.select();
@@ -917,7 +994,7 @@ function addShoppingItem() {
   shoppingItems.push(item);
   input.value = '';
   updateShoppingUI();
-  showToast('➕ ' + name + ' hinzugefügt — auf Karte platzieren');
+  showToast('➕ ' + name);
 }
 
 function updateShoppingUI() {
@@ -925,7 +1002,7 @@ function updateShoppingUI() {
   const marketName = document.getElementById('market-name').value || 'Kein Supermarkt';
   document.getElementById('sp-market-name').textContent = marketName;
   if (shoppingItems.length === 0) {
-    list.innerHTML = '<div class="sp-empty">Produkte hinzufügen und auf der Karte platzieren</div>';
+    list.innerHTML = '<div class="sp-empty">Produkte hinzufügen</div>';
     document.getElementById('sp-progress-bar').style.width = '0%';
     document.getElementById('sp-stats-text').textContent = '0 Produkte';
     document.getElementById('sp-done-text').textContent = '0 erledigt';
@@ -965,8 +1042,13 @@ function updateShoppingUI() {
 function startPlacingItem(item) {
   placingItem = item;
   canvas.style.cursor = 'crosshair';
-  showToast('🖱 Klick auf Karte zum Platzieren von "' + item.name + '"');
+  showToast('🖱 Klick zum Platzieren von "' + item.name + '"');
   updateShoppingUI();
+  // Auf Mobile: Panel schließen
+  if (window.innerWidth <= 768) {
+    document.getElementById('shopping-panel').classList.add('collapsed');
+    document.getElementById('toggle-right').textContent = '🛒';
+  }
 }
 
 window.markDone = (id) => { const item = shoppingItems.find(i=>i.id===id); if (item) { item.done = true; updateShoppingUI(); } };
@@ -988,7 +1070,7 @@ window.closeModal = closeModal;
 
 window.confirmClear = () => {
   document.getElementById('modal-title').textContent = 'Karte leeren?';
-  document.getElementById('modal-text').textContent = 'Alle Blöcke und platzierten Produkte werden entfernt.';
+  document.getElementById('modal-text').textContent = 'Alle Blöcke und Produkte werden entfernt.';
   document.getElementById('modal-confirm-btn').onclick = () => { blocks=[]; selectedBlock=null; render(); closeModal(); showToast('🗑 Karte geleert'); };
   document.getElementById('modal').classList.add('show');
 };
@@ -1007,7 +1089,7 @@ function cleanForFirestore(obj) {
 
 window.saveMap = async () => {
   const name = document.getElementById('market-name').value.trim();
-  if (!name) { showToast('⚠️ Bitte erst einen Namen eingeben'); document.getElementById('market-name').focus(); return; }
+  if (!name) { showToast('⚠️ Namen eingeben'); document.getElementById('market-name').focus(); return; }
   const raw = { name, blocks, shoppingItems, nextId, savedAt: new Date().toISOString() };
   const data = cleanForFirestore(raw);
   try {
@@ -1024,7 +1106,7 @@ window.saveMap = async () => {
 window.loadMap = async () => {
   let data = window._pendingLoad;
   if (!data && window._loadFromFirebase) data = await window._loadFromFirebase();
-  if (!data) { showToast('Keine gespeicherte Karte gefunden'); return; }
+  if (!data) { showToast('Keine gespeicherte Karte'); return; }
   blocks = data.blocks || [];
   shoppingItems = data.shoppingItems || [];
   nextId = data.nextId || blocks.length + 1;
