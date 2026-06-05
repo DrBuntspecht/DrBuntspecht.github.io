@@ -1017,6 +1017,7 @@ function onTouchStart(e){
   
   const b=hitTest(x,y);  
   if(b){  
+    e.preventDefault(); 
     selectedBlock=b;  
     _touchDragBlock=b;  
     _touchDragOffX=x-b.x; _touchDragOffY=y-b.y;  
