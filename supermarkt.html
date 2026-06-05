@@ -655,7 +655,8 @@ let lastTouchDist = null, lastTouchMid = null;
   
 // Für Pin-Drag (Long-Press)  
 let pinDragItem = null, pinDragOffset = {x:0,y:0}, pinDragActive = false, pinDragTimeout = null;  
-  
+let blockLongPressTimeout = null;  
+let blockLongPressTarget = null;  
 // ════════════════════════════════════════  
 //  CANVAS INIT  
 // ════════════════════════════════════════  
@@ -1015,23 +1016,36 @@ function onTouchStart(e){
     canvas.addEventListener('touchmove', _onTouchMovePinDrag, {passive:false});  
     return;  
   }  
+const b=hitTest(x,y);  
+if(b){  
+ e.preventDefault(); 
+ selectedBlock=b;  
+  _touchDragBlock=b;  
+  _touchDragOffX=x-b.x; _touchDragOffY=y-b.y;  
+  blocks=blocks.filter(bl=>bl.id!==b.id);blocks.push(b);  
+  render();  
   
-  const b=hitTest(x,y);  
-  if(b){  
-    e.preventDefault(); 
-    selectedBlock=b;  
-    _touchDragBlock=b;  
-    _touchDragOffX=x-b.x; _touchDragOffY=y-b.y;  
-    blocks=blocks.filter(bl=>bl.id!==b.id);blocks.push(b);  
+  // Long-Press für Kopieren  
+  blockLongPressTarget = b;  
+  blockLongPressTimeout = setTimeout(() => {  
+    // Kopieren  
+    const copy = {...blockLongPressTarget, id: nextId++, x: blockLongPressTarget.x + 30, y: blockLongPressTarget.y + 30};  
+    blocks.push(copy);  
+    selectedBlock = copy;  
     render();  
-  } else {  
-    selectedBlock=null; _touchDragBlock=null; render();  
-  }  
+    showToast('📋 Baustein kopiert');  
+    blockLongPressTimeout = null;  
+    blockLongPressTarget = null;  
+  }, 700);  
+} else {  
+  selectedBlock=null; _touchDragBlock=null; render();  
+}  
   
   canvas.addEventListener('touchmove', _onTouchMoveInternal, {passive:true});  
 }  
   
 function _onTouchMoveInternal(e){  
+  if (blockLongPressTimeout) { clearTimeout(blockLongPressTimeout); blockLongPressTimeout = null; blockLongPressTarget = null; }  
   if(e.touches.length!==1){ _touchDragBlock=null; return; }  
   const t=e.touches[0];  
   const{x,y}=getCanvasPos(t.clientX,t.clientY);  
@@ -1056,63 +1070,66 @@ function _onTouchMovePinDrag(e){
   pinDragItem.y = y - pinDragOffset.y;  
   render();  
 }  
+
+function onTouchEnd(e){    
+  // Long-Press-Kopieren abbrechen, falls Touch zu früh endet  
+  if (blockLongPressTimeout) { clearTimeout(blockLongPressTimeout); blockLongPressTimeout = null; blockLongPressTarget = null; }  
   
-function onTouchEnd(e){  
-  canvas.removeEventListener('touchmove',_onTouchMoveInternal);  
-  canvas.removeEventListener('touchmove',_onTouchMovePinDrag);  
-  if(pinDragTimeout) { clearTimeout(pinDragTimeout); pinDragTimeout = null; }  
-  if(pinDragActive && pinDragItem) {  
-    pinDragActive = false;  
-    pinDragItem = null;  
-    render();  
-    return;  
-  }  
-  const elapsed=Date.now()-_touchStartTime;  
-  _touchDragBlock=null;  
-  
-  if(_touchMoved) return;  
-  
-  const{x,y}={x:_touchStartX,y:_touchStartY};  
-  const now=Date.now();  
-  const doubleTap=(now-_lastTap)<350;  
-  _lastTap=now;  
-  
-  if(placingBlockType){ placeBlockAt(x,y); return; }  
-  if(placingItem){ placingItemAt(x,y); return; }  
-  
-  // Im Einkaufsmodus: Nur Pins (Produkte) können abgehakt werden!  
-  if(shoppingMode){  
-    const pin=hitTestPin(x,y);  
-    if(pin){  
-      pin.done=!pin.done;  
-      updateShoppingUI();  
-      showToast(pin.done?'✅ '+pin.name+' erledigt':'↩ '+pin.name+' zurückgesetzt');  
-    }  
-    return;  
-  }  
-  
-  if(activeTool==='select'&&!placingBlockType){  
-    const pin=hitTestPin(x,y);  
-    if(pin){  
-      pin.done=!pin.done;  
-      updateShoppingUI();  
-      showToast(pin.done?'✅ '+pin.name+' erledigt':'↩ '+pin.name+' zurückgesetzt');  
-      return;  
-    }  
-  }  
-  
-  if(activeTool==='delete'){  
-    const b=hitTest(x,y);  
-    if(b){blocks=blocks.filter(bl=>bl.id!==b.id);selectedBlock=null;render();}  
-    return;  
-  }  
-  
-  const b=hitTest(x,y);  
-  if(b&&doubleTap){  
-    openTextEdit(b,window.innerWidth/2,Math.min(window.innerHeight*0.4,300));  
-  }  
-}  
-  
+  canvas.removeEventListener('touchmove',_onTouchMoveInternal);    
+  canvas.removeEventListener('touchmove',_onTouchMovePinDrag);    
+  if(pinDragTimeout) { clearTimeout(pinDragTimeout); pinDragTimeout = null; }    
+  if(pinDragActive && pinDragItem) {    
+    pinDragActive = false;    
+    pinDragItem = null;    
+    render();    
+    return;    
+  }    
+  const elapsed=Date.now()-_touchStartTime;    
+  _touchDragBlock=null;    
+    
+  if(_touchMoved) return;    
+    
+  const{x,y}={x:_touchStartX,y:_touchStartY};    
+  const now=Date.now();    
+  const doubleTap=(now-_lastTap)<350;    
+  _lastTap=now;    
+    
+  if(placingBlockType){ placeBlockAt(x,y); return; }    
+  if(placingItem){ placingItemAt(x,y); return; }    
+    
+  // Im Einkaufsmodus: Nur Pins (Produkte) können abgehakt werden!    
+  if(shoppingMode){    
+    const pin=hitTestPin(x,y);    
+    if(pin){    
+      pin.done=!pin.done;    
+      updateShoppingUI();    
+      showToast(pin.done?'✅ '+pin.name+' erledigt':'↩ '+pin.name+' zurückgesetzt');    
+    }    
+    return;    
+  }    
+    
+  if(activeTool==='select'&&!placingBlockType){    
+    const pin=hitTestPin(x,y);    
+    if(pin){    
+      pin.done=!pin.done;    
+      updateShoppingUI();    
+      showToast(pin.done?'✅ '+pin.name+' erledigt':'↩ '+pin.name+' zurückgesetzt');    
+      return;    
+    }    
+  }    
+    
+  if(activeTool==='delete'){    
+    const b=hitTest(x,y);    
+    if(b){blocks=blocks.filter(bl=>bl.id!==b.id);selectedBlock=null;render();}    
+    return;    
+  }    
+    
+  const b=hitTest(x,y);    
+  if(b&&doubleTap){    
+    openTextEdit(b,window.innerWidth/2,Math.min(window.innerHeight*0.4,300));    
+  }    
+}    
+ 
 // Pinch-to-zoom & pan  
 function onTouchMovePinch(e) {  
   if (e.touches.length === 2) {  
