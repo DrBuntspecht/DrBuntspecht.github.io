@@ -1,1322 +1,1288 @@
-<!DOCTYPE html>  
-<html lang="de">  
-<head>  
-<meta charset="UTF-8">  
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">  
-<meta name="apple-mobile-web-app-capable" content="yes">  
-<title>Dr. Buntspecht – Mainz</title>  
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">  
-<style>  
-:root {  
-  --bg: #fdf6f0;  
-  --surface: #fff8f3;  
-  --surface2: #ffeee3;  
-  --pastel-rose: #f2c4c4;  
-  --pastel-peach: #f7d9c4;  
-  --pastel-sage: #c4d9c4;  
-  --pastel-sky: #c4d4e8;  
-  --pastel-lavender: #d4c4e8;  
-  --pastel-butter: #f0e8c4;  
-  --accent: #d4726a;  
-  --accent2: #7a9e8a;  
-  --gold: #c9a05a;  
-  --ink: #2d1f1a;  
-  --muted: #8a7060;  
-  --border: rgba(180,140,120,0.18);  
-  --shadow: rgba(180,120,100,0.12);  
-}  
-  
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }  
-html { scroll-behavior:smooth; }  
-  
-body {  
-  background: var(--bg);  
-  color: var(--ink);  
-  font-family: 'Lora', Georgia, serif;  
-  min-height: 100vh;  
-  overflow-x: hidden;  
-}  
-  
-/* ── PAGE SYSTEM ── */  
-.page { display:none; }  
-.page.active { display:block; }  
-  
-/* ── NAVBAR ── */  
-.navbar {  
-  position: fixed; top:0; left:0; right:0; z-index: 100;  
-  background: rgba(253,246,240,0.92);  
-  backdrop-filter: blur(16px);  
-  border-bottom: 1px solid var(--border);  
-  padding: 0 24px;  
-  height: 60px;  
-  display: flex; align-items: center; justify-content: space-between;  
-}  
-  
-.nav-logo {  
-  font-family: 'Playfair Display', serif;  
-  font-size: 19px; font-weight: 900;  
-  color: var(--ink); letter-spacing: -0.3px;  
-}  
-.nav-logo span { color: var(--accent); font-style: italic; }  
-  
-.nav-center {  
-  display: flex; gap: 4px;  
-}  
-  
-.nav-tab {  
-  font-family: 'DM Sans', sans-serif;  
-  font-size: 13px; font-weight: 500;  
-  padding: 7px 14px;  
-  border-radius: 20px;  
-  cursor: pointer;  
-  transition: all 0.2s;  
-  color: var(--muted);  
-  border: none; background: none;  
-}  
-.nav-tab:hover { background: var(--surface2); color: var(--ink); }  
-.nav-tab.active { background: var(--accent); color: #fff; }  
-  
-.nav-right { display:flex; gap:8px; align-items:center; }  
-  
-/* dropdown */  
-.dropdown { position:relative; }  
-.dropdown-btn {  
-  font-family: 'DM Sans', sans-serif;  
-  font-size: 13px; font-weight: 500;  
-  padding: 7px 14px;  
-  border-radius: 20px;  
-  border: 1px solid var(--border);  
-  background: var(--surface);  
-  color: var(--muted);  
-  cursor: pointer;  
-  display: flex; align-items: center; gap: 5px;  
-  transition: all 0.2s;  
-}  
-.dropdown-btn:hover { background: var(--surface2); color: var(--ink); }  
-.dropdown-menu {  
-  position: absolute; top: calc(100% + 8px); right: 0;  
-  background: var(--surface);  
-  border: 1px solid var(--border);  
-  border-radius: 14px;  
-  padding: 6px;  
-  min-width: 200px;  
-  box-shadow: 0 8px 32px var(--shadow);  
-  opacity: 0; pointer-events: none;  
-  transform: translateY(-6px);  
-  transition: all 0.2s;  
-  z-index: 200;  
-}  
-.dropdown-menu.open { opacity:1; pointer-events:all; transform:translateY(0); }  
-.dropdown-item {  
-  padding: 10px 14px;  
-  border-radius: 10px;  
-  cursor: pointer;  
-  font-family: 'DM Sans', sans-serif;  
-  font-size: 13px;  
-  color: var(--ink);  
-  transition: background 0.15s;  
-  display: flex; align-items: center; gap: 8px;  
-}  
-.dropdown-item:hover { background: var(--surface2); }  
-.dropdown-item.active-page { color: var(--accent); font-weight: 600; }  
-  
-/* ── BTN ── */  
-.btn {  
-  font-family: 'DM Sans', sans-serif;  
-  font-size: 13px; font-weight: 600;  
-  padding: 8px 16px;  
-  border-radius: 20px;  
-  border: none; cursor: pointer;  
-  transition: all 0.2s;  
-}  
-.btn:active { transform: scale(0.96); }  
-.btn-ghost {  
-  background: transparent;  
-  border: 1px solid var(--border);  
-  color: var(--muted);  
-}  
-.btn-ghost:hover { background: var(--surface2); color: var(--ink); }  
-.btn-primary { background: var(--accent); color: #fff; box-shadow: 0 4px 14px rgba(212,114,106,0.3); }  
-.btn-primary:hover { filter: brightness(1.08); }  
-.btn-sage { background: var(--accent2); color: #fff; }  
-.btn-full { width:100%; padding:14px; font-size:15px; border-radius:12px; margin-top:6px; }  
-  
-/* ── HERO ── */  
-.hero {  
-  position: relative;  
-  min-height: 100vh;  
-  display: flex; flex-direction: column;  
-  overflow: hidden;  
-  padding-top: 60px;  
-}  
-  
-.hero-bg {  
-  position: absolute; inset:0; z-index:0;  
-}  
-.hero-bg svg { width:100%; height:100%; position:absolute; inset:0; }  
-  
-.hero-overlay {  
-  position:absolute; inset:0; z-index:1;  
-  background: linear-gradient(to bottom,  
-    rgba(253,246,240,0.2) 0%,  
-    rgba(253,246,240,0.1) 40%,  
-    rgba(253,246,240,0.7) 70%,  
-    rgba(253,246,240,1) 100%);  
-}  
-  
-.hero-content {  
-  position:relative; z-index:5;  
-  flex:1; display:flex; flex-direction:column;  
-  justify-content:flex-end;  
-  padding: 0 28px 40px;  
-}  
-.hero-eyebrow {  
-  font-family:'DM Sans',sans-serif;  
-  font-size:11px; font-weight:600;  
-  text-transform:uppercase; letter-spacing:3px;  
-  color: var(--accent); margin-bottom:10px;  
-}  
-.hero-title {  
-  font-family:'Playfair Display',serif;  
-  font-size: clamp(40px,8vw,76px);  
-  font-weight:900; line-height:0.95;  
-  color: var(--ink);  
-  margin-bottom:14px;  
-}  
-.hero-title em { font-style:italic; color:var(--accent); }  
-.hero-sub {  
-  font-size:17px; font-weight:400;  
-  color:var(--muted); max-width:460px;  
-  line-height:1.6; margin-bottom:28px;  
-}  
-  
-/* ── INFO ROW ── */  
-.info-row {  
-  display:grid; grid-template-columns:1fr 1fr; gap:12px;  
-  position:relative; z-index:5;  
-  padding: 0 28px; margin-bottom:-56px;  
-}  
-@media(max-width:600px){  
-  .info-row { grid-template-columns:1fr; padding:0 16px; }  
-  .hero-content { padding:0 16px 36px; }  
-  .navbar { padding:0 16px; }  
-  .nav-center { display:none; }  
-}  
-  
-.info-card {  
-  background: rgba(255,248,243,0.95);  
-  backdrop-filter: blur(16px);  
-  border-radius: 16px;  
-  padding: 18px 20px;  
-  border: 1px solid var(--border);  
-  box-shadow: 0 4px 24px var(--shadow);  
-}  
-.info-card-label {  
-  font-family:'DM Sans',sans-serif;  
-  font-size:10px; font-weight:600;  
-  text-transform:uppercase; letter-spacing:2px;  
-  color:var(--muted); margin-bottom:8px;  
-}  
-  
-/* ── MAIN ── */  
-.main { background: var(--bg); padding-top: 90px; }  
-  
-/* ── SECTIONS ── */  
-.section-wrap {  
-  padding: 44px 28px 36px;  
-  max-width: 860px; margin: 0 auto;  
-}  
-@media(max-width:600px){ .section-wrap { padding:36px 16px 28px; } }  
-  
-.section-title {  
-  font-family:'Playfair Display',serif;  
-  font-size:26px; font-weight:700;  
-  color:var(--ink); margin-bottom:4px;  
-}  
-.section-title span { color:var(--accent); font-style:italic; }  
-.section-sub { font-size:14px; color:var(--muted); margin-bottom:24px; font-weight:400; }  
-  
-.divider {  
-  height:1px;  
-  background: linear-gradient(to right, transparent, var(--border), transparent);  
-  margin: 0 28px;  
-}  
-  
-/* ── WEATHER ── */  
-.weather-grid {  
-  display:grid; grid-template-columns:repeat(7,1fr); gap:8px;  
-}  
-@media(max-width:680px){ .weather-grid { grid-template-columns:repeat(4,1fr); } }  
-@media(max-width:380px){ .weather-grid { grid-template-columns:repeat(3,1fr); } }  
-  
-.weather-day {  
-  background: #fff;  
-  border-radius: 14px;  
-  padding: 14px 8px;  
-  text-align: center;  
-  border: 1px solid var(--border);  
-  transition: transform 0.2s, box-shadow 0.2s;  
-}  
-.weather-day:first-child {  
-  background: linear-gradient(135deg, var(--pastel-rose), var(--pastel-peach));  
-  border-color: rgba(212,114,106,0.25);  
-}  
-.weather-day:hover { transform:translateY(-3px); box-shadow:0 6px 20px var(--shadow); }  
-  
-.wd-name { font-family:'DM Sans',sans-serif; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:7px; }  
-.weather-day:first-child .wd-name { color: var(--accent); }  
-.wd-icon { font-size:22px; margin-bottom:7px; display:block; }  
-.wd-temp { font-family:'Playfair Display',serif; font-size:19px; font-weight:700; color:var(--ink); }  
-.wd-temp-low { font-family:'DM Sans',sans-serif; font-size:11px; color:var(--muted); margin-top:2px; }  
-.wd-desc { font-size:10px; color:var(--muted); margin-top:3px; font-style:italic; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }  
-  
-/* ── MATCH ── */  
-.match-card {  
-  background: linear-gradient(135deg, #2d1f1a, #4a2e26);  
-  border-radius:16px; padding:22px;  
-  color:#fff; display:flex; align-items:center; gap:18px; flex-wrap:wrap;  
-  border: 1px solid rgba(201,160,90,0.2);  
-}  
-.match-badge {  
-  background: var(--accent); border-radius:8px;  
-  padding:5px 12px; font-family:'DM Sans',sans-serif;  
-  font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px;  
-  color:#fff; flex-shrink:0;  
-}  
-.match-teams { flex:1; font-family:'Playfair Display',serif; font-size:19px; font-weight:700; }  
-.match-teams span { color: var(--pastel-peach); }  
-.match-meta { font-family:'DM Sans',sans-serif; font-size:12px; color:rgba(255,255,255,0.55); margin-top:3px; }  
-.match-time { font-family:'Playfair Display',serif; font-size:24px; font-weight:700; color:var(--pastel-butter); text-align:right; flex-shrink:0; }  
-.match-time-sub { font-family:'DM Sans',sans-serif; font-size:11px; color:rgba(255,255,255,0.4); text-align:right; }  
-  
-/* ── BLOG ── */  
-.members-banner {  
-  background: linear-gradient(135deg, var(--pastel-lavender), var(--pastel-sky));  
-  border-radius:16px; padding:24px;  
-  display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;  
-  margin-bottom:24px;  
-  border: 1px solid rgba(180,160,220,0.3);  
-}  
-.members-title { font-family:'Playfair Display',serif; font-size:20px; color:var(--ink); margin-bottom:3px; }  
-.members-sub { font-size:13px; color:var(--muted); font-weight:400; }  
-  
-.post-compose {  
-  background:#fff; border-radius:16px; padding:18px;  
-  margin-bottom:20px; border:1px solid var(--border);  
-  display:none;  
-}  
-.post-compose.visible { display:block; }  
-  
-.post-compose-top {  
-  display:flex; gap:12px; align-items:flex-start; margin-bottom:12px;  
-}  
-.compose-avatar {  
-  width:38px; height:38px; border-radius:50%; flex-shrink:0;  
-  object-fit:cover; border:2px solid var(--border);  
-}  
-.compose-avatar-placeholder {  
-  width:38px; height:38px; border-radius:50%; flex-shrink:0;  
-  display:flex; align-items:center; justify-content:center;  
-  font-family:'DM Sans',sans-serif; font-size:14px; font-weight:700;  
-  color:#fff; text-transform:uppercase;  
-  background: linear-gradient(135deg, var(--accent), var(--gold));  
-}  
-  
-.post-textarea {  
-  width:100%; border:1px solid var(--border); border-radius:10px;  
-  padding:13px; font-family:'Lora',serif; font-size:15px;  
-  color:var(--ink); resize:none; min-height:75px; outline:none;  
-  background: var(--bg); transition:border-color 0.2s;  
-}  
-.post-textarea:focus { border-color:var(--accent); }  
-  
-.post-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:10px; }  
-  
-/* POST ITEMS */  
-.post-feed { display:flex; flex-direction:column; gap:14px; }  
-  
-.post-item {  
-  background:#fff; border-radius:14px; padding:18px;  
-  border:1px solid var(--border);  
-  animation: fadeUp 0.35s ease forwards;  
-}  
-@keyframes fadeUp {  
-  from { opacity:0; transform:translateY(8px); }  
-  to { opacity:1; transform:translateY(0); }  
-}  
-  
-.post-header { display:flex; align-items:center; gap:10px; margin-bottom:10px; }  
-.post-avatar {  
-  width:36px; height:36px; border-radius:50%;  
-  object-fit:cover; border:2px solid var(--border); flex-shrink:0;  
-}  
-.post-avatar-placeholder {  
-  width:36px; height:36px; border-radius:50%; flex-shrink:0;  
-  display:flex; align-items:center; justify-content:center;  
-  font-family:'DM Sans',sans-serif; font-size:13px; font-weight:700;  
-  color:#fff; text-transform:uppercase;  
-  background: linear-gradient(135deg, var(--accent), var(--gold));  
-}  
-.post-author { font-family:'DM Sans',sans-serif; font-weight:600; font-size:14px; color:var(--ink); }  
-.post-time { font-family:'DM Sans',sans-serif; font-size:11px; color:var(--muted); margin-top:1px; }  
-.post-admin-badge {  
-  font-family:'DM Sans',sans-serif; font-size:10px; font-weight:700;  
-  background: var(--accent); color:#fff;  
-  padding:2px 8px; border-radius:10px; margin-left:6px;  
-  text-transform:uppercase; letter-spacing:0.5px;  
-}  
-  
-.post-body { font-size:15px; line-height:1.65; color:var(--ink); }  
-  
-.post-footer {  
-  display:flex; align-items:center; gap:12px; flex-wrap:wrap;  
-  margin-top:12px; padding-top:10px;  
-  border-top:1px solid var(--border);  
-}  
-.post-action-btn {  
-  background:none; border:none;  
-  font-family:'DM Sans',sans-serif; font-size:12px;  
-  color:var(--muted); cursor:pointer;  
-  display:flex; align-items:center; gap:4px;  
-  padding:4px 8px; border-radius:8px;  
-  transition:background 0.2s, color 0.2s;  
-}  
-.post-action-btn:hover { background:var(--surface2); color:var(--ink); }  
-.post-action-btn.liked { color:var(--accent); }  
-.post-action-btn.delete-btn:hover { background:rgba(212,114,106,0.1); color:var(--accent); }  
-  
-/* COMMENTS */  
-.comments-section {  
-  margin-top:12px; padding-top:12px;  
-  border-top:1px dashed var(--border);  
-  display:none;  
-}  
-.comments-section.open { display:block; }  
-  
-.comment-item {  
-  display:flex; gap:9px; margin-bottom:10px;  
-}  
-.comment-avatar {  
-  width:28px; height:28px; border-radius:50%; flex-shrink:0;  
-  object-fit:cover;  
-}  
-.comment-avatar-placeholder {  
-  width:28px; height:28px; border-radius:50%; flex-shrink:0;  
-  display:flex; align-items:center; justify-content:center;  
-  font-family:'DM Sans',sans-serif; font-size:11px; font-weight:700;  
-  color:#fff; text-transform:uppercase;  
-  background: linear-gradient(135deg, var(--accent2), var(--pastel-sky));  
-}  
-.comment-bubble {  
-  background: var(--bg); border-radius:10px; padding:9px 12px;  
-  flex:1; border:1px solid var(--border);  
-}  
-.comment-author { font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; color:var(--ink); }  
-.comment-text { font-size:13px; color:var(--ink); line-height:1.5; margin-top:2px; }  
-.comment-time { font-size:10px; color:var(--muted); margin-top:3px; }  
-  
-.comment-compose {  
-  display:flex; gap:9px; align-items:center; margin-top:10px;  
-}  
-.comment-input {  
-  flex:1; border:1px solid var(--border); border-radius:20px;  
-  padding:8px 14px; font-family:'Lora',serif; font-size:13px;  
-  color:var(--ink); outline:none; background:var(--bg);  
-  transition:border-color 0.2s;  
-}  
-.comment-input:focus { border-color:var(--accent); }  
-.comment-send-btn {  
-  background:var(--accent); color:#fff;  
-  border:none; border-radius:50%;  
-  width:32px; height:32px; cursor:pointer;  
-  display:flex; align-items:center; justify-content:center;  
-  font-size:14px; flex-shrink:0;  
-  transition:filter 0.2s;  
-}  
-.comment-send-btn:hover { filter:brightness(1.1); }  
-  
-.empty-blog { text-align:center; padding:44px 24px; color:var(--muted); font-style:italic; font-size:17px; }  
-.empty-blog-icon { font-size:44px; display:block; margin-bottom:10px; }  
-  
-/* ── AVATAR UPLOAD ── */  
-.avatar-upload-wrap { display:flex; align-items:center; gap:14px; margin-bottom:16px; }  
-.avatar-preview {  
-  width:56px; height:56px; border-radius:50%;  
-  object-fit:cover; border:2px solid var(--border);  
-  background: linear-gradient(135deg, var(--pastel-rose), var(--pastel-peach));  
-  display:flex; align-items:center; justify-content:center;  
-  font-size:22px; overflow:hidden;  
-}  
-.avatar-preview img { width:100%; height:100%; object-fit:cover; border-radius:50%; }  
-.avatar-label {  
-  font-family:'DM Sans',sans-serif; font-size:13px;  
-  color:var(--accent); cursor:pointer; font-weight:600;  
-  text-decoration:underline;  
-}  
-#avatar-file-input { display:none; }  
-  
-/* ── PAGE: INFO ── */  
-.info-page-wrap {  
-  max-width:640px; margin:0 auto; padding:60px 28px;  
-  text-align:center;  
-}  
-.info-page-icon { font-size:72px; margin-bottom:24px; display:block; }  
-.info-page-title {  
-  font-family:'Playfair Display',serif;  
-  font-size:32px; font-weight:900; color:var(--ink);  
-  margin-bottom:16px; line-height:1.2;  
-}  
-.info-page-title em { color:var(--accent); font-style:italic; }  
-.info-page-text {  
-  font-size:17px; line-height:1.75; color:var(--muted);  
-  margin-bottom:20px;  
-}  
-.info-highlight {  
-  background: linear-gradient(135deg, var(--pastel-butter), var(--pastel-peach));  
-  border-radius:16px; padding:20px 24px; margin:24px 0;  
-  border:1px solid rgba(212,114,106,0.15);  
-  text-align:left;  
-}  
-.info-highlight p { font-size:15px; line-height:1.7; color:var(--ink); }  
-.info-highlight strong { color:var(--accent); }  
-  
-/* ── MODAL ── */  
-.modal-overlay {  
-  position:fixed; inset:0; z-index:1000;  
-  background: rgba(45,31,26,0.6);  
-  backdrop-filter:blur(8px);  
-  display:flex; align-items:flex-end; justify-content:center;  
-  opacity:0; pointer-events:none; transition:opacity 0.3s;  
-}  
-.modal-overlay.show { opacity:1; pointer-events:all; }  
-.modal-sheet {  
-  background: var(--surface);  
-  border-radius:24px 24px 0 0;  
-  padding:28px 24px 44px;  
-  width:100%; max-width:460px;  
-  transform:translateY(40px);  
-  transition:transform 0.4s cubic-bezier(0.34,1.2,0.64,1);  
-  max-height:90vh; overflow-y:auto;  
-}  
-.modal-overlay.show .modal-sheet { transform:translateY(0); }  
-.modal-handle { width:40px; height:4px; background:var(--border); border-radius:2px; margin:0 auto 22px; }  
-.modal-title { font-family:'Playfair Display',serif; font-size:26px; font-weight:700; color:var(--ink); margin-bottom:4px; }  
-.modal-sub { font-size:14px; color:var(--muted); margin-bottom:22px; font-weight:400; }  
-.modal-tabs { display:flex; gap:0; background:var(--surface2); border-radius:10px; padding:4px; margin-bottom:22px; }  
-.modal-tab { flex:1; text-align:center; padding:9px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer; transition:all 0.2s; color:var(--muted); }  
-.modal-tab.active { background:#fff; color:var(--ink); box-shadow:0 2px 8px var(--shadow); }  
-  
-.field-group { margin-bottom:14px; }  
-.field-label { font-family:'DM Sans',sans-serif; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:5px; display:block; }  
-.field-input { width:100%; background:#fff; border:1px solid var(--border); border-radius:10px; padding:12px 14px; font-family:'Lora',serif; font-size:15px; color:var(--ink); outline:none; transition:border-color 0.2s, box-shadow 0.2s; }  
-.field-input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(212,114,106,0.1); }  
-.modal-error { color:var(--accent); font-size:12px; margin-bottom:10px; min-height:16px; font-family:'DM Sans',sans-serif; }  
-.modal-dismiss { text-align:center; margin-top:14px; font-family:'DM Sans',sans-serif; font-size:13px; color:var(--muted); cursor:pointer; }  
-.modal-dismiss:hover { color:var(--ink); }  
-  
-/* ── PROFILE MODAL ── */  
-.profile-info { display:flex; align-items:center; gap:14px; margin-bottom:20px; padding:16px; background:var(--surface2); border-radius:12px; }  
-.profile-avatar-big { width:52px; height:52px; border-radius:50%; object-fit:cover; border:2px solid var(--border); }  
-.profile-avatar-big-placeholder { width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'DM Sans',sans-serif; font-size:20px; font-weight:700; color:#fff; text-transform:uppercase; background:linear-gradient(135deg,var(--accent),var(--gold)); }  
-.profile-name { font-family:'Playfair Display',serif; font-size:18px; font-weight:700; }  
-.profile-email { font-size:12px; color:var(--muted); font-family:'DM Sans',sans-serif; margin-top:2px; }  
-  
-/* ── USER CHIP ── */  
-.user-chip { display:flex; align-items:center; gap:7px; background:var(--surface2); border:1px solid var(--border); border-radius:20px; padding:5px 12px 5px 6px; cursor:pointer; transition:background 0.2s; }  
-.user-chip:hover { background:var(--pastel-peach); }  
-.user-chip-avatar { width:26px; height:26px; border-radius:50%; object-fit:cover; }  
-.user-chip-avatar-placeholder { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#fff; text-transform:uppercase; background:linear-gradient(135deg,var(--accent),var(--gold)); font-family:'DM Sans',sans-serif; }  
-.user-chip-name { font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; color:var(--ink); }  
-  
-/* ── TOAST ── */  
-.toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--ink); color:#fff; padding:12px 20px; border-radius:50px; font-family:'DM Sans',sans-serif; font-size:13px; z-index:2000; transition:transform 0.4s cubic-bezier(0.34,1.4,0.64,1); white-space:nowrap; box-shadow:0 6px 24px rgba(0,0,0,0.2); max-width:calc(100vw - 40px); text-align:center; }  
-.toast.show { transform:translateX(-50%) translateY(0); }  
-  
-/* ── FOOTER ── */  
-footer { background:var(--ink); color:rgba(253,246,240,0.4); text-align:center; padding:20px; font-family:'DM Sans',sans-serif; font-size:12px; letter-spacing:0.5px; }  
-footer span { color:var(--pastel-peach); }  
-</style>  
-</head>  
-<body>  
-  
-<!-- NAVBAR -->  
-<nav class="navbar">  
-  <div class="nav-logo">Dr.<span>Buntspecht</span></div>  
-  <div class="nav-center">  
-    <button class="nav-tab active" onclick="showPage('home', this)">🏠 Start</button>  
-    <button class="nav-tab" onclick="showPage('info', this)">ℹ️ Info</button>  
-    <button class="nav-tab" onclick="window.location='supermarkt.html'">🛒 Markt</button>  
-  </div>  
-  <div class="nav-right">  
-    <div class="dropdown" id="pages-dropdown">  
-      <button class="dropdown-btn" onclick="toggleDropdown('pages-dd')" id="pages-dd-btn">  
-        Seiten ▾  
-      </button>  
-      <div class="dropdown-menu" id="pages-dd">  
-        <div class="dropdown-item active-page" onclick="showPage('home',null);closeDropdowns()">🏠 Startseite</div>  
-        <div class="dropdown-item" onclick="window.location='supermarkt.html';closeDropdowns()">🛒 Marktplaner</div>  
-        <div class="dropdown-item" onclick="showPage('info',null);closeDropdowns()">ℹ️ Allgemeine Info</div>  
-      </div>  
-    </div>  
-    <div id="nav-auth-area">  
-      <button class="btn btn-ghost" onclick="openModal('login')" style="font-size:12px;padding:6px 12px;">Einloggen</button>  
-      <button class="btn btn-primary" onclick="openModal('register')" style="font-size:12px;padding:6px 12px;">Registrieren</button>  
-    </div>  
-  </div>  
-</nav>  
-  
-<!-- ══════════════ PAGE: HOME ══════════════ -->  
-<div class="page active" id="page-home">  
-  
-  <!-- HERO -->  
-  <section class="hero">  
-    <div class="hero-bg">  
-      <svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">  
-        <defs>  
-          <radialGradient id="skyP" cx="50%" cy="30%" r="70%">  
-            <stop offset="0%" stop-color="#f7e8d8"/>  
-            <stop offset="50%" stop-color="#f0d4c0"/>  
-            <stop offset="100%" stop-color="#e8c4a8"/>  
-          </radialGradient>  
-          <radialGradient id="sunGlowP" cx="50%" cy="50%" r="50%">  
-            <stop offset="0%" stop-color="#f7c4a0" stop-opacity="0.6"/>  
-            <stop offset="100%" stop-color="#f7c4a0" stop-opacity="0"/>  
-          </radialGradient>  
-          <filter id="softBlur"><feGaussianBlur stdDeviation="8"/></filter>  
-          <filter id="midBlur"><feGaussianBlur stdDeviation="3"/></filter>  
-        </defs>  
-        <rect width="1200" height="800" fill="url(#skyP)"/>  
-        <ellipse cx="600" cy="160" rx="380" ry="260" fill="url(#sunGlowP)" filter="url(#softBlur)"/>  
-        <!-- Doppelrad -->  
-        <g opacity="0.12" transform="translate(600,380)">  
-          <circle cx="0" cy="0" r="285" fill="none" stroke="#c9a05a" stroke-width="12"/>  
-          <circle cx="0" cy="0" r="215" fill="none" stroke="#c9a05a" stroke-width="7"/>  
-          <circle cx="0" cy="0" r="36" fill="none" stroke="#c9a05a" stroke-width="10"/>  
-          <line x1="0" y1="-36" x2="0" y2="-285" stroke="#c9a05a" stroke-width="9"/>  
-          <line x1="0" y1="36" x2="0" y2="285" stroke="#c9a05a" stroke-width="9"/>  
-          <line x1="-36" y1="0" x2="-285" y2="0" stroke="#c9a05a" stroke-width="9"/>  
-          <line x1="36" y1="0" x2="285" y2="0" stroke="#c9a05a" stroke-width="9"/>  
-          <line x1="-26" y1="-26" x2="-202" y2="-202" stroke="#c9a05a" stroke-width="9"/>  
-          <line x1="26" y1="-26" x2="202" y2="-202" stroke="#c9a05a" stroke-width="9"/>  
-          <line x1="-26" y1="26" x2="-202" y2="202" stroke="#c9a05a" stroke-width="9"/>  
-          <line x1="26" y1="26" x2="202" y2="202" stroke="#c9a05a" stroke-width="9"/>  
-          <circle cx="0" cy="-285" r="13" fill="#c9a05a"/>  
-          <circle cx="0" cy="285" r="13" fill="#c9a05a"/>  
-          <circle cx="-285" cy="0" r="13" fill="#c9a05a"/>  
-          <circle cx="285" cy="0" r="13" fill="#c9a05a"/>  
-          <circle cx="-202" cy="-202" r="13" fill="#c9a05a"/>  
-          <circle cx="202" cy="-202" r="13" fill="#c9a05a"/>  
-          <circle cx="-202" cy="202" r="13" fill="#c9a05a"/>  
-          <circle cx="202" cy="202" r="13" fill="#c9a05a"/>  
-        </g>  
-        <!-- Dom silhouette pastel -->  
-        <g fill="#c4a090" opacity="0.55">  
-          <rect x="370" y="480" width="460" height="220"/>  
-          <rect x="320" y="530" width="60" height="170"/>  
-          <rect x="820" y="530" width="60" height="170"/>  
-          <rect x="355" y="320" width="80" height="200"/>  
-          <polygon points="355,320 395,258 435,320"/>  
-          <rect x="375" y="238" width="40" height="82"/>  
-          <polygon points="375,238 395,188 415,238"/>  
-          <rect x="765" y="320" width="80" height="200"/>  
-          <polygon points="765,320 805,258 845,320"/>  
-          <rect x="785" y="238" width="40" height="82"/>  
-          <polygon points="785,238 805,188 825,238"/>  
-          <rect x="550" y="280" width="100" height="240"/>  
-          <polygon points="540,280 600,198 660,280"/>  
-          <rect x="572" y="173" width="56" height="107"/>  
-          <polygon points="565,173 600,116 635,173"/>  
-          <rect x="585" y="106" width="30" height="42"/>  
-          <polygon points="582,106 600,80 618,106"/>  
-          <rect x="597" y="70" width="6" height="22"/>  
-          <rect x="590" y="76" width="20" height="4"/>  
-          <rect x="375" y="368" width="65" height="152"/>  
-          <polygon points="375,368 407,308 440,368"/>  
-          <rect x="760" y="368" width="65" height="152"/>  
-          <polygon points="760,368 792,308 825,368"/>  
-          <rect x="430" y="530" width="18" height="170"/>  
-          <rect x="480" y="530" width="18" height="170"/>  
-          <rect x="700" y="530" width="18" height="170"/>  
-          <rect x="750" y="530" width="18" height="170"/>  
-        </g>  
-        <!-- Specht -->  
-        <g transform="translate(328,148)">  
-          <ellipse cx="62" cy="72" rx="30" ry="23" fill="#c4a090" opacity="0.8"/>  
-          <ellipse cx="62" cy="50" rx="13" ry="9" fill="#d4726a" opacity="0.9"/>  
-          <polygon points="56,46 63,18 70,46" fill="#d4726a" opacity="0.9"/>  
-          <circle cx="62" cy="53" r="17" fill="#c4a090" opacity="0.8"/>  
-          <circle cx="67" cy="50" r="4" fill="#e8c06a" opacity="0.9"/>  
-          <circle cx="68" cy="49" r="2" fill="#2d1f1a"/>  
-          <polygon points="76,53 115,57 76,61" fill="#c9a05a" opacity="0.9"/>  
-          <ellipse cx="57" cy="74" rx="21" ry="15" fill="#b89080" opacity="0.7"/>  
-          <polygon points="46,90 61,94 56,122 49,120" fill="#c4a090" opacity="0.8"/>  
-          <polygon points="61,94 76,90 73,117 66,120" fill="#c4a090" opacity="0.8"/>  
-          <line x1="49" y1="89" x2="37" y2="101" stroke="#c9a05a" stroke-width="2.5" opacity="0.8"/>  
-          <line x1="37" y1="101" x2="29" y2="107" stroke="#c9a05a" stroke-width="2" opacity="0.8"/>  
-          <line x1="37" y1="101" x2="33" y2="111" stroke="#c9a05a" stroke-width="2" opacity="0.8"/>  
-          <line x1="37" y1="101" x2="43" y2="111" stroke="#c9a05a" stroke-width="2" opacity="0.8"/>  
-          <line x1="63" y1="91" x2="73" y2="103" stroke="#c9a05a" stroke-width="2.5" opacity="0.8"/>  
-          <line x1="73" y1="103" x2="66" y2="111" stroke="#c9a05a" stroke-width="2" opacity="0.8"/>  
-          <line x1="73" y1="103" x2="76" y2="111" stroke="#c9a05a" stroke-width="2" opacity="0.8"/>  
-        </g>  
-        <!-- Ground -->  
-        <rect x="0" y="692" width="1200" height="108" fill="#d4b8a0" opacity="0.4"/>  
-        <rect x="0" y="650" width="80" height="60" fill="#c4a090" opacity="0.3"/>  
-        <rect x="90" y="662" width="55" height="48" fill="#c4a090" opacity="0.3"/>  
-        <rect x="160" y="642" width="42" height="68" fill="#c4a090" opacity="0.3"/>  
-        <rect x="900" y="656" width="52" height="54" fill="#c4a090" opacity="0.3"/>  
-        <rect x="965" y="648" width="38" height="62" fill="#c4a090" opacity="0.3"/>  
-        <rect x="1015" y="638" width="48" height="72" fill="#c4a090" opacity="0.3"/>  
-        <rect x="1075" y="660" width="62" height="50" fill="#c4a090" opacity="0.3"/>  
-      </svg>  
-    </div>  
-    <div class="hero-overlay"></div>  
-  
-    <div class="hero-content">  
-      <div class="hero-eyebrow"></div>  
-      <h1 class="hero-title">Gude,<br>hier geht's <em>lang!</em></h1>  
-      <p class="hero-sub">Hier wird ganz sicher eine mords Website entstehen. Bis dahin nutzt die Seite "Markt"!</p>  
-    </div>  
-  </section>  
-  
-  <!-- INFO ROW -->  
-  <div class="info-row">  
-    <div class="info-card" id="weather-today-card">  
-      <div class="info-card-label">Heute in Mainz</div>  
-      <div class="loading-dots"><span></span><span></span><span></span></div>  
-    </div>  
-    <div class="info-card" id="match-mini-card">  
-      <div class="info-card-label">Nächstes Spiel — FSV Mainz 05</div>  
-      <div class="loading-dots"><span></span><span></span><span></span></div>  
-    </div>  
-  </div>  
-  
-  <!-- MAIN -->  
-  <main class="main">  
-    <div class="section-wrap">  
-      <h2 class="section-title">7-Tage-Wetter <span>Mainz</span></h2>  
-      <p class="section-sub">Aktuelle Vorhersage · Open-Meteo</p>  
-      <div class="weather-grid" id="weather-grid">  
-        <div style="text-align:center;padding:20px;grid-column:1/-1"><div class="loading-dots"><span></span><span></span><span></span></div></div>  
-      </div>  
-    </div>  
-  
-    <div class="divider"></div>  
-  
-    <div class="section-wrap" style="padding-top:32px;padding-bottom:32px;">  
-      <h2 class="section-title">FSV <span>Mainz 05</span></h2>  
-      <p class="section-sub">Nächstes Bundesliga-Spiel</p>  
-      <div id="match-container"><div class="loading-dots"><span></span><span></span><span></span></div></div>  
-    </div>  
-  
-    <div class="divider"></div>  
-  
-    <!-- BLOG -->    
-    <div class="section-wrap">    
-      <h2 class="section-title">Mainzer <span>Blog</span></h2>    
-      <p class="section-sub">    
-        Hier darf man sich neue und im idealfall sinnvolle Tools wünschen –    
-        oder einfach nur rummaulen. Ob das Ganze jemals gelesen wird,    
-        ist aber fraglich.    
-      </p>  
-      <div class="members-banner" id="members-banner">  
-        <div class="members-text">  
-          <div class="members-title">Sei dabei!</div>  
-          <div class="members-sub">Kostenlos registrieren und mitschreiben</div>  
-        </div>  
-        <button class="btn btn-primary" onclick="openModal('register')">Jetzt beitreten</button>  
-      </div>  
-  
-      <div class="post-compose" id="post-compose">  
-        <div class="post-compose-top">  
-          <div class="compose-avatar-placeholder" id="compose-avatar-display">?</div>  
-          <textarea class="post-textarea" id="post-text" placeholder="Hier fehlt noch dein Kommentar"></textarea>  
-        </div>  
-        <div class="post-actions">  
-          <button class="btn btn-ghost" style="font-size:12px;" onclick="document.getElementById('post-text').value=''">Leeren</button>  
-          <button class="btn btn-primary" onclick="submitPost()">Veröffentlichen</button>  
-        </div>  
-      </div>  
-  
-      <div class="post-feed" id="post-feed">  
-        <div class="empty-blog"><span class="empty-blog-icon">🔒</span>Logge dich ein um Beiträge zu sehen.</div>  
-      </div>  
-    </div>  
-  </main>  
-</div>  
-  
-<!-- ══════════════ PAGE: INFO ══════════════ -->  
-<div class="page" id="page-info" style="padding-top:60px;">  
-  <div class="info-page-wrap">  
-    <span class="info-page-icon">🗑️</span>  
-    <h2 class="info-page-title">Allgemeine <em>Info</em></h2>  
-    <p class="info-page-text">  
-      Diese Seite erfüllt aktuell <strong>absolut gar keinen Nutzen</strong>. Sorry dafür.  
-    </p>  
-  
-    <div class="info-highlight">  
-      <p>  
-        <strong>Voraussichtlich </strong> wird diese Seite in ferner Zukunft zu einer Verkaufsplattform für Krempel aller Art (bspw. selbstgebaute, überteuerte Schachbretter!).  
-      </p>  
-    </div>  
-  
-    <p class="info-page-text">  
-      Gedacht ist eine Art Schaufenster, aber warten wir ab...  
-    </p>  
-  
-    <p class="info-page-text" style="font-style:italic;font-size:15px;color:var(--muted);">  
-      Bis dahin: Checkt die Seite am besten täglich auf Neuerungen! Man weiß ja nie.  
-    </p>  
-  
-    <div style="margin-top:32px;">  
-      <button class="btn btn-primary" onclick="showPage('home',null)" style="padding:12px 28px;font-size:15px;border-radius:12px;">  
-        Zurück zur Startseite →  
-      </button>  
-    </div>  
-  </div>  
-</div>  
-  
-<footer>© 2026 <span>Dr. Buntspecht</span> · Mainz am Rhein </footer>  
-  
-<!-- MODAL -->  
-<div class="modal-overlay" id="modal" onclick="handleModalBg(event)">  
-  <div class="modal-sheet">  
-    <div class="modal-handle"></div>  
-  
-    <!-- AUTH -->  
-    <div id="modal-auth">  
-      <h2 class="modal-title" id="modal-title">Willkommen zurück</h2>  
-      <p class="modal-sub" id="modal-sub">Einloggen in dein Konto</p>  
-      <div class="modal-tabs">  
-        <div class="modal-tab active" id="tab-login" onclick="switchTab('login')">Einloggen</div>  
-        <div class="modal-tab" id="tab-register" onclick="switchTab('register')">Registrieren</div>  
-      </div>  
-  
-      <div id="form-login">  
-        <div class="field-group"><label class="field-label">E-Mail</label><input class="field-input" type="email" id="login-email" placeholder="deine@email.de" autocomplete="email"></div>  
-        <div class="field-group"><label class="field-label">Passwort</label><input class="field-input" type="password" id="login-pw" placeholder="••••••••" autocomplete="current-password"></div>  
-        <div class="modal-error" id="login-error"></div>  
-        <button class="btn btn-primary btn-full" onclick="doLogin()">Einloggen</button>  
-      </div>  
-  
-      <div id="form-register" style="display:none">  
-        <div class="avatar-upload-wrap">  
-          <div class="avatar-preview" id="avatar-preview-wrap"><span>🧑</span></div>  
-          <div>  
-            <div style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:4px;">Profilbild</div>  
-            <label class="avatar-label" for="avatar-file-input">Foto auswählen</label>  
-            <input type="file" id="avatar-file-input" accept="image/*" onchange="previewAvatar(this)">  
-            <div style="font-size:11px;color:var(--muted);margin-top:2px;">Optional · max. 1MB</div>  
-          </div>  
-        </div>  
-        <div class="field-group"><label class="field-label">Anzeigename</label><input class="field-input" type="text" id="reg-name" placeholder="Mainzer Max" autocomplete="nickname"></div>  
-        <div class="field-group"><label class="field-label">E-Mail</label><input class="field-input" type="email" id="reg-email" placeholder="deine@email.de" autocomplete="email"></div>  
-        <div class="field-group"><label class="field-label">Passwort (mind. 6 Zeichen)</label><input class="field-input" type="password" id="reg-pw" placeholder="••••••••" autocomplete="new-password"></div>  
-        <div class="modal-error" id="reg-error"></div>  
-        <button class="btn btn-primary btn-full" onclick="doRegister()">Account erstellen</button>  
-      </div>  
-      <p class="modal-dismiss" onclick="closeModal()">Schließen</p>  
-    </div>  
-  
-    <!-- PROFILE -->  
-    <div id="modal-profile" style="display:none">  
-      <h2 class="modal-title">Mein Profil</h2>  
-      <p class="modal-sub">Einstellungen & Account</p>  
-      <div class="profile-info" id="profile-info-block"></div>  
-      <div class="field-group" style="margin-top:4px;">  
-        <label class="field-label">Profilbild ändern</label>  
-        <label class="avatar-label" for="profile-avatar-input">Neues Foto auswählen</label>  
-        <input type="file" id="profile-avatar-input" accept="image/*" style="display:none" onchange="updateAvatar(this)">  
-      </div>  
-      <div style="margin-top:16px;">  
-        <button class="btn btn-ghost btn-full" onclick="doSignOut()" style="color:var(--accent);border-color:rgba(212,114,106,0.3);">Ausloggen</button>  
-      </div>  
-      <p class="modal-dismiss" onclick="closeModal()">Schließen</p>  
-    </div>  
-  </div>  
-</div>  
-  
-<div class="toast" id="toast"></div>  
-  
-<!-- FIREBASE -->  
-<script type="module">  
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";  
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";    
-import { getFirestore, collection, addDoc, onSnapshot, orderBy, query, serverTimestamp, doc, updateDoc, increment, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";  
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";  
-  
-const ADMIN_EMAIL = "admin@drbuntspecht.de"; // ← HIER DEINE E-MAIL EINTRAGEN  
-  
-const app = initializeApp({  
-  apiKey: "AIzaSyCTSYRwq9G9inKW-bEnLC90I19J4oTTkp8",  
-  authDomain: "drbuntspecht-f92ba.firebaseapp.com",  
-  projectId: "drbuntspecht-f92ba",  
-  storageBucket: "drbuntspecht-f92ba.firebasestorage.app",  
-  messagingSenderId: "1075490932089",  
-  appId: "1:1075490932089:web:44f532194f78e41f539ba8"  
-});  
-  
-const auth = getAuth(app);  
-setPersistence(auth, browserLocalPersistence);    
-const db = getFirestore(app);  
-const storage = getStorage(app);  
-  
-let currentUser = null;  
-let postsUnsub = null;  
-let pendingAvatarFile = null;  
-let pendingAvatarDataUrl = null;  
-  
-// ── AUTH STATE ──  
-onAuthStateChanged(auth, async user => {  
-  currentUser = user;  
-  updateNavUI(user);  
-  updateBlogUI(user);  
-  if (user) {  
-    closeModal();  
-    loadBlogPosts();  
-  } else {  
-    if (postsUnsub) { postsUnsub(); postsUnsub = null; }  
-    showBlogLocked();  
-  }  
-});  
-  
-// ── NAV ──  
-function updateNavUI(user) {  
-  const area = document.getElementById('nav-auth-area');  
-  if (user) {  
-    const isAdmin = user.email === ADMIN_EMAIL;  
-    const avatarHtml = user.photoURL  
-      ? `<img src="${user.photoURL}" class="user-chip-avatar">`  
-      : `<div class="user-chip-avatar-placeholder">${(user.displayName||'U').substring(0,2)}</div>`;  
-    area.innerHTML = `<div class="user-chip" onclick="openProfile()">  
-      ${avatarHtml}  
-      <span class="user-chip-name">${user.displayName||'Mitglied'}${isAdmin?' 👑':''}</span>  
-    </div>`;  
-  } else {  
-    area.innerHTML = `  
-      <button class="btn btn-ghost" onclick="openModal('login')" style="font-size:12px;padding:6px 12px;">Einloggen</button>  
-      <button class="btn btn-primary" onclick="openModal('register')" style="font-size:12px;padding:6px 12px;">Registrieren</button>`;  
-  }  
-}  
-  
-function updateBlogUI(user) {  
-  document.getElementById('members-banner').style.display = user ? 'none' : 'flex';  
-  const comp = document.getElementById('post-compose');  
-  comp.classList.toggle('visible', !!user);  
-  if (user) {  
-    const av = document.getElementById('compose-avatar-display');  
-    if (user.photoURL) {  
-      av.outerHTML = `<img src="${user.photoURL}" class="compose-avatar" id="compose-avatar-display">`;  
-    } else {  
-      if (av.tagName === 'IMG') {  
-        av.outerHTML = `<div class="compose-avatar-placeholder" id="compose-avatar-display">${(user.displayName||'?').substring(0,2).toUpperCase()}</div>`;  
-      } else {  
-        av.textContent = (user.displayName||'?').substring(0,2).toUpperCase();  
-      }  
-    }  
-  }  
-}  
-  
-function showBlogLocked() {  
-  document.getElementById('post-feed').innerHTML = `<div class="empty-blog"><span class="empty-blog-icon">🔒</span>Logge dich ein um Beiträge zu sehen.</div>`;  
-}  
-  
-// ── BLOG ──  
-function loadBlogPosts() {  
-  const q = query(collection(db,'posts'), orderBy('createdAt','desc'));  
-  postsUnsub = onSnapshot(q, snap => {  
-    const feed = document.getElementById('post-feed');  
-    if (snap.empty) {  
-      feed.innerHTML = `<div class="empty-blog"><span class="empty-blog-icon">✍️</span>Noch keine Beiträge — sei der Erste!</div>`;  
-      return;  
-    }  
-    feed.innerHTML = '';  
-    snap.forEach(docSnap => {  
-      const p = docSnap.data();  
-      const isAdmin = currentUser && currentUser.email === ADMIN_EMAIL;  
-      const canDelete = isAdmin || (currentUser && currentUser.uid === p.authorId);  
-      const adminBadge = p.authorEmail === ADMIN_EMAIL ? '<span class="post-admin-badge">Admin</span>' : '';  
-  
-      const avatarHtml = p.authorPhoto  
-        ? `<img src="${p.authorPhoto}" class="post-avatar">`  
-        : `<div class="post-avatar-placeholder">${(p.authorName||'?').substring(0,2)}</div>`;  
-  
-      const div = document.createElement('div');  
-      div.className = 'post-item';  
-      div.id = `post-${docSnap.id}`;  
-      div.innerHTML = `  
-        <div class="post-header">  
-          ${avatarHtml}  
-          <div>  
-            <div class="post-author">${p.authorName||'Anonym'}${adminBadge}</div>  
-            <div class="post-time">${formatTime(p.createdAt)}</div>  
-          </div>  
-        </div>  
-        <div class="post-body">${escHtml(p.text)}</div>  
-        <div class="post-footer">  
-          <button class="post-action-btn" id="like-btn-${docSnap.id}" onclick="likePost('${docSnap.id}',this)">♥ <span>${p.likes||0}</span></button>  
-          <button class="post-action-btn" onclick="toggleComments('${docSnap.id}')">💬 <span id="ccount-${docSnap.id}">${p.commentCount||0}</span></button>  
-          ${canDelete ? `<button class="post-action-btn delete-btn" onclick="deletePost('${docSnap.id}')">🗑 Löschen</button>` : ''}  
-        </div>  
-        <div class="comments-section" id="comments-${docSnap.id}">  
-          <div class="comment-list" id="clist-${docSnap.id}"></div>  
-          <div class="comment-compose">  
-            <input class="comment-input" id="cinput-${docSnap.id}" placeholder="Kommentar schreiben…" onkeydown="if(event.key==='Enter')sendComment('${docSnap.id}')">  
-            <button class="comment-send-btn" onclick="sendComment('${docSnap.id}')">➤</button>  
-          </div>  
-        </div>`;  
-      feed.appendChild(div);  
-    });  
-  });  
-}  
-  
-window.toggleComments = async (postId) => {  
-  const sec = document.getElementById(`comments-${postId}`);  
-  const isOpen = sec.classList.contains('open');  
-  if (isOpen) { sec.classList.remove('open'); return; }  
-  sec.classList.add('open');  
-  const clist = document.getElementById(`clist-${postId}`);  
-  clist.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px;">Lädt…</div>';  
-  const q = query(collection(db,`posts/${postId}/comments`), orderBy('createdAt','asc'));  
-  const snap = await getDocs(q);  
-  clist.innerHTML = '';  
-  snap.forEach(d => {  
-    const c = d.data();  
-    const av = c.authorPhoto  
-      ? `<img src="${c.authorPhoto}" class="comment-avatar">`  
-      : `<div class="comment-avatar-placeholder">${(c.authorName||'?').substring(0,2)}</div>`;  
-    const div = document.createElement('div');  
-    div.className = 'comment-item';  
-    div.innerHTML = `${av}<div class="comment-bubble"><div class="comment-author">${c.authorName||'Anonym'}</div><div class="comment-text">${escHtml(c.text)}</div><div class="comment-time">${formatTime(c.createdAt)}</div></div>`;  
-    clist.appendChild(div);  
-  });  
-  if (snap.empty) clist.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:4px 0 8px;">Noch keine Kommentare.</div>';  
-};  
-  
-window.sendComment = async (postId) => {  
-  if (!currentUser) { showToast('Bitte einloggen'); return; }  
-  const input = document.getElementById(`cinput-${postId}`);  
-  const text = input.value.trim();  
-  if (!text) return;  
-  input.value = '';  
-  await addDoc(collection(db,`posts/${postId}/comments`), {  
-    text,  
-    authorId: currentUser.uid,  
-    authorName: currentUser.displayName || currentUser.email.split('@')[0],  
-    authorPhoto: currentUser.photoURL || null,  
-    authorEmail: currentUser.email,  
-    createdAt: serverTimestamp()  
-  });  
-  await updateDoc(doc(db,'posts',postId), { commentCount: increment(1) });  
-  toggleComments(postId);  
-  setTimeout(() => toggleComments(postId), 100);  
-};  
-  
-window.likePost = async (id, btn) => {  
-  if (!currentUser) { showToast('Bitte einloggen'); return; }  
-  btn.classList.toggle('liked');  
-  const v = btn.classList.contains('liked') ? 1 : -1;  
-  await updateDoc(doc(db,'posts',id), { likes: increment(v) });  
-};  
-  
-window.deletePost = async (id) => {  
-  if (!currentUser) return;  
-  if (!confirm('Beitrag wirklich löschen?')) return;  
-  await deleteDoc(doc(db,'posts',id));  
-  showToast('🗑 Beitrag gelöscht');  
-};  
-  
-window.submitPost = async () => {  
-  if (!currentUser) return;  
-  const text = document.getElementById('post-text').value.trim();  
-  if (!text) { showToast('Bitte Text eingeben'); return; }  
-  await addDoc(collection(db,'posts'), {  
-    text,  
-    authorId: currentUser.uid,  
-    authorName: currentUser.displayName || currentUser.email.split('@')[0],  
-    authorPhoto: currentUser.photoURL || null,  
-    authorEmail: currentUser.email,  
-    createdAt: serverTimestamp(),  
-    likes: 0, commentCount: 0  
-  });  
-  document.getElementById('post-text').value = '';  
-  showToast('✅ Veröffentlicht!');  
-  
-  // E-Mail-Benachrichtigung via EmailJS (optional, setup below)  
-  notifyNewPost(currentUser.displayName || 'Jemand', text);  
-};  
-  
-// ── AUTH ──  
-window.doLogin = async () => {  
-  const e = document.getElementById('login-email').value.trim();  
-  const p = document.getElementById('login-pw').value;  
-  const err = document.getElementById('login-error');  
-  err.textContent = '';  
-  if (!e||!p) { err.textContent = 'Bitte alle Felder ausfüllen.'; return; }  
-  try { await signInWithEmailAndPassword(auth,e,p); showToast('👋 Willkommen zurück!'); }  
-  catch(ex) { err.textContent = fbErr(ex.code); }  
-};  
-  
-window.doRegister = async () => {  
-  const name = document.getElementById('reg-name').value.trim();  
-  const e = document.getElementById('reg-email').value.trim();  
-  const p = document.getElementById('reg-pw').value;  
-  const err = document.getElementById('reg-error');  
-  err.textContent = '';  
-  if (!name||!e||!p) { err.textContent = 'Bitte alle Felder ausfüllen.'; return; }  
-  if (p.length < 6) { err.textContent = 'Passwort mind. 6 Zeichen.'; return; }  
-  try {  
-    const cred = await createUserWithEmailAndPassword(auth,e,p);  
-    let photoURL = null;  
-    if (pendingAvatarFile) {  
-      try {  
-        const r = ref(storage,`avatars/${cred.user.uid}`);  
-        await uploadBytes(r, pendingAvatarFile);  
-        photoURL = await getDownloadURL(r);  
-      } catch(se) { console.warn('Avatar upload failed',se); }  
-    }  
-    await updateProfile(cred.user, { displayName: name, photoURL });  
-    await cred.user.reload();  
-    currentUser = auth.currentUser;  
-    updateNavUI(currentUser);  
-    updateBlogUI(currentUser);  
-    showToast('🎉 Willkommen, ' + name + '!');  
-  } catch(ex) { err.textContent = fbErr(ex.code); }  
-};  
-window.doSignOut = async () => {  
-  await signOut(auth);  
-  closeModal();  
-  showToast('Bis bald! 👋');  
-};  
-  
-window.updateAvatar = async (input) => {  
-  if (!currentUser || !input.files[0]) return;  
-  const file = input.files[0];  
-  if (file.size > 1024*1024) { showToast('Bild max. 1MB'); return; }  
-  try {  
-    showToast('⏳ Wird hochgeladen…');  
-    const r = ref(storage,`avatars/${currentUser.uid}`);  
-    await uploadBytes(r, file);  
-    const url = await getDownloadURL(r);  
-    await updateProfile(currentUser, { photoURL: url });  
-    updateNavUI(currentUser);  
-    updateBlogUI(currentUser);  
-    renderProfileInfo(currentUser);  
-    showToast('✅ Profilbild aktualisiert!');  
-  } catch(ex) { showToast('Fehler: ' + ex.message); }  
-};  
-  
-// ── PROFILE MODAL ──  
-window.openProfile = () => {  
-  document.getElementById('modal-auth').style.display = 'none';  
-  document.getElementById('modal-profile').style.display = 'block';  
-  renderProfileInfo(currentUser);  
-  document.getElementById('modal').classList.add('show');  
-};  
-  
-function renderProfileInfo(user) {  
-  const block = document.getElementById('profile-info-block');  
-  const isAdmin = user.email === ADMIN_EMAIL;  
-  const av = user.photoURL  
-    ? `<img src="${user.photoURL}" class="profile-avatar-big">`  
-    : `<div class="profile-avatar-big-placeholder">${(user.displayName||'U').substring(0,2).toUpperCase()}</div>`;  
-  block.innerHTML = `${av}<div><div class="profile-name">${user.displayName||'Mitglied'}${isAdmin?' 👑':''}</div><div class="profile-email">${user.email}</div></div>`;  
-}  
-  
-// ── AVATAR PREVIEW (register) ──  
-window.previewAvatar = (input) => {  
-  if (!input.files[0]) return;  
-  const file = input.files[0];  
-  if (file.size > 1024*1024) { showToast('Max. 1MB'); return; }  
-  pendingAvatarFile = file;  
-  const reader = new FileReader();  
-  reader.onload = e => {  
-    pendingAvatarDataUrl = e.target.result;  
-    const wrap = document.getElementById('avatar-preview-wrap');  
-    wrap.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;  
-  };  
-  reader.readAsDataURL(file);  
-};  
-  
-// ── E-MAIL NOTIFICATION (via EmailJS) ──  
-function notifyNewPost(author, text) {  
-  /*  
-  if (typeof emailjs !== 'undefined') {  
-    emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", {  
-      author_name: author,  
-      post_preview: text.substring(0, 100),  
-      site_url: "https://DrBuntspecht.github.io"  
-    });  
-  }  
-  */  
-  console.log('📧 Neuer Post von', author, '— E-Mail-Benachrichtigung (EmailJS einrichten für echte Mails)');  
-}  
-  
-function fbErr(code) {  
-  const m = {  
-    'auth/user-not-found':'Kein Account mit dieser E-Mail.',  
-    'auth/wrong-password':'Falsches Passwort.',  
-    'auth/email-already-in-use':'E-Mail bereits registriert.',  
-    'auth/invalid-email':'Ungültige E-Mail.',  
-    'auth/weak-password':'Passwort zu schwach.',  
-    'auth/too-many-requests':'Zu viele Versuche. Kurz warten.',  
-    'auth/invalid-credential':'E-Mail oder Passwort falsch.'  
-  };  
-  return m[code] || 'Fehler: '+code;  
-}  
-  
-function formatTime(ts) {  
-  if (!ts) return 'gerade eben';  
-  const d = ts.toDate ? ts.toDate() : new Date(ts);  
-  return d.toLocaleDateString('de-DE',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});  
-}  
-function escHtml(t) {  
-  return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');  
-}  
-  
-window._fbAuth = auth;  
-window._fbDb = db;  
-</script>  
-  
-<!-- WEATHER + MATCH + UI -->  
-<script>  
-// ── PAGE NAVIGATION ──  
-function showPage(id, btn) {  
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));  
-  document.getElementById('page-'+id).classList.add('active');  
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));  
-  if (btn) btn.classList.add('active');  
-  document.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('active-page'));  
-  document.querySelectorAll('.dropdown-item').forEach(i => {  
-    if (i.textContent.toLowerCase().includes(id==='home'?'start':'info')) i.classList.add('active-page');  
-  });  
-  window.scrollTo(0,0);  
-}  
-window.showPage = showPage;  
-  
-// ── DROPDOWN ──  
-function toggleDropdown(id) {  
-  document.getElementById(id).classList.toggle('open');  
-}  
-function closeDropdowns() {  
-  document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('open'));  
-}  
-document.addEventListener('click', e => {  
-  if (!e.target.closest('.dropdown')) closeDropdowns();  
-});  
-window.toggleDropdown = toggleDropdown;  
-window.closeDropdowns = closeDropdowns;  
-  
-// ── MODAL ──  
-function openModal(tab) {  
-  document.getElementById('modal-auth').style.display = 'block';  
-  document.getElementById('modal-profile').style.display = 'none';  
-  document.getElementById('modal').classList.add('show');  
-  switchTab(tab||'login');  
-}  
-function closeModal() { document.getElementById('modal').classList.remove('show'); }  
-function handleModalBg(e) { if(e.target===document.getElementById('modal')) closeModal(); }  
-function switchTab(t) {  
-  document.getElementById('tab-login').classList.toggle('active',t==='login');  
-  document.getElementById('tab-register').classList.toggle('active',t==='register');  
-  document.getElementById('form-login').style.display = t==='login'?'block':'none';  
-  document.getElementById('form-register').style.display = t==='register'?'block':'none';  
-  document.getElementById('modal-title').textContent = t==='login'?'Willkommen zurück':'Account erstellen';  
-  document.getElementById('modal-sub').textContent = t==='login'?'Einloggen in dein Konto':'Kostenlos & in 30 Sekunden';  
-  document.getElementById('login-error').textContent='';  
-  document.getElementById('reg-error').textContent='';  
-}  
-window.openModal=openModal; window.closeModal=closeModal;  
-window.handleModalBg=handleModalBg; window.switchTab=switchTab;  
-  
-// ── TOAST ──  
-let toastT;  
-function showToast(msg) {  
-  clearTimeout(toastT);  
-  const t = document.getElementById('toast');  
-  t.textContent = msg; t.classList.add('show');  
-  toastT = setTimeout(()=>t.classList.remove('show'), 3000);  
-}  
-window.showToast = showToast;  
-  
-// ── WEATHER ──  
-const WMO_ICON = {0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',51:'🌦',53:'🌦',55:'🌧',61:'🌧',63:'🌧',65:'🌧',71:'❄️',73:'❄️',75:'❄️',80:'🌦',81:'🌧',82:'⛈',95:'⛈',96:'⛈'};  
-const WMO_DESC = {0:'Klar',1:'Meist klar',2:'Bewölkt',3:'Bedeckt',45:'Nebel',48:'Nebel',51:'Nieselregen',53:'Nieselregen',55:'Nieselregen',61:'Leichter Regen',63:'Regen',65:'Starker Regen',71:'Schnee',73:'Schnee',75:'Schnee',80:'Schauer',81:'Schauer',82:'Schauer',95:'Gewitter',96:'Gewitter'};  
-const DAYS = ['So','Mo','Di','Mi','Do','Fr','Sa'];  
-  
-async function loadWeather() {  
-  try {  
-    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=49.9929&longitude=8.2473&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=Europe%2FBerlin&forecast_days=7');  
-    const data = await res.json();  
-    const {time,weathercode,temperature_2m_max,temperature_2m_min} = data.daily;  
-  
-    document.getElementById('weather-today-card').innerHTML = `  
-      <div class="info-card-label">Heute in Mainz</div>  
-      <div style="display:flex;align-items:center;gap:12px;">  
-        <span style="font-size:34px;">${WMO_ICON[weathercode[0]]||'🌡'}</span>  
-        <div>  
-          <div style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--ink);line-height:1">${Math.round(temperature_2m_max[0])}°</div>  
-          <div style="font-size:13px;color:var(--muted);margin-top:2px;">${WMO_DESC[weathercode[0]]||''}</div>  
-        </div>  
-      </div>`;  
-  
-    const grid = document.getElementById('weather-grid');  
-    grid.innerHTML = '';  
-    time.forEach((t,i) => {  
-      const d = new Date(t);  
-      const el = document.createElement('div');  
-      el.className = 'weather-day';  
-      el.innerHTML = `<div class="wd-name">${i===0?'Heute':DAYS[d.getDay()]}</div><span class="wd-icon">${WMO_ICON[weathercode[i]]||'🌡'}</span><div class="wd-temp">${Math.round(temperature_2m_max[i])}°</div><div class="wd-temp-low">${Math.round(temperature_2m_min[i])}°</div><div class="wd-desc">${WMO_DESC[weathercode[i]]||''}</div>`;  
-      grid.appendChild(el);  
-    });  
-  } catch(e) {  
-    document.getElementById('weather-grid').innerHTML='<p style="color:var(--muted);padding:16px;grid-column:1/-1">Wetter nicht verfügbar.</p>';  
-  }  
-}  
-  
-// ── MAINZ 05 ──  
-async function loadMatch05() {  
-  try {  
-    const res = await fetch('https://www.thesportsdb.com/api/v1/json/3/eventsnext.php?id=133878');  
-    const data = await res.json();  
-    const e = data.events && data.events[0];  
-    if (!e) throw new Error();  
-    const d = new Date(e.dateEvent+'T'+(e.strTime||'15:30:00'));  
-    const dateStr = d.toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'});  
-    const timeStr = d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+' Uhr';  
-    const isHome = e.strHomeTeam.toLowerCase().includes('mainz');  
-  
-    document.getElementById('match-mini-card').innerHTML = `  
-      <div class="info-card-label">Nächstes Spiel — FSV Mainz 05</div>  
-      <div style="font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--ink)">${e.strHomeTeam} – ${e.strAwayTeam}</div>  
-      <div style="font-size:12px;color:var(--muted);margin-top:3px;">${dateStr} · ${timeStr}</div>`;  
-  
-    document.getElementById('match-container').innerHTML = `  
-      <div class="match-card">  
-        <div class="match-badge">${isHome?'Heimspiel':'Auswärts'} · ${e.strLeague||'Bundesliga'}</div>  
-        <div style="flex:1"><div class="match-teams">${isHome?'<span>'+e.strHomeTeam+'</span>':e.strHomeTeam} – ${!isHome?'<span>'+e.strAwayTeam+'</span>':e.strAwayTeam}</div><div class="match-meta">${dateStr}</div></div>  
-        <div><div class="match-time">${timeStr}</div><div class="match-time-sub">Anstoß</div></div>  
-      </div>`;  
-  } catch {  
-    document.getElementById('match-mini-card').innerHTML = `<div class="info-card-label">Nächstes Spiel — FSV Mainz 05</div><div style="font-size:13px;color:var(--muted)"><a href="https://www.mainz05.de/spielplan/" target="_blank" style="color:var(--accent)">Spielplan ansehen →</a></div>`;  
-    document.getElementById('match-container').innerHTML = `<div class="match-card"><div style="flex:1"><div class="match-teams"><span>1. FSV Mainz 05</span></div><div class="match-meta"><a href="https://www.mainz05.de/spielplan/" target="_blank" style="color:var(--pastel-butter)">Alle Spiele auf mainz05.de →</a></div></div></div>`;  
-  }  
-}  
-  
-// ── KEYBOARD ──  
-document.addEventListener('keydown', e => {  
-  if (e.key==='Escape') closeModal();  
-  if (e.key==='Enter' && document.getElementById('modal').classList.contains('show')) {  
-    if (document.getElementById('modal-auth').style.display !== 'none') {  
-      if (document.getElementById('form-login').style.display !== 'none') window.doLogin && window.doLogin();  
-      else window.doRegister && window.doRegister();  
-    }  
-  }  
-});  
-  
-// ── INIT ──  
-loadWeather();  
-loadMatch05();  
-</script>  
-</body>  
-</html>  
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Dr. Buntspecht – Mainz</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --bg: #fdf6f0;
+  --surface: #fff8f3;
+  --surface2: #ffeee3;
+  --pastel-rose: #f2c4c4;
+  --pastel-peach: #f7d9c4;
+  --pastel-sage: #c4d9c4;
+  --pastel-sky: #c4d4e8;
+  --pastel-lavender: #d4c4e8;
+  --pastel-butter: #f0e8c4;
+  --accent: #d4726a;
+  --accent2: #7a9e8a;
+  --gold: #c9a05a;
+  --ink: #2d1f1a;
+  --muted: #8a7060;
+  --border: rgba(180,140,120,0.18);
+  --shadow: rgba(180,120,100,0.12);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html { scroll-behavior:smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Lora', Georgia, serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.page { display:none; }
+.page.active { display:block; }
+
+.navbar {
+  position: fixed; top:0; left:0; right:0; z-index: 100;
+  background: rgba(253,246,240,0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 60px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.nav-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 19px; font-weight: 900;
+  color: var(--ink); letter-spacing: -0.3px;
+}
+.nav-logo span { color: var(--accent); font-style: italic; }
+
+.nav-center { display: flex; gap: 4px; }
+
+.nav-tab {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 500;
+  padding: 7px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--muted);
+  border: none; background: none;
+}
+.nav-tab:hover { background: var(--surface2); color: var(--ink); }
+.nav-tab.active { background: var(--accent); color: #fff; }
+
+.nav-right { display:flex; gap:8px; align-items:center; }
+
+.dropdown { position:relative; }
+.dropdown-btn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 500;
+  padding: 7px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  display: flex; align-items: center; gap: 5px;
+  transition: all 0.2s;
+}
+.dropdown-btn:hover { background: var(--surface2); color: var(--ink); }
+.dropdown-menu {
+  position: absolute; top: calc(100% + 8px); right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 6px;
+  min-width: 200px;
+  box-shadow: 0 8px 32px var(--shadow);
+  opacity: 0; pointer-events: none;
+  transform: translateY(-6px);
+  transition: all 0.2s;
+  z-index: 200;
+}
+.dropdown-menu.open { opacity:1; pointer-events:all; transform:translateY(0); }
+.dropdown-item {
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: var(--ink);
+  transition: background 0.15s;
+  display: flex; align-items: center; gap: 8px;
+}
+.dropdown-item:hover { background: var(--surface2); }
+.dropdown-item.active-page { color: var(--accent); font-weight: 600; }
+
+.btn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: none; cursor: pointer;
+  transition: all 0.2s;
+}
+.btn:active { transform: scale(0.96); }
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+.btn-ghost:hover { background: var(--surface2); color: var(--ink); }
+.btn-primary { background: var(--accent); color: #fff; box-shadow: 0 4px 14px rgba(212,114,106,0.3); }
+.btn-primary:hover { filter: brightness(1.08); }
+.btn-sage { background: var(--accent2); color: #fff; }
+.btn-full { width:100%; padding:14px; font-size:15px; border-radius:12px; margin-top:6px; }
+
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  padding-top: 60px;
+}
+.hero-bg { position: absolute; inset:0; z-index:0; }
+.hero-bg svg { width:100%; height:100%; position:absolute; inset:0; }
+
+.hero-overlay {
+  position:absolute; inset:0; z-index:1;
+  background: linear-gradient(to bottom,
+    rgba(253,246,240,0.2) 0%,
+    rgba(253,246,240,0.1) 40%,
+    rgba(253,246,240,0.7) 70%,
+    rgba(253,246,240,1) 100%);
+}
+
+.hero-content {
+  position:relative; z-index:5;
+  flex:1; display:flex; flex-direction:column;
+  justify-content:flex-end;
+  padding: 0 28px 40px;
+}
+.hero-eyebrow {
+  font-family:'DM Sans',sans-serif;
+  font-size:11px; font-weight:600;
+  text-transform:uppercase; letter-spacing:3px;
+  color: var(--accent); margin-bottom:10px;
+}
+.hero-title {
+  font-family:'Playfair Display',serif;
+  font-size: clamp(40px,8vw,76px);
+  font-weight:900; line-height:0.95;
+  color: var(--ink);
+  margin-bottom:14px;
+}
+.hero-title em { font-style:italic; color:var(--accent); }
+.hero-sub {
+  font-size:17px; font-weight:400;
+  color:var(--muted); max-width:460px;
+  line-height:1.6; margin-bottom:28px;
+}
+
+.info-row {
+  display:grid; grid-template-columns:1fr 1fr; gap:12px;
+  position:relative; z-index:5;
+  padding: 0 28px; margin-bottom:-56px;
+}
+@media(max-width:600px){
+  .info-row { grid-template-columns:1fr; padding:0 16px; }
+  .hero-content { padding:0 16px 36px; }
+  .navbar { padding:0 16px; }
+  .nav-center { display:none; }
+}
+
+.info-card {
+  background: rgba(255,248,243,0.95);
+  backdrop-filter: blur(16px);
+  border-radius: 16px;
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 24px var(--shadow);
+}
+.info-card-label {
+  font-family:'DM Sans',sans-serif;
+  font-size:10px; font-weight:600;
+  text-transform:uppercase; letter-spacing:2px;
+  color:var(--muted); margin-bottom:8px;
+}
+
+.main { background: var(--bg); padding-top: 90px; }
+
+.section-wrap {
+  padding: 44px 28px 36px;
+  max-width: 860px; margin: 0 auto;
+}
+@media(max-width:600px){ .section-wrap { padding:36px 16px 28px; } }
+
+.section-title {
+  font-family:'Playfair Display',serif;
+  font-size:26px; font-weight:700;
+  color:var(--ink); margin-bottom:4px;
+}
+.section-title span { color:var(--accent); font-style:italic; }
+.section-sub { font-size:14px; color:var(--muted); margin-bottom:24px; font-weight:400; }
+
+.divider {
+  height:1px;
+  background: linear-gradient(to right, transparent, var(--border), transparent);
+  margin: 0 28px;
+}
+
+.weather-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; }
+@media(max-width:680px){ .weather-grid { grid-template-columns:repeat(4,1fr); } }
+@media(max-width:380px){ .weather-grid { grid-template-columns:repeat(3,1fr); } }
+
+.weather-day {
+  background: #fff;
+  border-radius: 14px;
+  padding: 14px 8px;
+  text-align: center;
+  border: 1px solid var(--border);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.weather-day:first-child {
+  background: linear-gradient(135deg, var(--pastel-rose), var(--pastel-peach));
+  border-color: rgba(212,114,106,0.25);
+}
+.weather-day:hover { transform:translateY(-3px); box-shadow:0 6px 20px var(--shadow); }
+
+.wd-name { font-family:'DM Sans',sans-serif; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:7px; }
+.weather-day:first-child .wd-name { color: var(--accent); }
+.wd-icon { font-size:22px; margin-bottom:7px; display:block; }
+.wd-temp { font-family:'Playfair Display',serif; font-size:19px; font-weight:700; color:var(--ink); }
+.wd-temp-low { font-family:'DM Sans',sans-serif; font-size:11px; color:var(--muted); margin-top:2px; }
+.wd-desc { font-size:10px; color:var(--muted); margin-top:3px; font-style:italic; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+.match-card {
+  background: linear-gradient(135deg, #2d1f1a, #4a2e26);
+  border-radius:16px; padding:22px;
+  color:#fff; display:flex; align-items:center; gap:18px; flex-wrap:wrap;
+  border: 1px solid rgba(201,160,90,0.2);
+}
+.match-badge {
+  background: var(--accent); border-radius:8px;
+  padding:5px 12px; font-family:'DM Sans',sans-serif;
+  font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px;
+  color:#fff; flex-shrink:0;
+}
+.match-teams { flex:1; font-family:'Playfair Display',serif; font-size:19px; font-weight:700; }
+.match-teams span { color: var(--pastel-peach); }
+.match-meta { font-family:'DM Sans',sans-serif; font-size:12px; color:rgba(255,255,255,0.55); margin-top:3px; }
+.match-time { font-family:'Playfair Display',serif; font-size:24px; font-weight:700; color:var(--pastel-butter); text-align:right; flex-shrink:0; }
+.match-time-sub { font-family:'DM Sans',sans-serif; font-size:11px; color:rgba(255,255,255,0.4); text-align:right; }
+
+.members-banner {
+  background: linear-gradient(135deg, var(--pastel-lavender), var(--pastel-sky));
+  border-radius:16px; padding:24px;
+  display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+  margin-bottom:24px;
+  border: 1px solid rgba(180,160,220,0.3);
+}
+.members-title { font-family:'Playfair Display',serif; font-size:20px; color:var(--ink); margin-bottom:3px; }
+.members-sub { font-size:13px; color:var(--muted); font-weight:400; }
+
+.post-compose {
+  background:#fff; border-radius:16px; padding:18px;
+  margin-bottom:20px; border:1px solid var(--border);
+  display:none;
+}
+.post-compose.visible { display:block; }
+
+.post-compose-top {
+  display:flex; gap:12px; align-items:flex-start; margin-bottom:12px;
+}
+.compose-avatar {
+  width:38px; height:38px; border-radius:50%; flex-shrink:0;
+  object-fit:cover; border:2px solid var(--border);
+}
+.compose-avatar-placeholder {
+  width:38px; height:38px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'DM Sans',sans-serif; font-size:14px; font-weight:700;
+  color:#fff; text-transform:uppercase;
+  background: linear-gradient(135deg, var(--accent), var(--gold));
+}
+
+.post-textarea {
+  width:100%; border:1px solid var(--border); border-radius:10px;
+  padding:13px; font-family:'Lora',serif; font-size:15px;
+  color:var(--ink); resize:none; min-height:75px; outline:none;
+  background: var(--bg); transition:border-color 0.2s;
+}
+.post-textarea:focus { border-color:var(--accent); }
+
+.post-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:10px; }
+
+.post-feed { display:flex; flex-direction:column; gap:14px; }
+
+.post-item {
+  background:#fff; border-radius:14px; padding:18px;
+  border:1px solid var(--border);
+  animation: fadeUp 0.35s ease forwards;
+}
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(8px); }
+  to { opacity:1; transform:translateY(0); }
+}
+
+.post-header { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.post-avatar {
+  width:36px; height:36px; border-radius:50%;
+  object-fit:cover; border:2px solid var(--border); flex-shrink:0;
+}
+.post-avatar-placeholder {
+  width:36px; height:36px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'DM Sans',sans-serif; font-size:13px; font-weight:700;
+  color:#fff; text-transform:uppercase;
+  background: linear-gradient(135deg, var(--accent), var(--gold));
+}
+.post-author { font-family:'DM Sans',sans-serif; font-weight:600; font-size:14px; color:var(--ink); }
+.post-time { font-family:'DM Sans',sans-serif; font-size:11px; color:var(--muted); margin-top:1px; }
+.post-admin-badge {
+  font-family:'DM Sans',sans-serif; font-size:10px; font-weight:700;
+  background: var(--accent); color:#fff;
+  padding:2px 8px; border-radius:10px; margin-left:6px;
+  text-transform:uppercase; letter-spacing:0.5px;
+}
+
+.post-body { font-size:15px; line-height:1.65; color:var(--ink); }
+
+.post-footer {
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  margin-top:12px; padding-top:10px;
+  border-top:1px solid var(--border);
+}
+.post-action-btn {
+  background:none; border:none;
+  font-family:'DM Sans',sans-serif; font-size:12px;
+  color:var(--muted); cursor:pointer;
+  display:flex; align-items:center; gap:4px;
+  padding:4px 8px; border-radius:8px;
+  transition:background 0.2s, color 0.2s;
+}
+.post-action-btn:hover { background:var(--surface2); color:var(--ink); }
+.post-action-btn.liked { color:var(--accent); }
+.post-action-btn.delete-btn:hover { background:rgba(212,114,106,0.1); color:var(--accent); }
+
+.comments-section {
+  margin-top:12px; padding-top:12px;
+  border-top:1px dashed var(--border);
+  display:none;
+}
+.comments-section.open { display:block; }
+
+.comment-item {
+  display:flex; gap:9px; margin-bottom:10px;
+}
+.comment-avatar {
+  width:28px; height:28px; border-radius:50%; flex-shrink:0;
+  object-fit:cover;
+}
+.comment-avatar-placeholder {
+  width:28px; height:28px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'DM Sans',sans-serif; font-size:11px; font-weight:700;
+  color:#fff; text-transform:uppercase;
+  background: linear-gradient(135deg, var(--accent2), var(--pastel-sky));
+}
+.comment-bubble {
+  background: var(--bg); border-radius:10px; padding:9px 12px;
+  flex:1; border:1px solid var(--border);
+}
+.comment-author { font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; color:var(--ink); }
+.comment-text { font-size:13px; color:var(--ink); line-height:1.5; margin-top:2px; }
+.comment-time { font-size:10px; color:var(--muted); margin-top:3px; }
+
+.comment-compose {
+  display:flex; gap:9px; align-items:center; margin-top:10px;
+}
+.comment-input {
+  flex:1; border:1px solid var(--border); border-radius:20px;
+  padding:8px 14px; font-family:'Lora',serif; font-size:13px;
+  color:var(--ink); outline:none; background:var(--bg);
+  transition:border-color 0.2s;
+}
+.comment-input:focus { border-color:var(--accent); }
+.comment-send-btn {
+  background:var(--accent); color:#fff;
+  border:none; border-radius:50%;
+  width:32px; height:32px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  font-size:14px; flex-shrink:0;
+  transition:filter 0.2s;
+}
+.comment-send-btn:hover { filter:brightness(1.1); }
+
+.empty-blog { text-align:center; padding:44px 24px; color:var(--muted); font-style:italic; font-size:17px; }
+.empty-blog-icon { font-size:44px; display:block; margin-bottom:10px; }
+
+.avatar-upload-wrap { display:flex; align-items:center; gap:14px; margin-bottom:16px; }
+.avatar-preview {
+  width:56px; height:56px; border-radius:50%;
+  object-fit:cover; border:2px solid var(--border);
+  background: linear-gradient(135deg, var(--pastel-rose), var(--pastel-peach));
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px; overflow:hidden;
+}
+.avatar-preview img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+.avatar-label {
+  font-family:'DM Sans',sans-serif; font-size:13px;
+  color:var(--accent); cursor:pointer; font-weight:600;
+  text-decoration:underline;
+}
+#avatar-file-input { display:none; }
+
+.info-page-wrap {
+  max-width:640px; margin:0 auto; padding:60px 28px;
+  text-align:center;
+}
+.info-page-icon { font-size:72px; margin-bottom:24px; display:block; }
+.info-page-title {
+  font-family:'Playfair Display',serif;
+  font-size:32px; font-weight:900; color:var(--ink);
+  margin-bottom:16px; line-height:1.2;
+}
+.info-page-title em { color:var(--accent); font-style:italic; }
+.info-page-text {
+  font-size:17px; line-height:1.75; color:var(--muted);
+  margin-bottom:20px;
+}
+.info-highlight {
+  background: linear-gradient(135deg, var(--pastel-butter), var(--pastel-peach));
+  border-radius:16px; padding:20px 24px; margin:24px 0;
+  border:1px solid rgba(212,114,106,0.15);
+  text-align:left;
+}
+.info-highlight p { font-size:15px; line-height:1.7; color:var(--ink); }
+.info-highlight strong { color:var(--accent); }
+
+.modal-overlay {
+  position:fixed; inset:0; z-index:1000;
+  background: rgba(45,31,26,0.6);
+  backdrop-filter:blur(8px);
+  display:flex; align-items:flex-end; justify-content:center;
+  opacity:0; pointer-events:none; transition:opacity 0.3s;
+}
+.modal-overlay.show { opacity:1; pointer-events:all; }
+.modal-sheet {
+  background: var(--surface);
+  border-radius:24px 24px 0 0;
+  padding:28px 24px 44px;
+  width:100%; max-width:460px;
+  transform:translateY(40px);
+  transition:transform 0.4s cubic-bezier(0.34,1.2,0.64,1);
+  max-height:90vh; overflow-y:auto;
+}
+.modal-overlay.show .modal-sheet { transform:translateY(0); }
+.modal-handle { width:40px; height:4px; background:var(--border); border-radius:2px; margin:0 auto 22px; }
+.modal-title { font-family:'Playfair Display',serif; font-size:26px; font-weight:700; color:var(--ink); margin-bottom:4px; }
+.modal-sub { font-size:14px; color:var(--muted); margin-bottom:22px; font-weight:400; }
+.modal-tabs { display:flex; gap:0; background:var(--surface2); border-radius:10px; padding:4px; margin-bottom:22px; }
+.modal-tab { flex:1; text-align:center; padding:9px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer; transition:all 0.2s; color:var(--muted); }
+.modal-tab.active { background:#fff; color:var(--ink); box-shadow:0 2px 8px var(--shadow); }
+
+.field-group { margin-bottom:14px; }
+.field-label { font-family:'DM Sans',sans-serif; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:5px; display:block; }
+.field-input { width:100%; background:#fff; border:1px solid var(--border); border-radius:10px; padding:12px 14px; font-family:'Lora',serif; font-size:15px; color:var(--ink); outline:none; transition:border-color 0.2s, box-shadow 0.2s; }
+.field-input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(212,114,106,0.1); }
+.modal-error { color:var(--accent); font-size:12px; margin-bottom:10px; min-height:16px; font-family:'DM Sans',sans-serif; }
+.modal-dismiss { text-align:center; margin-top:14px; font-family:'DM Sans',sans-serif; font-size:13px; color:var(--muted); cursor:pointer; }
+.modal-dismiss:hover { color:var(--ink); }
+
+.profile-info { display:flex; align-items:center; gap:14px; margin-bottom:20px; padding:16px; background:var(--surface2); border-radius:12px; }
+.profile-avatar-big { width:52px; height:52px; border-radius:50%; object-fit:cover; border:2px solid var(--border); }
+.profile-avatar-big-placeholder { width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'DM Sans',sans-serif; font-size:20px; font-weight:700; color:#fff; text-transform:uppercase; background:linear-gradient(135deg,var(--accent),var(--gold)); }
+.profile-name { font-family:'Playfair Display',serif; font-size:18px; font-weight:700; }
+.profile-email { font-size:12px; color:var(--muted); font-family:'DM Sans',sans-serif; margin-top:2px; }
+
+.user-chip { display:flex; align-items:center; gap:7px; background:var(--surface2); border:1px solid var(--border); border-radius:20px; padding:5px 12px 5px 6px; cursor:pointer; transition:background 0.2s; }
+.user-chip:hover { background:var(--pastel-peach); }
+.user-chip-avatar { width:26px; height:26px; border-radius:50%; object-fit:cover; }
+.user-chip-avatar-placeholder { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#fff; text-transform:uppercase; background:linear-gradient(135deg,var(--accent),var(--gold)); font-family:'DM Sans',sans-serif; }
+.user-chip-name { font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; color:var(--ink); }
+
+.toast {
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px);
+  background:var(--ink); color:#fff; padding:12px 20px; border-radius:50px;
+  font-family:'DM Sans',sans-serif; font-size:13px; z-index:2000;
+  transition:transform 0.4s cubic-bezier(0.34,1.4,0.64,1); white-space:nowrap;
+  box-shadow:0 6px 24px rgba(0,0,0,0.2); max-width:calc(100vw - 40px); text-align:center;
+}
+.toast.show { transform:translateX(-50%) translateY(0); }
+
+.loading-dots { display:flex; align-items:center; justify-content:center; gap:5px; padding:10px 0; }
+.loading-dots span { width:8px; height:8px; border-radius:50%; background:var(--accent); animation:bounce 1s infinite ease-in-out; opacity:.7; }
+.loading-dots span:nth-child(2) { animation-delay:.15s; }
+.loading-dots span:nth-child(3) { animation-delay:.3s; }
+@keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
+
+footer { background:var(--ink); color:rgba(253,246,240,0.4); text-align:center; padding:20px; font-family:'DM Sans',sans-serif; font-size:12px; letter-spacing:0.5px; }
+footer span { color:var(--pastel-peach); }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-logo">Dr.<span>Buntspecht</span></div>
+  <div class="nav-center">
+    <button class="nav-tab active" onclick="showPage('home', this)">🏠 Start</button>
+    <button class="nav-tab" onclick="showPage('info', this)">ℹ️ Info</button>
+    <button class="nav-tab" onclick="window.location='supermarkt.html'">🛒 Markt</button>
+  </div>
+  <div class="nav-right">
+    <div class="dropdown" id="pages-dropdown">
+      <button class="dropdown-btn" onclick="toggleDropdown('pages-dd')" id="pages-dd-btn">Seiten ▾</button>
+      <div class="dropdown-menu" id="pages-dd">
+        <div class="dropdown-item active-page" onclick="showPage('home',null);closeDropdowns()">🏠 Startseite</div>
+        <div class="dropdown-item" onclick="window.location='supermarkt.html';closeDropdowns()">🛒 Marktplaner</div>
+        <div class="dropdown-item" onclick="showPage('info',null);closeDropdowns()">ℹ️ Allgemeine Info</div>
+      </div>
+    </div>
+    <div id="nav-auth-area">
+      <button class="btn btn-ghost" onclick="openModal('login')" style="font-size:12px;padding:6px 12px;">Einloggen</button>
+      <button class="btn btn-primary" onclick="openModal('register')" style="font-size:12px;padding:6px 12px;">Registrieren</button>
+    </div>
+  </div>
+</nav>
+
+<div class="page active" id="page-home">
+  <section class="hero">
+    <div class="hero-bg">
+      <svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="skyP" cx="50%" cy="30%" r="70%">
+            <stop offset="0%" stop-color="#f7e8d8"/>
+            <stop offset="50%" stop-color="#f0d4c0"/>
+            <stop offset="100%" stop-color="#e8c4a8"/>
+          </radialGradient>
+          <radialGradient id="sunGlowP" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#f7c4a0" stop-opacity="0.6"/>
+            <stop offset="100%" stop-color="#f7c4a0" stop-opacity="0"/>
+          </radialGradient>
+          <filter id="softBlur"><feGaussianBlur stdDeviation="8"/></filter>
+          <filter id="midBlur"><feGaussianBlur stdDeviation="3"/></filter>
+        </defs>
+        <rect width="1200" height="800" fill="url(#skyP)"/>
+        <ellipse cx="600" cy="160" rx="380" ry="260" fill="url(#sunGlowP)" filter="url(#softBlur)"/>
+        <g opacity="0.12" transform="translate(600,380)">
+          <circle cx="0" cy="0" r="285" fill="none" stroke="#c9a05a" stroke-width="12"/>
+          <circle cx="0" cy="0" r="215" fill="none" stroke="#c9a05a" stroke-width="7"/>
+          <circle cx="0" cy="0" r="36" fill="none" stroke="#c9a05a" stroke-width="10"/>
+          <line x1="0" y1="-36" x2="0" y2="-285" stroke="#c9a05a" stroke-width="9"/>
+          <line x1="0" y1="36" x2="0" y2="285" stroke="#c9a05a" stroke-width="9"/>
+          <line x1="-36" y1="0" x2="-285" y2="0" stroke="#c9a05a" stroke-width="9"/>
+          <line x1="36" y1="0" x2="285" y2="0" stroke="#c9a05a" stroke-width="9"/>
+          <line x1="-26" y1="-26" x2="-202" y2="-202" stroke="#c9a05a" stroke-width="9"/>
+          <line x1="26" y1="-26" x2="202" y2="-202" stroke="#c9a05a" stroke-width="9"/>
+          <line x1="-26" y1="26" x2="-202" y2="202" stroke="#c9a05a" stroke-width="9"/>
+          <line x1="26" y1="26" x2="202" y2="202" stroke="#c9a05a" stroke-width="9"/>
+          <circle cx="0" cy="-285" r="13" fill="#c9a05a"/>
+          <circle cx="0" cy="285" r="13" fill="#c9a05a"/>
+          <circle cx="-285" cy="0" r="13" fill="#c9a05a"/>
+          <circle cx="285" cy="0" r="13" fill="#c9a05a"/>
+          <circle cx="-202" cy="-202" r="13" fill="#c9a05a"/>
+          <circle cx="202" cy="-202" r="13" fill="#c9a05a"/>
+          <circle cx="-202" cy="202" r="13" fill="#c9a05a"/>
+          <circle cx="202" cy="202" r="13" fill="#c9a05a"/>
+        </g>
+        <g fill="#c4a090" opacity="0.55">
+          <rect x="370" y="480" width="460" height="220"/>
+          <rect x="320" y="530" width="60" height="170"/>
+          <rect x="820" y="530" width="60" height="170"/>
+          <rect x="355" y="320" width="80" height="200"/>
+          <polygon points="355,320 395,258 435,320"/>
+          <rect x="375" y="238" width="40" height="82"/>
+          <polygon points="375,238 395,188 415,238"/>
+          <rect x="765" y="320" width="80" height="200"/>
+          <polygon points="765,320 805,258 845,320"/>
+          <rect x="785" y="238" width="40" height="82"/>
+          <polygon points="785,238 805,188 825,238"/>
+          <rect x="550" y="280" width="100" height="240"/>
+          <polygon points="540,280 600,198 660,280"/>
+          <rect x="572" y="173" width="56" height="107"/>
+          <polygon points="565,173 600,116 635,173"/>
+          <rect x="585" y="106" width="30" height="42"/>
+          <polygon points="582,106 600,80 618,106"/>
+          <rect x="597" y="70" width="6" height="22"/>
+          <rect x="590" y="76" width="20" height="4"/>
+          <rect x="375" y="368" width="65" height="152"/>
+          <polygon points="375,368 407,308 440,368"/>
+          <rect x="760" y="368" width="65" height="152"/>
+          <polygon points="760,368 792,308 825,368"/>
+          <rect x="430" y="530" width="18" height="170"/>
+          <rect x="480" y="530" width="18" height="170"/>
+          <rect x="700" y="530" width="18" height="170"/>
+          <rect x="750" y="530" width="18" height="170"/>
+        </g>
+        <g transform="translate(328,148)">
+          <ellipse cx="62" cy="72" rx="30" ry="23" fill="#c4a090" opacity="0.8"/>
+          <ellipse cx="62" cy="50" rx="13" ry="9" fill="#d4726a" opacity="0.9"/>
+          <polygon points="56,46 63,18 70,46" fill="#d4726a" opacity="0.9"/>
+          <circle cx="62" cy="53" r="17" fill="#c4a090" opacity="0.8"/>
+          <circle cx="67" cy="50" r="4" fill="#e8c06a" opacity="0.9"/>
+          <circle cx="68" cy="49" r="2" fill="#2d1f1a"/>
+          <polygon points="76,53 115,57 76,61" fill="#c9a05a" opacity="0.9"/>
+          <ellipse cx="57" cy="74" rx="21" ry="15" fill="#b89080" opacity="0.7"/>
+          <polygon points="46,90 61,94 56,122 49,120" fill="#c4a090" opacity="0.8"/>
+          <polygon points="61,94 76,90 73,117 66,120" fill="#c4a090" opacity="0.8"/>
+          <line x1="49" y1="89" x2="37" y2="101" stroke="#c9a05a" stroke-width="2.5" opacity="0.8"/>
+          <line x1="37" y1="101" x2="29" y2="107" stroke="#c9a05a" stroke-width="2" opacity="0.8"/>
+          <line x1="37" y1="101" x2="33" y2="111" stroke="#c9a05a" stroke-width="2" opacity="0.8"/>
+          <line x1="37" y1="101" x2="43" y2="111" stroke="#c9a05a" stroke-width="2" opacity="0.8"/>
+          <line x1="63" y1="91" x2="73" y2="103" stroke="#c9a05a" stroke-width="2.5" opacity="0.8"/>
+          <line x1="73" y1="103" x2="66" y2="111" stroke="#c9a05a" stroke-width="2" opacity="0.8"/>
+          <line x1="73" y1="103" x2="76" y2="111" stroke="#c9a05a" stroke-width="2" opacity="0.8"/>
+        </g>
+        <rect x="0" y="692" width="1200" height="108" fill="#d4b8a0" opacity="0.4"/>
+        <rect x="0" y="650" width="80" height="60" fill="#c4a090" opacity="0.3"/>
+        <rect x="90" y="662" width="55" height="48" fill="#c4a090" opacity="0.3"/>
+        <rect x="160" y="642" width="42" height="68" fill="#c4a090" opacity="0.3"/>
+        <rect x="900" y="656" width="52" height="54" fill="#c4a090" opacity="0.3"/>
+        <rect x="965" y="648" width="38" height="62" fill="#c4a090" opacity="0.3"/>
+        <rect x="1015" y="638" width="48" height="72" fill="#c4a090" opacity="0.3"/>
+        <rect x="1075" y="660" width="62" height="50" fill="#c4a090" opacity="0.3"/>
+      </svg>
+    </div>
+    <div class="hero-overlay"></div>
+
+    <div class="hero-content">
+      <div class="hero-eyebrow"></div>
+      <h1 class="hero-title">Gude,<br>hier geht's <em>lang!</em></h1>
+      <p class="hero-sub">Hier wird ganz sicher eine mords Website entstehen. Bis dahin nutzt die Seite "Markt"!</p>
+    </div>
+  </section>
+
+  <div class="info-row">
+    <div class="info-card" id="weather-today-card">
+      <div class="info-card-label">Heute in Mainz</div>
+      <div class="loading-dots"><span></span><span></span><span></span></div>
+    </div>
+    <div class="info-card" id="match-mini-card">
+      <div class="info-card-label">Nächstes Spiel — FSV Mainz 05</div>
+      <div class="loading-dots"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+
+  <main class="main">
+    <div class="section-wrap">
+      <h2 class="section-title">7-Tage-Wetter <span>Mainz</span></h2>
+      <p class="section-sub">Aktuelle Vorhersage · Open-Meteo</p>
+      <div class="weather-grid" id="weather-grid">
+        <div style="text-align:center;padding:20px;grid-column:1/-1"><div class="loading-dots"><span></span><span></span><span></span></div></div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section-wrap" style="padding-top:32px;padding-bottom:32px;">
+      <h2 class="section-title">FSV <span>Mainz 05</span></h2>
+      <p class="section-sub">Nächstes Bundesliga-Spiel</p>
+      <div id="match-container"><div class="loading-dots"><span></span><span></span><span></span></div></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section-wrap">
+      <h2 class="section-title">Mainzer <span>Blog</span></h2>
+      <p class="section-sub">Hier darf man sich neue und im idealfall sinnvolle Tools wünschen – oder einfach nur rummaulen.</p>
+      <div class="members-banner" id="members-banner">
+        <div class="members-text">
+          <div class="members-title">Sei dabei!</div>
+          <div class="members-sub">Kostenlos registrieren und mitschreiben</div>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('register')">Jetzt beitreten</button>
+      </div>
+
+      <div class="post-compose" id="post-compose">
+        <div class="post-compose-top">
+          <div class="compose-avatar-placeholder" id="compose-avatar-display">?</div>
+          <textarea class="post-textarea" id="post-text" placeholder="Hier fehlt noch dein Kommentar"></textarea>
+        </div>
+        <div class="post-actions">
+          <button class="btn btn-ghost" style="font-size:12px;" onclick="document.getElementById('post-text').value=''">Leeren</button>
+          <button class="btn btn-primary" onclick="submitPost()">Veröffentlichen</button>
+        </div>
+      </div>
+
+      <div class="post-feed" id="post-feed">
+        <div class="empty-blog"><span class="empty-blog-icon">🔒</span>Logge dich ein um Beiträge zu sehen.</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="page" id="page-info" style="padding-top:60px;">
+  <div class="info-page-wrap">
+    <span class="info-page-icon">🗑️</span>
+    <h2 class="info-page-title">Allgemeine <em>Info</em></h2>
+    <p class="info-page-text">Diese Seite erfüllt aktuell <strong>absolut gar keinen Nutzen</strong>. Sorry dafür.</p>
+
+    <div class="info-highlight">
+      <p><strong>Voraussichtlich </strong> wird diese Seite in ferner Zukunft zu einer Verkaufsplattform für Krempel aller Art (bspw. selbstgebaute, überteuerte Schachbretter!).</p>
+    </div>
+
+    <p class="info-page-text">Gedacht ist eine Art Schaufenster, aber warten wir ab...</p>
+    <p class="info-page-text" style="font-style:italic;font-size:15px;color:var(--muted);">Bis dahin: Checkt die Seite am besten täglich auf Neuerungen! Man weiß ja nie.</p>
+
+    <div style="margin-top:32px;">
+      <button class="btn btn-primary" onclick="showPage('home',null)" style="padding:12px 28px;font-size:15px;border-radius:12px;">Zurück zur Startseite →</button>
+    </div>
+  </div>
+</div>
+
+<footer>© 2026 <span>Dr. Buntspecht</span> · Mainz am Rhein</footer>
+
+<div class="modal-overlay" id="modal" onclick="handleModalBg(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+
+    <div id="modal-auth">
+      <h2 class="modal-title" id="modal-title">Willkommen zurück</h2>
+      <p class="modal-sub" id="modal-sub">Einloggen in dein Konto</p>
+      <div class="modal-tabs">
+        <div class="modal-tab active" id="tab-login" onclick="switchTab('login')">Einloggen</div>
+        <div class="modal-tab" id="tab-register" onclick="switchTab('register')">Registrieren</div>
+      </div>
+
+      <div id="form-login">
+        <div class="field-group"><label class="field-label">E-Mail</label><input class="field-input" type="email" id="login-email" placeholder="deine@email.de" autocomplete="email"></div>
+        <div class="field-group"><label class="field-label">Passwort</label><input class="field-input" type="password" id="login-pw" placeholder="••••••••" autocomplete="current-password"></div>
+        <div class="modal-error" id="login-error"></div>
+        <button class="btn btn-primary btn-full" onclick="doLogin()">Einloggen</button>
+      </div>
+
+      <div id="form-register" style="display:none">
+        <div class="avatar-upload-wrap">
+          <div class="avatar-preview" id="avatar-preview-wrap"><span>🧑</span></div>
+          <div>
+            <div style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:4px;">Profilbild</div>
+            <label class="avatar-label" for="avatar-file-input">Foto auswählen</label>
+            <input type="file" id="avatar-file-input" accept="image/*" onchange="previewAvatar(this)">
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">Optional · max. 1MB</div>
+          </div>
+        </div>
+        <div class="field-group"><label class="field-label">Anzeigename</label><input class="field-input" type="text" id="reg-name" placeholder="Mainzer Max" autocomplete="nickname"></div>
+        <div class="field-group"><label class="field-label">E-Mail</label><input class="field-input" type="email" id="reg-email" placeholder="deine@email.de" autocomplete="email"></div>
+        <div class="field-group"><label class="field-label">Passwort (mind. 6 Zeichen)</label><input class="field-input" type="password" id="reg-pw" placeholder="••••••••" autocomplete="new-password"></div>
+        <div class="modal-error" id="reg-error"></div>
+        <button class="btn btn-primary btn-full" onclick="doRegister()">Account erstellen</button>
+      </div>
+      <p class="modal-dismiss" onclick="closeModal()">Schließen</p>
+    </div>
+
+    <div id="modal-profile" style="display:none">
+      <h2 class="modal-title">Mein Profil</h2>
+      <p class="modal-sub">Einstellungen & Account</p>
+      <div class="profile-info" id="profile-info-block"></div>
+      <div class="field-group" style="margin-top:4px;">
+        <label class="field-label">Profilbild ändern</label>
+        <label class="avatar-label" for="profile-avatar-input">Neues Foto auswählen</label>
+        <input type="file" id="profile-avatar-input" accept="image/*" style="display:none" onchange="updateAvatar(this)">
+      </div>
+      <div style="margin-top:16px;">
+        <button class="btn btn-ghost btn-full" onclick="doSignOut()" style="color:var(--accent);border-color:rgba(212,114,106,0.3);">Ausloggen</button>
+      </div>
+      <p class="modal-dismiss" onclick="closeModal()">Schließen</p>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, onSnapshot, orderBy, query, serverTimestamp, doc, updateDoc, increment, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+const ADMIN_EMAIL = "admin@drbuntspecht.de";
+
+const app = initializeApp({
+  apiKey: "AIzaSyCTSYRwq9G9inKW-bEnLC90I19J4oTTkp8",
+  authDomain: "drbuntspecht-f92ba.firebaseapp.com",
+  projectId: "drbuntspecht-f92ba",
+  storageBucket: "drbuntspecht-f92ba.firebasestorage.app",
+  messagingSenderId: "1075490932089",
+  appId: "1:1075490932089:web:44f532194f78e41f539ba8"
+});
+
+const auth = getAuth(app);
+await setPersistence(auth, browserLocalPersistence);
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+let currentUser = null;
+let postsUnsub = null;
+let pendingAvatarFile = null;
+let pendingAvatarDataUrl = null;
+
+const weatherCodeMap = {
+  0:["☀️","Klar"],
+  1:["🌤️","Überwiegend klar"],
+  2:["⛅","Teilweise bewölkt"],
+  3:["☁️","Bedeckt"],
+  45:["🌫️","Nebel"],
+  48:["🌫️","Reifnebel"],
+  51:["🌦️","Leichter Niesel"],
+  53:["🌦️","Niesel"],
+  55:["🌦️","Starker Niesel"],
+  61:["🌧️","Leichter Regen"],
+  63:["🌧️","Regen"],
+  65:["🌧️","Starker Regen"],
+  66:["🌨️","Gefrierender Regen"],
+  67:["🌨️","Starker gefrierender Regen"],
+  71:["🌨️","Leichter Schnee"],
+  73:["🌨️","Schnee"],
+  75:["🌨️","Starker Schnee"],
+  77:["🌨️","Schneegriesel"],
+  80:["🌦️","Regenschauer"],
+  81:["🌧️","Starke Schauer"],
+  82:["⛈️","Gewitterartige Schauer"],
+  85:["🌨️","Schneeschauer"],
+  86:["🌨️","Starke Schneeschauer"],
+  95:["⛈️","Gewitter"],
+  96:["⛈️","Gewitter mit Hagel"],
+  99:["⛈️","Starkes Gewitter mit Hagel"]
+};
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(() => t.classList.remove('show'), 2300);
+}
+
+function showPage(page, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  closeDropdowns();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+window.showPage = showPage;
+
+function toggleDropdown(id) {
+  const m = document.getElementById(id);
+  m.classList.toggle('open');
+}
+window.toggleDropdown = toggleDropdown;
+
+function closeDropdowns() {
+  document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('open'));
+}
+window.closeDropdowns = closeDropdowns;
+
+document.addEventListener('click', (e) => {
+  const dd = document.getElementById('pages-dropdown');
+  if (dd && !dd.contains(e.target)) closeDropdowns();
+});
+
+function openModal(mode='login') {
+  const modal = document.getElementById('modal');
+  modal.classList.add('show');
+  document.getElementById('modal-auth').style.display = 'block';
+  document.getElementById('modal-profile').style.display = 'none';
+  switchTab(mode);
+}
+window.openModal = openModal;
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
+}
+window.closeModal = closeModal;
+
+function handleModalBg(e) {
+  if (e.target.id === 'modal') closeModal();
+}
+window.handleModalBg = handleModalBg;
+
+function switchTab(tab) {
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+  document.getElementById('form-login').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('form-register').style.display = tab === 'register' ? 'block' : 'none';
+  document.getElementById('modal-title').textContent = tab === 'login' ? 'Willkommen zurück' : 'Registrieren';
+  document.getElementById('modal-sub').textContent = tab === 'login' ? 'Einloggen in dein Konto' : 'Neues Konto erstellen';
+}
+window.switchTab = switchTab;
+
+function safeText(v) {
+  return (v ?? '').toString().replace(/[&<>"]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s]));
+}
+
+function initials(name='?') {
+  return name.trim().split(/\s+/).slice(0,2).map(s => s[0]).join('').toUpperCase() || '?';
+}
+
+function avatarHtml(user, size='post') {
+  const cls = size === 'big' ? 'profile-avatar-big' : size === 'chip' ? 'user-chip-avatar' : size === 'comment' ? 'comment-avatar' : size === 'compose' ? 'compose-avatar' : 'post-avatar';
+  const placeholderCls = size === 'big' ? 'profile-avatar-big-placeholder' : size === 'chip' ? 'user-chip-avatar-placeholder' : size === 'comment' ? 'comment-avatar-placeholder' : size === 'compose' ? 'compose-avatar-placeholder' : 'post-avatar-placeholder';
+  const s = size === 'big' ? 52 : size === 'chip' ? 26 : size === 'comment' ? 28 : size === 'compose' ? 38 : 36;
+  const name = user?.displayName || user?.email || '?';
+  if (user?.photoURL) return `<img class="${cls}" src="${user.photoURL}" alt="Avatar" style="width:${s}px;height:${s}px;">`;
+  return `<div class="${placeholderCls}" style="width:${s}px;height:${s}px;">${safeText(initials(name))}</div>`;
+}
+
+function updateNavUI(user) {
+  const area = document.getElementById('nav-auth-area');
+  if (user) {
+    const isAdmin = user.email === ADMIN_EMAIL;
+    area.innerHTML = `
+      <div class="user-chip" onclick="openProfileModal()" title="Profil öffnen">
+        ${user.photoURL ? `<img class="user-chip-avatar" src="${user.photoURL}" alt="Avatar">` : `<div class="user-chip-avatar-placeholder">${safeText(initials(user.displayName || user.email))}</div>`}
+        <div class="user-chip-name">${safeText(user.displayName || user.email)}</div>
+        ${isAdmin ? `<div class="post-admin-badge">Admin</div>` : ``}
+      </div>
+    `;
+  } else {
+    area.innerHTML = `
+      <button class="btn btn-ghost" onclick="openModal('login')" style="font-size:12px;padding:6px 12px;">Einloggen</button>
+      <button class="btn btn-primary" onclick="openModal('register')" style="font-size:12px;padding:6px 12px;">Registrieren</button>
+    `;
+  }
+}
+window.openProfileModal = function() {
+  if (!currentUser) return openModal('login');
+  const modal = document.getElementById('modal');
+  modal.classList.add('show');
+  document.getElementById('modal-auth').style.display = 'none';
+  document.getElementById('modal-profile').style.display = 'block';
+  const block = document.getElementById('profile-info-block');
+  block.innerHTML = `
+    ${avatarHtml(currentUser, 'big')}
+    <div>
+      <div class="profile-name">${safeText(currentUser.displayName || 'Ohne Namen')}</div>
+      <div class="profile-email">${safeText(currentUser.email || '')}</div>
+    </div>
+  `;
+};
+
+async function updateBlogUI(user) {
+  const compose = document.getElementById('post-compose');
+  const feed = document.getElementById('post-feed');
+  const banner = document.getElementById('members-banner');
+  if (user) {
+    compose.classList.add('visible');
+    banner.style.display = 'none';
+    document.getElementById('compose-avatar-display').innerHTML = user.photoURL ? `<img src="${user.photoURL}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : safeText(initials(user.displayName || user.email));
+    await loadBlogPosts();
+  } else {
+    compose.classList.remove('visible');
+    banner.style.display = 'flex';
+    feed.innerHTML = `<div class="empty-blog"><span class="empty-blog-icon">🔒</span>Logge dich ein um Beiträge zu sehen.</div>`;
+  }
+}
+
+function renderComments(postId, comments=[]) {
+  return comments.map(c => `
+    <div class="comment-item">
+      ${c.avatarUrl ? `<img class="comment-avatar" src="${c.avatarUrl}" alt="Avatar">` : `<div class="comment-avatar-placeholder">${safeText(initials(c.author || 'U'))}</div>`}
+      <div class="comment-bubble">
+        <div class="comment-author">${safeText(c.author || 'Unbekannt')}</div>
+        <div class="comment-text">${safeText(c.text || '')}</div>
+        <div class="comment-time">${safeText(c.time || '')}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderPost(docSnap) {
+  const p = docSnap.data();
+  const likes = p.likes || 0;
+  const liked = currentUser && Array.isArray(p.likedBy) && p.likedBy.includes(currentUser.uid);
+  const comments = Array.isArray(p.comments) ? p.comments : [];
+  const canDelete = currentUser && (currentUser.email === ADMIN_EMAIL || p.userId === currentUser.uid);
+  return `
+    <div class="post-item" data-id="${docSnap.id}">
+      <div class="post-header">
+        ${p.avatarUrl ? `<img class="post-avatar" src="${p.avatarUrl}" alt="Avatar">` : `<div class="post-avatar-placeholder">${safeText(initials(p.author || 'U'))}</div>`}
+        <div style="flex:1;">
+          <div class="post-author">${safeText(p.author || 'Unbekannt')}${p.isAdmin ? `<span class="post-admin-badge">Admin</span>` : ''}</div>
+          <div class="post-time">${safeText(p.createdAtText || 'gerade eben')}</div>
+        </div>
+      </div>
+      <div class="post-body">${safeText(p.text || '')}</div>
+      <div class="post-footer">
+        <button class="post-action-btn ${liked ? 'liked' : ''}" onclick="toggleLike('${docSnap.id}')">❤️ ${likes}</button>
+        <button class="post-action-btn" onclick="toggleComments('${docSnap.id}')">💬 ${comments.length}</button>
+        ${canDelete ? `<button class="post-action-btn delete-btn" onclick="deletePost('${docSnap.id}')">🗑️ Löschen</button>` : ''}
+      </div>
+      <div class="comments-section" id="comments-${docSnap.id}">
+        ${renderComments(docSnap.id, comments)}
+        ${currentUser ? `
+          <div class="comment-compose">
+            ${avatarHtml(currentUser, 'comment')}
+            <input class="comment-input" id="comment-input-${docSnap.id}" type="text" placeholder="Kommentar schreiben...">
+            <button class="comment-send-btn" onclick="submitComment('${docSnap.id}')">➤</button>
+          </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+}
+
+async function loadBlogPosts() {
+  if (!currentUser) return;
+  const feed = document.getElementById('post-feed');
+  const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
+  if (postsUnsub) postsUnsub();
+  postsUnsub = onSnapshot(q, snap => {
+    if (snap.empty) {
+      feed.innerHTML = `<div class="empty-blog"><span class="empty-blog-icon">📝</span>Noch keine Beiträge da.</div>`;
+      return;
+    }
+    feed.innerHTML = snap.docs.map(renderPost).join('');
+  }, err => {
+    feed.innerHTML = `<div class="empty-blog"><span class="empty-blog-icon">⚠️</span>Beiträge konnten nicht geladen werden.</div>`;
+  });
+}
+window.loadBlogPosts = loadBlogPosts;
+
+async function doRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pw = document.getElementById('reg-pw').value;
+  const err = document.getElementById('reg-error');
+  err.textContent = '';
+  if (!name || !email || pw.length < 6) {
+    err.textContent = 'Bitte alle Felder korrekt ausfüllen.';
+    return;
+  }
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, pw);
+    let photoURL = '';
+    if (pendingAvatarFile) {
+      const path = `avatars/${cred.user.uid}-${Date.now()}-${pendingAvatarFile.name}`;
+      const storageRef = ref(storage, path);
+      await uploadBytes(storageRef, pendingAvatarFile);
+      photoURL = await getDownloadURL(storageRef);
+    }
+    await updateProfile(cred.user, { displayName: name, photoURL });
+    closeModal();
+    showToast('Account erstellt');
+  } catch (e) {
+    err.textContent = 'Registrierung fehlgeschlagen.';
+  }
+}
+window.doRegister = doRegister;
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pw = document.getElementById('login-pw').value;
+  const err = document.getElementById('login-error');
+  err.textContent = '';
+  try {
+    await signInWithEmailAndPassword(auth, email, pw);
+    closeModal();
+    showToast('Eingeloggt');
+  } catch (e) {
+    err.textContent = 'Login fehlgeschlagen.';
+  }
+}
+window.doLogin = doLogin;
+
+async function doSignOut() {
+  await signOut(auth);
+  closeModal();
+  showToast('Ausgeloggt');
+}
+window.doSignOut = doSignOut;
+
+async function updateAvatar(input) {
+  if (!currentUser || !input.files?.[0]) return;
+  const file = input.files[0];
+  if (file.size > 1024 * 1024) {
+    showToast('Bild zu groß');
+    input.value = '';
+    return;
+  }
+  const storageRef = ref(storage, `avatars/${currentUser.uid}-${Date.now()}-${file.name}`);
+  await uploadBytes(storageRef, file);
+  const url = await getDownloadURL(storageRef);
+  await updateProfile(auth.currentUser, { photoURL: url });
+  showToast('Profilbild aktualisiert');
+  input.value = '';
+}
+window.updateAvatar = updateAvatar;
+
+function previewAvatar(input) {
+  const wrap = document.getElementById('avatar-preview-wrap');
+  const file = input.files?.[0];
+  pendingAvatarFile = file || null;
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    pendingAvatarDataUrl = e.target.result;
+    wrap.innerHTML = `<img src="${pendingAvatarDataUrl}" alt="Avatar">`;
+  };
+  reader.readAsDataURL(file);
+}
+window.previewAvatar = previewAvatar;
+
+async function submitPost() {
+  if (!currentUser) return openModal('login');
+  const textEl = document.getElementById('post-text');
+  const text = textEl.value.trim();
+  if (!text) return;
+  await addDoc(collection(db, 'posts'), {
+    text,
+    author: currentUser.displayName || currentUser.email || 'Unbekannt',
+    userId: currentUser.uid,
+    avatarUrl: currentUser.photoURL || '',
+    isAdmin: currentUser.email === ADMIN_EMAIL,
+    likes: 0,
+    likedBy: [],
+    comments: [],
+    createdAt: serverTimestamp(),
+    createdAtText: 'gerade eben'
+  });
+  textEl.value = '';
+  showToast('Beitrag veröffentlicht');
+}
+window.submitPost = submitPost;
+
+async function toggleLike(postId) {
+  if (!currentUser) return openModal('login');
+  const postsRef = collection(db, 'posts');
+  const snap = await getDocs(postsRef);
+  const docSnap = snap.docs.find(d => d.id === postId);
+  if (!docSnap) return;
+  const data = docSnap.data();
+  const likedBy = Array.isArray(data.likedBy) ? [...data.likedBy] : [];
+  const refDoc = doc(db, 'posts', postId);
+  if (likedBy.includes(currentUser.uid)) {
+    await updateDoc(refDoc, { likes: Math.max(0, (data.likes || 0) - 1), likedBy: likedBy.filter(id => id !== currentUser.uid) });
+  } else {
+    await updateDoc(refDoc, { likes: increment(1), likedBy: [...likedBy, currentUser.uid] });
+  }
+}
+window.toggleLike = toggleLike;
+
+function toggleComments(postId) {
+  const el = document.getElementById(`comments-${postId}`);
+  if (el) el.classList.toggle('open');
+}
+window.toggleComments = toggleComments;
+
+async function submitComment(postId) {
+  if (!currentUser) return openModal('login');
+  const input = document.getElementById(`comment-input-${postId}`);
+  const text = input.value.trim();
+  if (!text) return;
+  const refDoc = doc(db, 'posts', postId);
+  const postSnap = await getDocs(collection(db, 'posts'));
+  const p = postSnap.docs.find(d => d.id === postId);
+  if (!p) return;
+  const comments = Array.isArray(p.data().comments) ? [...p.data().comments] : [];
+  comments.push({
+    author: currentUser.displayName || currentUser.email || 'Unbekannt',
+    avatarUrl: currentUser.photoURL || '',
+    text,
+    time: 'gerade eben',
+    uid: currentUser.uid
+  });
+  await updateDoc(refDoc, { comments });
+  input.value = '';
+}
+window.submitComment = submitComment;
+
+async function deletePost(postId) {
+  if (!currentUser) return;
+  const postsRef = collection(db, 'posts');
+  const snap = await getDocs(postsRef);
+  const docSnap = snap.docs.find(d => d.id === postId);
+  if (!docSnap) return;
+  const data = docSnap.data();
+  if (currentUser.email !== ADMIN_EMAIL && data.userId !== currentUser.uid) return;
+  await deleteDoc(doc(db, 'posts', postId));
+  showToast('Beitrag gelöscht');
+}
+window.deletePost = deletePost;
+
+async function loadWeather() {
+  try {
+    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=49.9929&longitude=8.2473&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=Europe%2FBerlin');
+    const data = await res.json();
+    const days = data.daily.time.slice(0,7).map((d, i) => {
+      const dt = new Date(d + 'T12:00:00');
+      const name = dt.toLocaleDateString('de-DE', { weekday:'short' });
+      const max = Math.round(data.daily.temperature_2m_max[i]);
+      const min = Math.round(data.daily.temperature_2m_min[i]);
+      const code = data.daily.weather_code[i];
+      const w = weatherCodeMap[code] || ['❔','Unklar'];
+      return { name, max, min, icon:w[0], desc:w[1] };
+    });
+    document.getElementById('weather-grid').innerHTML = days.map((d, idx) => `
+      <div class="weather-day">
+        <div class="wd-name">${idx === 0 ? 'Heute' : d.name}</div>
+        <span class="wd-icon">${d.icon}</span>
+        <div class="wd-temp">${d.max}°</div>
+        <div class="wd-temp-low">${d.min}°</div>
+        <div class="wd-desc">${d.desc}</div>
+      </div>
+    `).join('');
+    const t = days[0];
+    document.getElementById('weather-today-card').innerHTML = `
+      <div class="info-card-label">Heute in Mainz</div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="font-size:30px;">${t.icon}</div>
+        <div>
+          <div style="font-family:'Playfair Display',serif;font-size:30px;font-weight:700;">${t.max}°</div>
+          <div style="font-size:13px;color:var(--muted);">${t.desc} · Tief ${t.min}°</div>
+        </div>
+      </div>
+    `;
+  } catch (e) {
+    document.getElementById('weather-grid').innerHTML = `<div class="empty-blog" style="grid-column:1/-1;">Wetter konnte nicht geladen werden.</div>`;
+  }
+}
+
+async function loadMatch() {
+  const html = `
+    <div class="match-card">
+      <div class="match-badge">Nächstes Spiel</div>
+      <div class="match-teams">FSV Mainz 05 <span>vs.</span> Gegner</div>
+      <div style="width:100%;"></div>
+      <div class="match-meta">Bundesliga · Heimspiel</div>
+      <div style="flex:1;"></div>
+      <div>
+        <div class="match-time">20:30</div>
+        <div class="match-time-sub">Samstag · Mainz</div>
+      </div>
+    </div>
+  `;
+  document.getElementById('match-container').innerHTML = html;
+  document.getElementById('match-mini-card').innerHTML = `
+    <div class="info-card-label">Nächstes Spiel — FSV Mainz 05</div>
+    <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;">20:30</div>
+    <div style="font-size:13px;color:var(--muted);">Samstag · Heimspiel</div>
+  `;
+}
+
+onAuthStateChanged(auth, async user => {
+  currentUser = user;
+  updateNavUI(user);
+  updateBlogUI(user);
+  if (user) {
+    closeModal();
+    await loadBlogPosts();
+  } else {
+    if (postsUnsub) { postsUnsub(); postsUnsub = null; }
+    updateBlogUI(null);
+  }
+});
+
+await loadWeather();
+await loadMatch();
+
+window.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+</script>
+</body>
+</html>
