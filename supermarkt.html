@@ -43,17 +43,8 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
 .btn-sage { background:var(--accent2); color:#fff; }
 .btn-ghost { background:transparent; border:1px solid var(--border); color:var(--muted); }
 .btn-ghost:hover { background:var(--surface2); color:var(--ink); }
-
-.mode-btn {
-  background:#fff;
-  border:1px solid var(--border);
-  color:var(--ink);
-}
-.mode-btn.active {
-  background:var(--accent2);
-  color:#fff;
-  border-color:transparent;
-}
+.mode-btn { background:#fff; border:1px solid var(--border); color:var(--ink); }
+.mode-btn.active { background:var(--accent2); color:#fff; border-color:transparent; }
 
 /* MAIN LAYOUT */
 .editor-layout { display:flex; flex:1; overflow:hidden; position:relative; }
@@ -84,7 +75,6 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
 .palette-item:active { transform:scale(0.97); }
 .palette-item.selected-tool { border-color:var(--accent); background:rgba(212,114,106,0.06); }
 .palette-item.placing-mode { border-color:var(--accent); background:rgba(212,114,106,0.12); }
-
 .pi-icon { width:28px; height:20px; border-radius:4px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:13px; }
 .pi-label { font-size:12px; font-weight:500; color:var(--ink); }
 .pi-sub { font-size:9px; color:var(--muted); margin-top:1px; }
@@ -95,15 +85,12 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
   overflow:auto;
   background-color:#f9f2ea;
   cursor:default;
-}
-#canvas-container { position:relative; transform-origin:0 0; }
-#supermarkt-canvas {
-  position:absolute; top:0; left:0;
   touch-action: pan-x pan-y pinch-zoom;
-  display:block;
 }
+#canvas-container { position:relative; transform-origin:0 0; will-change:transform; }
+#supermarkt-canvas { position:absolute; top:0; left:0; touch-action: pan-x pan-y pinch-zoom; display:block; }
 
-/* Shopping mode lock */
+/* shopping mode lock */
 body.shopping-mode .palette,
 body.shopping-mode #canvas-wrap {
   pointer-events:none;
@@ -245,9 +232,25 @@ body.shopping-mode #supermarkt-canvas {
 .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(60px); background:var(--ink); color:#fff; padding:12px 20px; border-radius:50px; font-size:14px; z-index:2000; transition:transform 0.35s cubic-bezier(0.34,1.4,0.64,1); white-space:nowrap; box-shadow:0 4px 20px rgba(0,0,0,0.2); max-width:90%; text-align:center; }
 .toast.show { transform:translateX(-50%) translateY(0); }
 
+.zoom-hint {
+  position:absolute;
+  left:50%;
+  bottom:10px;
+  transform:translateX(-50%);
+  font-size:11px;
+  color:var(--muted);
+  background:rgba(255,255,255,0.75);
+  border:1px solid var(--border);
+  padding:4px 10px;
+  border-radius:999px;
+  z-index:10;
+  pointer-events:none;
+}
+
 ::-webkit-scrollbar { width:5px; }
 ::-webkit-scrollbar-track { background:transparent; }
 ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+
 </style>
 </head>
 <body>
@@ -311,6 +314,7 @@ body.shopping-mode #supermarkt-canvas {
     <div id="canvas-container">
       <canvas id="supermarkt-canvas"></canvas>
     </div>
+    <div class="zoom-hint">Pinch-Zoom am Handy · Ctrl/Cmd + Mausrad am Desktop</div>
   </div>
 
   <div class="shopping-panel" id="shopping-panel">
@@ -416,18 +420,15 @@ async function refreshSaveSlotsCache() {
 }
 
 window._refreshSaveSlotsCache = refreshSaveSlotsCache;
-
 window._saveToFirebase = async (slotId, data) => {
   if (!currentUser) return;
   await setDoc(doc(db,'supermarkets',currentUser.uid,'saves',slotId), data);
 };
-
 window._loadFromFirebase = async (slotId) => {
   if (!currentUser) return null;
   const s = await getDoc(doc(db,'supermarkets',currentUser.uid,'saves',slotId));
   return s.exists() ? s.data() : null;
 };
-
 window._deleteSaveFromFirebase = async (slotId) => {
   if (!currentUser) return;
   await deleteDoc(doc(db,'supermarkets',currentUser.uid,'saves',slotId));
@@ -453,10 +454,10 @@ let nextId = 1;
 const CANVAS_W = 1400;
 const CANVAS_H = 1000;
 let shoppingMode = false;
-let loadPickerMode = false;
-let saveChoiceMode = false;
-let pendingSaveData = null;
-let pendingSaveName = null;
+let zoomScale = 1;
+const MIN_ZOOM = 0.5;
+const MAX_ZOOM = 2.8;
+const ZOOM_STEP = 0.12;
 
 function initCanvas() {
   canvas = document.getElementById('supermarkt-canvas');
@@ -471,10 +472,56 @@ function initCanvas() {
   canvas.addEventListener('contextmenu', e => e.preventDefault());
   canvas.addEventListener('touchstart', onTouchStart, {passive:true});
   canvas.addEventListener('touchend', onTouchEnd, {passive:true});
+  document.getElementById('canvas-wrap').addEventListener('wheel', onCanvasWheel, {passive:false});
+  applyZoom();
   render();
   updateShoppingUI();
   applyShoppingModeUI();
 }
+
+function applyZoom() {
+  const container = document.getElementById('canvas-container');
+  container.style.transform = `scale(${zoomScale})`;
+  const hint = document.querySelector('.zoom-hint');
+  if (hint) hint.textContent = `Zoom: ${Math.round(zoomScale * 100)}% · Pinch-Zoom am Handy · Ctrl/Cmd + Mausrad am Desktop`;
+}
+
+function setZoom(nextZoom) {
+  zoomScale = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, nextZoom));
+  applyZoom();
+}
+
+function onCanvasWheel(e) {
+  if (!(e.ctrlKey || e.metaKey)) return;
+  e.preventDefault();
+  const delta = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
+  setZoom(zoomScale + delta);
+}
+
+let _touchZoomStartDistance = 0;
+let _touchZoomStartScale = 1;
+
+function getTouchDistance(touches) {
+  const a = touches[0];
+  const b = touches[1];
+  return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+}
+
+document.addEventListener('touchstart', e => {
+  if (e.touches.length === 2 && canvas) {
+    _touchZoomStartDistance = getTouchDistance(e.touches);
+    _touchZoomStartScale = zoomScale;
+  }
+}, { passive: true });
+
+document.addEventListener('touchmove', e => {
+  if (e.touches.length === 2 && canvas) {
+    const dist = getTouchDistance(e.touches);
+    if (_touchZoomStartDistance > 0) {
+      setZoom(_touchZoomStartScale * (dist / _touchZoomStartDistance));
+    }
+  }
+}, { passive: true });
 
 function render() {
   if (!ctx) return;
@@ -668,22 +715,13 @@ function onMouseDown(e){
 
   if(shoppingMode){
     const pin=hitTestPin(x,y);
-    if(pin){
-      pin.done=!pin.done;
-      updateShoppingUI();
-      showToast(pin.done?'✅ '+pin.name+' erledigt':'↩ '+pin.name+' zurückgesetzt');
-    }
+    if(pin){ pin.done=!pin.done; updateShoppingUI(); showToast(pin.done?'✅ '+pin.name+' erledigt':'↩ '+pin.name+' zurückgesetzt'); }
     return;
   }
 
   if(activeTool==='select'&&!placingBlockType){
     const pin=hitTestPin(x,y);
-    if(pin){
-      pin.done=!pin.done;
-      updateShoppingUI();
-      showToast(pin.done?'✅ '+pin.name+' erledigt':'↩ '+pin.name+' zurückgesetzt');
-      return;
-    }
+    if(pin){ pin.done=!pin.done; updateShoppingUI(); showToast(pin.done?'✅ '+pin.name+' erledigt':'↩ '+pin.name+' zurückgesetzt'); return; }
   }
 
   if(activeTool==='delete'){
@@ -759,7 +797,7 @@ function _onTouchMoveInternal(e){
   }
 }
 
-function onTouchEnd(e){
+function onTouchEnd(){
   canvas.removeEventListener('touchmove',_onTouchMoveInternal);
   _touchDragBlock=null;
   if(_touchMoved) return;
@@ -774,22 +812,13 @@ function onTouchEnd(e){
 
   if(shoppingMode){
     const pin=hitTestPin(x,y);
-    if(pin){
-      pin.done=!pin.done;
-      updateShoppingUI();
-      showToast(pin.done?'✅ '+pin.name+' erledigt':'↩ '+pin.name+' zurückgesetzt');
-    }
+    if(pin){ pin.done=!pin.done; updateShoppingUI(); showToast(pin.done?'✅ '+pin.name+' erledigt':'↩ '+pin.name+' zurückgesetzt'); }
     return;
   }
 
   if(activeTool==='select'&&!placingBlockType){
     const pin=hitTestPin(x,y);
-    if(pin){
-      pin.done=!pin.done;
-      updateShoppingUI();
-      showToast(pin.done?'✅ '+pin.name+' erledigt':'↩ '+pin.name+' zurückgesetzt');
-      return;
-    }
+    if(pin){ pin.done=!pin.done; updateShoppingUI(); showToast(pin.done?'✅ '+pin.name+' erledigt':'↩ '+pin.name+' zurückgesetzt'); return; }
   }
 
   if(activeTool==='delete'){
@@ -849,20 +878,14 @@ function applyShoppingModeUI(){
     hidePlaceBanner();
     document.querySelectorAll('.palette-item').forEach(i=>i.classList.remove('placing-mode'));
     canvas && (canvas.style.cursor='default');
+    document.getElementById('shopping-panel').classList.remove('collapsed');
+    document.getElementById('toggle-right').textContent='✕';
   }
 }
 function toggleShoppingMode(){
   shoppingMode = !shoppingMode;
   applyShoppingModeUI();
-  if (shoppingMode) {
-    if (window.innerWidth <= 768) {
-      document.getElementById('shopping-panel').classList.remove('collapsed');
-      document.getElementById('toggle-right').textContent = '✕';
-    }
-    showToast('🛒 Einkaufsmodus aktiviert');
-  } else {
-    showToast('🖱 Bearbeitungsmodus aktiviert');
-  }
+  showToast(shoppingMode ? '🛒 Einkaufsmodus aktiviert' : '🖱 Bearbeitungsmodus aktiviert');
 }
 window.toggleShoppingMode = toggleShoppingMode;
 
@@ -956,7 +979,6 @@ function startPlacingItem(item){
   showPlaceBanner('📍 Tippe auf die Karte um "'+item.name+'" zu platzieren · Esc = Abbrechen');
   updateShoppingUI();
 }
-
 window.markDone=(id)=>{const i=shoppingItems.find(i=>i.id===id);if(i){i.done=true;updateShoppingUI();}};
 window.undoDone=(id)=>{const i=shoppingItems.find(i=>i.id===id);if(i){i.done=false;updateShoppingUI();}};
 window.removeItem=(id)=>{
@@ -979,73 +1001,32 @@ function cleanForFirestore(obj){
   return obj;
 }
 
-function sanitizeSlotName(name){
-  return (name||'').trim().replace(/[^\wäöüÄÖÜß\s\-_.]/g,'').slice(0,40);
-}
-
 function buildSaveData(){
   const name=document.getElementById('market-name').value.trim();
   return cleanForFirestore({name,blocks,shoppingItems,nextId,savedAt:new Date().toISOString()});
 }
+
+function createSlotId(slotNum){ return `slot_${slotNum}`; }
+function slotLabel(slotNum){ return `Supermarkt ${slotNum}`; }
 
 async function getSaveSlots(){
   if (!window._marketSlots) await window._refreshSaveSlotsCache?.();
   return Array.isArray(window._marketSlots) ? [...window._marketSlots].sort((a,b)=>(a.slot||0)-(b.slot||0)) : [];
 }
 
-function createSlotId(slotNum){
-  return `slot_${slotNum}`;
-}
-
-function slotLabel(slotNum){
-  return `Supermarkt ${slotNum}`;
-}
-
-async function saveMap(){
-  const name=document.getElementById('market-name').value.trim();
-  if(!name){showToast('⚠️ Namen eingeben');document.getElementById('market-name').focus();return;}
-  const data=buildSaveData();
-  const slots=await getSaveSlots();
-  const existingBySlot = new Map(slots.map(s => [s.slot, s]));
-
-  let slotToUse = null;
-
-  if (slots.length < 3) {
-    const used = new Set(slots.map(s => s.slot));
-    for (let i=1;i<=3;i++) if (!used.has(i)) { slotToUse = i; break; }
-  } else {
-    openSlotChoiceModal('Speicherplatz wählen', 'Es sind bereits 3 Supermärkte gespeichert. Wähle aus, welchen Slot du überschreiben möchtest.', [
-      { text: 'Slot 1', action: async () => { closeModal(); await doSaveToSlot(1, data, name); } },
-      { text: 'Slot 2', action: async () => { closeModal(); await doSaveToSlot(2, data, name); } },
-      { text: 'Slot 3', action: async () => { closeModal(); await doSaveToSlot(3, data, name); } }
-    ]);
-    return;
-  }
-
-  if (slotToUse == null) {
-    showToast('⚠️ Kein freier Speicherplatz');
-    return;
-  }
-  await doSaveToSlot(slotToUse, data, name);
-}
-
 async function doSaveToSlot(slotNum, data, name){
   try{
     const slotId = createSlotId(slotNum);
-    const payload = {
-      ...data,
-      slot: slotNum,
-      slotId,
-      displayName: name,
-      savedAt: new Date().toISOString()
-    };
+    const payload = {...data, slot:slotNum, slotId, displayName:name, savedAt:new Date().toISOString()};
     if(window._saveToFirebase){
       await window._saveToFirebase(slotId, payload);
       await window._refreshSaveSlotsCache?.();
       showToast(`💾 "${name}" in Slot ${slotNum} gespeichert`);
     } else {
-      const backup = await getSaveSlots();
-      localStorage.setItem('supermarkt_backup_slots', JSON.stringify([...backup, payload].slice(0,3)));
+      const old = JSON.parse(localStorage.getItem('supermarkt_backup_slots') || '[]');
+      const filtered = old.filter(x => x.slot !== slotNum);
+      filtered.push(payload);
+      localStorage.setItem('supermarkt_backup_slots', JSON.stringify(filtered.slice(0,3)));
       showToast(`💾 Lokal in Slot ${slotNum} gespeichert`);
     }
   }catch(e){
@@ -1053,40 +1034,17 @@ async function doSaveToSlot(slotNum, data, name){
   }
 }
 
-function openSlotChoiceModal(title, text, choices){
-  const modal = document.getElementById('modal');
-  document.getElementById('modal-title').textContent = title;
-  document.getElementById('modal-text').textContent = text;
+function closeModal(){ document.getElementById('modal').classList.remove('show'); }
+window.closeModal=closeModal;
+
+function openLoadModal(slots){
+  document.getElementById('modal-title').textContent='Supermarkt laden';
+  document.getElementById('modal-text').textContent='Wähle einen deiner bis zu 3 gespeicherten Supermärkte aus.';
+  document.getElementById('modal-confirm-btn').style.display='none';
   const content = document.getElementById('modal-content');
   content.innerHTML = '';
-  const wrap = document.createElement('div');
-  wrap.className = 'slot-actions';
-  choices.forEach(choice => {
-    const btn = document.createElement('button');
-    btn.className = 'btn btn-sage';
-    btn.textContent = choice.text;
-    btn.onclick = choice.action;
-    wrap.appendChild(btn);
-  });
-  content.appendChild(wrap);
-  document.getElementById('modal-confirm-btn').style.display = 'none';
-  modal.classList.add('show');
-}
-
-async function loadMap(){
-  const slots = await getSaveSlots();
-  if (!slots.length) { showToast('Keine gespeicherte Karte'); return; }
-
-  const content = document.getElementById('modal-content');
-  content.innerHTML = '';
-
-  document.getElementById('modal-title').textContent = 'Supermarkt laden';
-  document.getElementById('modal-text').textContent = 'Wähle einen deiner bis zu 3 gespeicherten Supermärkte aus.';
-  document.getElementById('modal-confirm-btn').style.display = 'none';
-
   const list = document.createElement('div');
   list.className = 'load-list';
-
   slots.slice(0,3).forEach((slot, idx) => {
     const row = document.createElement('div');
     row.className = 'load-slot';
@@ -1104,21 +1062,28 @@ async function loadMap(){
     };
     list.appendChild(row);
   });
-
   content.appendChild(list);
-  modal.classList.add('show');
+  document.getElementById('modal').classList.add('show');
+}
+
+async function loadMap(){
+  const slots = await getSaveSlots();
+  if (!slots.length) { showToast('Keine gespeicherte Karte'); return; }
+  openLoadModal(slots);
 }
 
 async function loadSlot(slotNum){
   try{
-    let data = null;
     const slotId = createSlotId(slotNum);
+    let data = null;
     if(window._loadFromFirebase) data = await window._loadFromFirebase(slotId);
-    if(!data){ showToast('Keine gespeicherte Karte in diesem Slot'); return; }
+    if(!data){
+      showToast('Keine gespeicherte Karte in diesem Slot');
+      return;
+    }
     blocks=data.blocks||[]; shoppingItems=data.shoppingItems||[];
     nextId=data.nextId||blocks.length+1;
     document.getElementById('market-name').value=data.name||'';
-    window._pendingLoad=null;
     updateShoppingUI(); render();
     showToast(`📂 "${data.name || slotLabel(slotNum)}" geladen`);
   }catch(e){
@@ -1126,25 +1091,61 @@ async function loadSlot(slotNum){
   }
 }
 
-window.saveMap = saveMap;
-window.loadMap = loadMap;
+async function saveMap(){
+  const name=document.getElementById('market-name').value.trim();
+  if(!name){showToast('⚠️ Namen eingeben');document.getElementById('market-name').focus();return;}
+  const data=buildSaveData();
+  const slots=await getSaveSlots();
+  const used = new Set(slots.map(s => s.slot));
+  let freeSlot = null;
+  for(let i=1;i<=3;i++) if(!used.has(i)) { freeSlot = i; break; }
 
-// CLEAR / MODAL / TOAST
+  if (freeSlot) {
+    await doSaveToSlot(freeSlot, data, name);
+    return;
+  }
+
+  const content = document.getElementById('modal-content');
+  content.innerHTML = '';
+  const wrap = document.createElement('div');
+  wrap.className = 'slot-actions';
+
+  [1,2,3].forEach(slotNum => {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-sage';
+    btn.textContent = `Slot ${slotNum} überschreiben`;
+    btn.onclick = async () => {
+      closeModal();
+      await doSaveToSlot(slotNum, data, name);
+    };
+    wrap.appendChild(btn);
+  });
+
+  content.appendChild(wrap);
+  document.getElementById('modal-title').textContent='Speicherplatz wählen';
+  document.getElementById('modal-text').textContent='Es sind bereits 3 Supermärkte gespeichert. Welchen Slot möchtest du überschreiben?';
+  document.getElementById('modal-confirm-btn').style.display='none';
+  document.getElementById('modal').classList.add('show');
+}
+window.saveMap=saveMap;
+window.loadMap=loadMap;
+
+// CLEAR / TOAST
 window.confirmClear=()=>{
   document.getElementById('modal-title').textContent='Karte leeren?';
   document.getElementById('modal-text').textContent='Alle Blöcke und Produkte werden entfernt.';
-  document.getElementById('modal-content').innerHTML='';
   document.getElementById('modal-confirm-btn').style.display='inline-flex';
   document.getElementById('modal-confirm-btn').onclick=()=>{blocks=[];selectedBlock=null;render();closeModal();showToast('🗑 Karte geleert');};
+  document.getElementById('modal-content').innerHTML='';
   document.getElementById('modal').classList.add('show');
 };
-function closeModal(){document.getElementById('modal').classList.remove('show');}
-window.closeModal=closeModal;
 
 let toastT;
 function showToast(msg){
-  clearTimeout(toastT);const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastT);
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
   toastT=setTimeout(()=>t.classList.remove('show'),3000);
 }
 window.showToast=showToast;
