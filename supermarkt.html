@@ -598,7 +598,11 @@ onAuthStateChanged(auth, async user => {
     document.getElementById('shopping-panel').classList.add('collapsed');  
     initCanvas();  
     const snap = await getDoc(doc(db, 'supermarkets', user.uid));  
-    if (snap.exists()) { window._pendingLoad = snap.data(); showToast('📂 Gespeicherte Karte gefunden — klick 📂'); }  
+    if (snap.exists()) {  
+      window._pendingLoad = snap.data();  
+      await window.loadMap(); // <-- Karte direkt laden!  
+      showToast('📂 Gespeicherte Karte geladen!');  
+    }  
   } else {  
     document.getElementById('editor-layout').style.display = 'none';  
     document.getElementById('login-gate').style.display = 'flex';  
