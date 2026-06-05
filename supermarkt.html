@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <title>Supermarkt-Planer – Dr. Buntspecht</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -30,17 +30,9 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
   padding:0 12px; flex-shrink:0; gap:6px;
   box-shadow:0 2px 8px var(--shadow);
 }
-.topbar-logo {
-  font-family:'Playfair Display',serif;
-  font-size:14px; font-weight:900; color:var(--ink); white-space:nowrap;
-}
+.topbar-logo { font-family:'Playfair Display',serif; font-size:14px; font-weight:900; color:var(--ink); white-space:nowrap; }
 .topbar-logo span { color:var(--accent); font-style:italic; }
-.topbar-name {
-  flex:1; border:1px solid var(--border); border-radius:8px;
-  padding:6px 10px; font-family:'DM Sans',sans-serif; font-size:12px;
-  color:var(--ink); background:#fff; outline:none; max-width:180px;
-  transition:border-color 0.2s;
-}
+.topbar-name { flex:1; border:1px solid var(--border); border-radius:8px; padding:6px 10px; font-family:'DM Sans',sans-serif; font-size:12px; color:var(--ink); background:#fff; outline:none; max-width:180px; transition:border-color 0.2s; }
 .topbar-name:focus { border-color:var(--accent); }
 .topbar-actions { display:flex; gap:4px; flex-shrink:0; }
 
@@ -53,32 +45,21 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
 .btn-ghost:hover { background:var(--surface2); color:var(--ink); }
 
 /* ── MAIN LAYOUT ── */
-.editor-layout {
-  display:flex; flex:1; overflow:hidden;
-  position:relative;
-}
+.editor-layout { display:flex; flex:1; overflow:hidden; position:relative; }
 
-/* ── LEFT PANEL (Palette) ── */
+/* ── LEFT PANEL ── */
 .palette {
   width:160px; flex-shrink:0;
   background:var(--surface);
   border-right:1px solid var(--border);
   overflow-y:auto; padding:10px 8px;
   display:flex; flex-direction:column; gap:4px;
-  transition:transform 0.3s ease, width 0.3s ease;
-  position:absolute;
-  left:0;
-  top:0;
-  bottom:0;
-  z-index:20;
+  position:absolute; left:0; top:0; bottom:0; z-index:20;
+  transition:transform 0.3s ease;
 }
-.palette.collapsed {
-  transform:translateX(-100%);
-}
-.palette-title {
-  font-size:10px; font-weight:700; text-transform:uppercase;
-  letter-spacing:1.5px; color:var(--muted); padding:6px 4px 4px;
-}
+.palette.collapsed { transform:translateX(-100%); }
+
+.palette-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--muted); padding:6px 4px 4px; }
 .palette-divider { height:1px; background:var(--border); margin:6px 0; }
 
 .palette-item {
@@ -86,125 +67,82 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
   padding:10px 12px; border-radius:10px;
   cursor:pointer; border:1.5px solid transparent;
   transition:all 0.15s; user-select:none;
-  background:#fff;
-  min-height:44px;
+  background:#fff; min-height:44px;
 }
 .palette-item:hover { border-color:var(--border); box-shadow:0 2px 8px var(--shadow); }
 .palette-item:active { transform:scale(0.97); }
 .palette-item.selected-tool { border-color:var(--accent); background:rgba(212,114,106,0.06); }
 .palette-item.placing-mode { border-color:var(--accent); background:rgba(212,114,106,0.12); }
 
-.pi-icon {
-  width:28px; height:20px; border-radius:4px; flex-shrink:0;
-  display:flex; align-items:center; justify-content:center;
-  font-size:13px;
-}
+.pi-icon { width:28px; height:20px; border-radius:4px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:13px; }
 .pi-label { font-size:12px; font-weight:500; color:var(--ink); }
 .pi-sub { font-size:9px; color:var(--muted); margin-top:1px; }
 
-/* ── CANVAS AREA ── */
+/* ── CANVAS ── */
 .canvas-wrap {
-  flex:1; position:relative; overflow:hidden;
-  background: repeating-linear-gradient(0deg, transparent, transparent 29px, rgba(180,140,120,0.08) 30px),
-              repeating-linear-gradient(90deg, transparent, transparent 29px, rgba(180,140,120,0.08) 30px);
+  flex:1; position:relative;
+  /* ZOOM: overflow:auto allows native pinch-zoom scrolling */
+  overflow:auto;
   background-color: #f9f2ea;
   cursor:default;
-  margin-left:0;
-  transition:margin-left 0.3s ease;
+  /* This wrapper scrolls; inner div is the actual zoomable surface */
 }
 
+/* The inner zoomable container — width/height set by JS */
+#canvas-container {
+  position:relative;
+  transform-origin: 0 0;
+}
+
+/* Grid drawn on canvas, canvas fills container */
 #supermarkt-canvas {
   position:absolute; top:0; left:0;
-  touch-action:none;
+  touch-action: pan-x pan-y pinch-zoom;
+  display:block;
 }
 
 /* Toggle Buttons */
 .toggle-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 36px;
-  height: 44px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  z-index: 30;
-  box-shadow: 0 2px 8px var(--shadow);
-  transition: all 0.2s;
-  min-width: 44px;
+  position:absolute; top:50%; transform:translateY(-50%);
+  width:36px; height:44px;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:8px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  font-size:18px; z-index:30;
+  box-shadow:0 2px 8px var(--shadow); transition:all 0.2s;
+  min-width:44px;
 }
-.toggle-btn:hover { background: var(--surface2); }
-.toggle-btn:active { transform: translateY(-50%) scale(0.95); }
+.toggle-btn:hover { background:var(--surface2); }
+.toggle-btn:active { transform:translateY(-50%) scale(0.95); }
+.toggle-left { left:8px; }
+.toggle-right { right:8px; }
 
-.toggle-left {
-  left: 8px;
-}
-.toggle-right {
-  right: 8px;
-}
-
-/* ── RIGHT PANEL (Shopping) ── */
+/* ── RIGHT PANEL ── */
 .shopping-panel {
   width:240px; flex-shrink:0;
-  background:var(--surface);
-  border-left:1px solid var(--border);
-  display:flex; flex-direction:column;
-  overflow:hidden;
-  position:absolute;
-  right:0;
-  top:0;
-  bottom:0;
-  z-index:20;
+  background:var(--surface); border-left:1px solid var(--border);
+  display:flex; flex-direction:column; overflow:hidden;
+  position:absolute; right:0; top:0; bottom:0; z-index:20;
   transition:transform 0.3s ease;
 }
-.shopping-panel.collapsed {
-  transform:translateX(100%);
-}
-.sp-header {
-  padding:12px 14px 8px;
-  border-bottom:1px solid var(--border);
-}
-.sp-title {
-  font-family:'Playfair Display',serif;
-  font-size:15px; font-weight:700; color:var(--ink); margin-bottom:2px;
-}
+.shopping-panel.collapsed { transform:translateX(100%); }
+
+.sp-header { padding:12px 14px 8px; border-bottom:1px solid var(--border); }
+.sp-title { font-family:'Playfair Display',serif; font-size:15px; font-weight:700; color:var(--ink); margin-bottom:2px; }
 .sp-sub { font-size:11px; color:var(--muted); }
 
-.sp-add {
-  display:flex; gap:6px; padding:10px 12px;
-  border-bottom:1px solid var(--border);
-}
-.sp-input {
-  flex:1; border:1px solid var(--border); border-radius:8px;
-  padding:8px 10px; font-family:'DM Sans',sans-serif; font-size:13px;
-  color:var(--ink); background:#fff; outline:none;
-  min-height:44px;
-}
+.sp-add { display:flex; gap:6px; padding:10px 12px; border-bottom:1px solid var(--border); }
+.sp-input { flex:1; border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-family:'DM Sans',sans-serif; font-size:13px; color:var(--ink); background:#fff; outline:none; min-height:44px; }
 .sp-input:focus { border-color:var(--accent); }
-.sp-add-btn {
-  background:var(--accent); color:#fff; border:none;
-  border-radius:8px; width:44px; height:44px;
-  display:flex; align-items:center; justify-content:center;
-  cursor:pointer; font-size:20px; flex-shrink:0;
-  transition:filter 0.15s;
-}
-.sp-add-btn:hover { filter:brightness(1.1); }
+.sp-add-btn { background:var(--accent); color:#fff; border:none; border-radius:8px; width:44px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:20px; flex-shrink:0; }
 
-.sp-list {
-  flex:1; overflow-y:auto; padding:8px;
-  display:flex; flex-direction:column; gap:4px;
-}
+.sp-list { flex:1; overflow-y:auto; padding:8px; display:flex; flex-direction:column; gap:4px; }
+
 .sp-item {
   display:flex; align-items:center; gap:8px;
   padding:10px 12px; border-radius:10px;
   background:#fff; border:1.5px solid var(--border);
-  cursor:pointer; transition:all 0.15s;
-  min-height:48px;
+  cursor:pointer; transition:all 0.15s; min-height:48px;
 }
 .sp-item:active { transform:scale(0.98); }
 .sp-item:hover { border-color:var(--accent); }
@@ -213,95 +151,52 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
 .sp-item.done { opacity:0.5; }
 .sp-item.done .sp-item-name { text-decoration:line-through; }
 
-.sp-item-dot {
-  width:12px; height:12px; border-radius:50%; flex-shrink:0;
-  border:2px solid var(--muted);
-  transition:all 0.2s;
-}
+.sp-item-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; border:2px solid var(--muted); transition:all 0.2s; }
 .sp-item.placed .sp-item-dot { background:var(--accent2); border-color:var(--accent2); }
 .sp-item.done .sp-item-dot { background:var(--muted); border-color:var(--muted); }
-
 .sp-item-name { flex:1; font-size:13px; font-weight:500; color:var(--ink); min-width:0; }
 .sp-item-loc { font-size:10px; color:var(--accent2); margin-top:1px; }
-
 .sp-item-actions { display:flex; gap:4px; }
-.sp-icon-btn {
-  background:none; border:none; cursor:pointer;
-  font-size:16px; padding:6px; border-radius:6px;
-  color:var(--muted); transition:color 0.15s;
-  min-width:36px;
-  min-height:36px;
-  display:flex; align-items:center; justify-content:center;
-}
+.sp-icon-btn { background:none; border:none; cursor:pointer; font-size:16px; padding:6px; border-radius:6px; color:var(--muted); min-width:36px; min-height:36px; display:flex; align-items:center; justify-content:center; }
 .sp-icon-btn:active { background:var(--surface2); }
-.sp-icon-btn:hover { color:var(--accent); }
 
 .sp-empty { text-align:center; padding:32px 12px; color:var(--muted); font-size:13px; font-style:italic; }
-
 .sp-footer { padding:10px 12px; border-top:1px solid var(--border); }
 .sp-progress { height:4px; background:var(--surface2); border-radius:2px; margin-bottom:6px; overflow:hidden; }
 .sp-progress-bar { height:100%; background:var(--accent2); border-radius:2px; transition:width 0.4s ease; }
 .sp-stats { font-size:11px; color:var(--muted); display:flex; justify-content:space-between; }
 
+/* ── PLACE HINT BANNER ── */
+.place-banner {
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px);
+  background:var(--accent); color:#fff;
+  padding:12px 22px; border-radius:50px;
+  font-size:14px; font-weight:600;
+  z-index:500; white-space:nowrap;
+  box-shadow:0 4px 20px rgba(212,114,106,0.4);
+  transition:transform 0.4s cubic-bezier(0.34,1.4,0.64,1);
+  max-width:90vw; text-align:center;
+}
+.place-banner.show { transform:translateX(-50%) translateY(0); }
+
 /* ── CONTEXT MENU ── */
-.ctx-menu {
-  position:fixed; z-index:500;
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:6px;
-  box-shadow:0 8px 32px var(--shadow);
-  min-width:160px;
-  opacity:0; pointer-events:none;
-  transform:scale(0.95);
-  transition:all 0.15s;
-}
+.ctx-menu { position:fixed; z-index:500; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:6px; box-shadow:0 8px 32px var(--shadow); min-width:160px; opacity:0; pointer-events:none; transform:scale(0.95); transition:all 0.15s; }
 .ctx-menu.show { opacity:1; pointer-events:all; transform:scale(1); }
-.ctx-item {
-  padding:12px 14px; border-radius:8px;
-  cursor:pointer; font-size:14px; color:var(--ink);
-  display:flex; align-items:center; gap:8px;
-  transition:background 0.1s;
-  min-height:44px;
-}
+.ctx-item { padding:12px 14px; border-radius:8px; cursor:pointer; font-size:14px; color:var(--ink); display:flex; align-items:center; gap:8px; transition:background 0.1s; min-height:44px; }
 .ctx-item:active { background:var(--surface2); }
 .ctx-item:hover { background:var(--surface2); }
 .ctx-item.danger { color:var(--accent); }
 
-/* ── TEXT EDIT POPUP ── */
-.text-popup {
-  position:fixed; z-index:600;
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:12px;
-  box-shadow:0 8px 32px var(--shadow);
-  display:none; gap:8px; align-items:center;
-  min-width:280px;
-}
+/* ── TEXT POPUP ── */
+.text-popup { position:fixed; z-index:600; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px; box-shadow:0 8px 32px var(--shadow); display:none; gap:8px; align-items:center; min-width:280px; }
 .text-popup.show { display:flex; }
-.text-popup input {
-  border:1px solid var(--border); border-radius:8px;
-  padding:8px 10px; font-family:'DM Sans',sans-serif; font-size:14px;
-  color:var(--ink); background:#fff; outline:none; flex:1;
-  min-height:44px;
-}
+.text-popup input { border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--ink); background:#fff; outline:none; flex:1; min-height:44px; }
 .text-popup input:focus { border-color:var(--accent); }
 
 /* ── MODAL ── */
-.modal-overlay {
-  position:fixed; inset:0; z-index:1000;
-  background:rgba(45,31,26,0.5); backdrop-filter:blur(6px);
-  display:flex; align-items:center; justify-content:center;
-  opacity:0; pointer-events:none; transition:opacity 0.25s;
-  padding:20px;
-}
+.modal-overlay { position:fixed; inset:0; z-index:1000; background:rgba(45,31,26,0.5); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.25s; padding:20px; }
 .modal-overlay.show { opacity:1; pointer-events:all; }
-.modal-box {
-  background:var(--surface); border-radius:20px;
-  padding:24px; max-width:340px; width:100%;
-  box-shadow:0 16px 48px rgba(0,0,0,0.15);
-}
+.modal-box { background:var(--surface); border-radius:20px; padding:24px; max-width:340px; width:100%; box-shadow:0 16px 48px rgba(0,0,0,0.15); }
 .modal-title { font-family:'Playfair Display',serif; font-size:20px; font-weight:700; margin-bottom:8px; }
 .modal-text { font-size:14px; color:var(--muted); line-height:1.6; margin-bottom:20px; }
 .modal-actions { display:flex; gap:8px; justify-content:flex-end; }
@@ -310,36 +205,9 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
 .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(60px); background:var(--ink); color:#fff; padding:12px 20px; border-radius:50px; font-size:14px; z-index:2000; transition:transform 0.35s cubic-bezier(0.34,1.4,0.64,1); white-space:nowrap; box-shadow:0 4px 20px rgba(0,0,0,0.2); max-width:90%; text-align:center; }
 .toast.show { transform:translateX(-50%) translateY(0); }
 
-/* ── LOGIN GATE ── */
-.login-gate {
-  flex:1; display:flex; flex-direction:column;
-  align-items:center; justify-content:center; gap:16px;
-  color:var(--muted); padding:20px;
-}
-
-/* SCROLLBAR */
 ::-webkit-scrollbar { width:5px; }
 ::-webkit-scrollbar-track { background:transparent; }
 ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
-
-/* Mobile Hinweis */
-.mobile-hint {
-  position:fixed;
-  bottom:80px;
-  left:50%;
-  transform:translateX(-50%);
-  background:var(--accent);
-  color:#fff;
-  padding:8px 16px;
-  border-radius:20px;
-  font-size:12px;
-  z-index:100;
-  opacity:0;
-  pointer-events:none;
-  transition:opacity 0.3s;
-  white-space:nowrap;
-}
-.mobile-hint.show { opacity:0.95; }
 </style>
 </head>
 <body>
@@ -369,7 +237,6 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
       <div class="pi-icon">🗑</div>
       <div><div class="pi-label">Löschen</div><div class="pi-sub">Klick auf Block</div></div>
     </div>
-
     <div class="palette-divider"></div>
     <div class="palette-title">Bausteine</div>
     <div class="palette-item" data-block="regal" onclick="selectBlockType('regal',this)">
@@ -392,7 +259,6 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
       <div class="pi-icon" style="background:#c8a8e0;border-radius:3px;width:20px;height:20px;"></div>
       <div><div class="pi-label">Kasse</div><div class="pi-sub">lila</div></div>
     </div>
-
     <div class="palette-divider"></div>
     <div class="palette-title">Text</div>
     <div class="palette-item" data-block="label" onclick="selectBlockType('label',this)">
@@ -405,9 +271,11 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
   <button class="toggle-btn toggle-left" id="toggle-left" onclick="toggleLeftPanel()">☰</button>
   <button class="toggle-btn toggle-right" id="toggle-right" onclick="toggleRightPanel()">🛒</button>
 
-  <!-- CANVAS -->
-  <div class="canvas-wrap" id="canvas-wrap" onclick="onCanvasClick(event)">
-    <canvas id="supermarkt-canvas"></canvas>
+  <!-- CANVAS WRAP — scrollable/zoomable container -->
+  <div class="canvas-wrap" id="canvas-wrap">
+    <div id="canvas-container">
+      <canvas id="supermarkt-canvas"></canvas>
+    </div>
   </div>
 
   <!-- RIGHT PANEL -->
@@ -434,12 +302,15 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
 </div>
 
 <!-- LOGIN GATE -->
-<div id="login-gate" style="display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
+<div id="login-gate" style="display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px;text-align:center;">
   <div style="font-size:48px;">🔒</div>
   <div style="font-family:'Playfair Display',serif;font-size:22px;color:var(--ink);">Bitte einloggen</div>
-  <div style="font-size:14px;color:var(--muted); text-align:center;">Der Marktplaner ist nur für angemeldete Nutzer verfügbar.</div>
-  <a href="index.html" class="btn btn-primary" style="margin-top:8px;">← Zur Startseite</a>
+  <div style="font-size:14px;color:var(--muted);">Der Marktplaner ist nur für angemeldete Nutzer.</div>
+  <a href="index.html" class="btn btn-primary" style="margin-top:8px;padding:10px 18px;">← Zur Startseite</a>
 </div>
+
+<!-- PLACE BANNER -->
+<div class="place-banner" id="place-banner">📍 Tippe auf die Karte zum Platzieren · Esc = Abbrechen</div>
 
 <!-- CONTEXT MENU -->
 <div class="ctx-menu" id="ctx-menu">
@@ -467,11 +338,7 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
-
-<!-- MOBILE HINT -->
-<div class="mobile-hint" id="mobile-hint">➡️ Klick auf Canvas zum Platzieren</div>
 
 <!-- FIREBASE -->
 <script type="module">
@@ -499,44 +366,20 @@ onAuthStateChanged(auth, async user => {
     document.getElementById('login-gate').style.display = 'none';
     document.getElementById('btn-clear').style.display = 'inline-block';
     document.getElementById('btn-load').style.display = 'inline-block';
-    
-    if (window.innerWidth <= 768) {
-      document.getElementById('palette').classList.add('collapsed');
-      document.getElementById('shopping-panel').classList.add('collapsed');
-      document.getElementById('toggle-left').textContent = '☰';
-      document.getElementById('toggle-right').textContent = '🛒';
-    } else {
-      document.getElementById('shopping-panel').classList.add('collapsed');
-      document.getElementById('toggle-right').textContent = '🛒';
-    }
-    
+    // Both panels collapsed by default
+    document.getElementById('palette').classList.add('collapsed');
+    document.getElementById('shopping-panel').classList.add('collapsed');
     initCanvas();
-    await loadMapFromFirebase(user, db);
+    const snap = await getDoc(doc(db, 'supermarkets', user.uid));
+    if (snap.exists()) { window._pendingLoad = snap.data(); showToast('📂 Gespeicherte Karte gefunden — klick 📂'); }
   } else {
     document.getElementById('editor-layout').style.display = 'none';
     document.getElementById('login-gate').style.display = 'flex';
   }
 });
 
-window._saveToFirebase = async (data) => {
-  if (!currentUser) return;
-  await setDoc(doc(db, 'supermarkets', currentUser.uid), data);
-};
-
-window._loadFromFirebase = async () => {
-  if (!currentUser) return null;
-  const snap = await getDoc(doc(db, 'supermarkets', currentUser.uid));
-  return snap.exists() ? snap.data() : null;
-};
-
-async function loadMapFromFirebase(user, db) {
-  const snap = await getDoc(doc(db, 'supermarkets', user.uid));
-  if (snap.exists()) {
-    const data = snap.data();
-    window._pendingLoad = data;
-    showToast('📂 Gespeicherte Karte gefunden — klick "Laden"');
-  }
-}
+window._saveToFirebase = async (data) => { if (!currentUser) return; await setDoc(doc(db,'supermarkets',currentUser.uid), data); };
+window._loadFromFirebase = async () => { if (!currentUser) return null; const s=await getDoc(doc(db,'supermarkets',currentUser.uid)); return s.exists()?s.data():null; };
 </script>
 
 <script>
@@ -544,588 +387,535 @@ async function loadMapFromFirebase(user, db) {
 //  BLOCK DEFINITIONS
 // ════════════════════════════════════════
 const BLOCK_DEFS = {
-  'regal':     { w:120, h:28,  color:'#a8e0a8', label:'', emoji:'', labelColor:'#2d5a8a' },
-  'obst':      { w:70,  h:70,  color:'#f0c080', label:'', emoji:'', labelColor:'#2d5a8a' },
-  'kuehl':     { w:130, h:32,  color:'#a8c4e0', label:'', emoji:'', labelColor:'#2d5a8a' },
-  'eingang':   { w:50,  h:50,  color:'#8a7060', label:'', emoji:'', labelColor:'#2d5a8a' },
-  'kasse':     { w:50,  h:50,  color:'#c8a8e0', label:'', emoji:'', labelColor:'#2d5a8a' },
-  'label':     { w:80,  h:28,  color:'rgba(212,114,106,0.12)', label:'Label', emoji:'', labelColor:'#2d5a8a', isLabel:true }
+  'regal':   { w:120, h:28,  color:'#a8e0a8', labelColor:'#2d5a8a' },
+  'obst':    { w:70,  h:70,  color:'#f0c080', labelColor:'#2d5a8a' },
+  'kuehl':   { w:130, h:32,  color:'#a8c4e0', labelColor:'#2d5a8a' },
+  'eingang': { w:50,  h:50,  color:'#8a7060', labelColor:'#fff' },
+  'kasse':   { w:50,  h:50,  color:'#c8a8e0', labelColor:'#2d5a8a' },
+  'label':   { w:80,  h:28,  color:'rgba(212,114,106,0.12)', labelColor:'#2d5a8a', isLabel:true }
 };
 
-let blocks = [];
-let shoppingItems = [];
-let selectedBlock = null;
-let placingItem = null;
-let placingBlockType = null; // NEW: Block type selected for placement
-let activeTool = 'select';
-let ctxTarget = null;
-let textEditTarget = null;
-let canvas, ctx;
-let canvasW, canvasH;
-let isDraggingBlock = false;
-let dragOffX = 0, dragOffY = 0;
+// ════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════
+let blocks = [], shoppingItems = [];
+let selectedBlock = null, placingItem = null, placingBlockType = null;
+let activeTool = 'select', ctxTarget = null, textEditTarget = null;
+let canvas, ctx, canvasW = 1200, canvasH = 900; // large internal canvas
+let isDraggingBlock = false, dragOffX = 0, dragOffY = 0;
 let nextId = 1;
 
+// zoom/scroll state
+let zoomScale = 1;
+const CANVAS_W = 1400; // internal canvas dimensions
+const CANVAS_H = 1000;
+
+// ════════════════════════════════════════
+//  CANVAS INIT
+// ════════════════════════════════════════
 function initCanvas() {
   canvas = document.getElementById('supermarkt-canvas');
   ctx = canvas.getContext('2d');
-  resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
+
+  // Set large internal canvas — user can scroll/pinch-zoom via browser
+  canvas.width = CANVAS_W;
+  canvas.height = CANVAS_H;
+  document.getElementById('canvas-container').style.width = CANVAS_W + 'px';
+  document.getElementById('canvas-container').style.height = CANVAS_H + 'px';
+
   canvas.addEventListener('mousedown', onMouseDown);
   canvas.addEventListener('mousemove', onMouseMove);
   canvas.addEventListener('mouseup', onMouseUp);
-  canvas.addEventListener('touchstart', onTouchStart, {passive:false});
-  canvas.addEventListener('touchmove', onTouchMove, {passive:false});
-  canvas.addEventListener('touchend', onTouchEnd);
+  canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+  // Touch: tap to place, tap to select/move (no preventDefault so pinch-zoom works natively)
+  canvas.addEventListener('touchstart', onTouchStart, {passive:true});
+  canvas.addEventListener('touchend', onTouchEnd, {passive:true});
+  // touchmove left to browser for native scroll/zoom
+
   render();
 }
 
-function resizeCanvas() {
-  const wrap = document.getElementById('canvas-wrap');
-  canvasW = wrap.clientWidth;
-  canvasH = wrap.clientHeight;
-  canvas.width = canvasW;
-  canvas.height = canvasH;
-  render();
-}
-
+// ════════════════════════════════════════
+//  RENDER
+// ════════════════════════════════════════
 function render() {
   if (!ctx) return;
-  ctx.clearRect(0, 0, canvasW, canvasH);
-  ctx.strokeStyle = 'rgba(180,140,120,0.12)';
-  ctx.lineWidth = 1;
-  for (let x = 0; x < canvasW; x += 30) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvasH); ctx.stroke(); }
-  for (let y = 0; y < canvasH; y += 30) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvasW,y); ctx.stroke(); }
-  blocks.forEach(b => drawBlock(b));
-  shoppingItems.forEach(item => {
-    if (item.x !== undefined && item.y !== undefined && !item.done) drawPin(item.x, item.y, item.name, item.color);
+  ctx.clearRect(0,0,CANVAS_W,CANVAS_H);
+  // grid
+  ctx.strokeStyle='rgba(180,140,120,0.12)'; ctx.lineWidth=1;
+  for(let x=0;x<CANVAS_W;x+=30){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,CANVAS_H);ctx.stroke();}
+  for(let y=0;y<CANVAS_H;y+=30){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(CANVAS_W,y);ctx.stroke();}
+  blocks.forEach(b=>drawBlock(b));
+  shoppingItems.forEach(item=>{
+    if(item.x!==undefined&&item.y!==undefined&&!item.done) drawPin(item.x,item.y,item.name,item.color);
   });
 }
 
 function drawBlock(b) {
-  const def = BLOCK_DEFS[b.type];
-  const isSelected = selectedBlock && selectedBlock.id === b.id;
+  const def=BLOCK_DEFS[b.type];
+  if(!def)return;
+  const isSel=selectedBlock&&selectedBlock.id===b.id;
   ctx.save();
-  if (isSelected) { ctx.shadowColor = 'rgba(212,114,106,0.4)'; ctx.shadowBlur = 12; }
-  if (def.isLabel) {
-    ctx.fillStyle = 'rgba(212,114,106,0.1)';
-    ctx.strokeStyle = 'rgba(212,114,106,0.4)';
-    ctx.lineWidth = 1;
-    ctx.setLineDash([4,3]);
-    roundRect(b.x, b.y, b.w, b.h, 4);
-    ctx.fill(); ctx.stroke();
-    ctx.setLineDash([]);
+  if(isSel){ctx.shadowColor='rgba(212,114,106,0.4)';ctx.shadowBlur=12;}
+  if(def.isLabel){
+    ctx.fillStyle='rgba(212,114,106,0.1)';
+    ctx.strokeStyle='rgba(212,114,106,0.4)';
+    ctx.lineWidth=1; ctx.setLineDash([4,3]);
+    rr(b.x,b.y,b.w,b.h,4); ctx.fill(); ctx.stroke(); ctx.setLineDash([]);
   } else {
-    ctx.fillStyle = b.color || def.color;
-    roundRect(b.x, b.y, b.w, b.h, 6);
-    ctx.fill();
-    ctx.strokeStyle = isSelected ? '#d4726a' : 'rgba(0,0,0,0.08)';
-    ctx.lineWidth = isSelected ? 2 : 1;
-    ctx.stroke();
+    ctx.fillStyle=b.color||def.color;
+    rr(b.x,b.y,b.w,b.h,6); ctx.fill();
+    ctx.strokeStyle=isSel?'#d4726a':'rgba(0,0,0,0.08)';
+    ctx.lineWidth=isSel?2:1; ctx.stroke();
   }
-  ctx.shadowBlur = 0;
-  if (def.emoji && b.w > 30) {
-    ctx.font = `${Math.min(b.h*0.55, 20)}px serif`;
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(def.emoji, b.x + 6, b.y + b.h/2);
+  ctx.shadowBlur=0;
+  const lbl=b.customLabel!=null?b.customLabel:'';
+  if(lbl&&b.w>20){
+    ctx.fillStyle=def.isLabel?'#2d5a8a':def.labelColor;
+    const fs=def.isLabel?13:Math.min(b.h*0.42,13);
+    ctx.font=`${def.isLabel?'600 ':''}${fs}px DM Sans,sans-serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(trunc(lbl,b.w-10,ctx),b.x+b.w/2,b.y+b.h/2);
   }
-  const labelText = b.customLabel !== undefined ? b.customLabel : def.label;
-  if (labelText && b.w > 20) {
-    ctx.fillStyle = def.isLabel ? '#d4726a' : def.labelColor;
-    const emojiOffset = def.emoji ? 22 : 0;
-    const availW = b.w - 10 - emojiOffset;
-    const fontSize = def.isLabel ? 13 : Math.min(Math.min(b.h * 0.42, 12), 13);
-    ctx.font = `${def.isLabel ? '600 ' : ''}${fontSize}px DM Sans, sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    const tx = b.x + emojiOffset + (b.w - emojiOffset)/2;
-    ctx.fillText(truncate(labelText, availW, ctx), tx, b.y + b.h/2);
-  }
-  if (isSelected) {
-    ctx.strokeStyle = '#d4726a';
-    ctx.lineWidth = 2;
-    ctx.setLineDash([4,3]);
-    roundRect(b.x-2, b.y-2, b.w+4, b.h+4, 8);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle = '#d4726a';
-    ctx.beginPath();
-    ctx.arc(b.x+b.w, b.y+b.h, 5, 0, Math.PI*2);
-    ctx.fill();
+  if(isSel){
+    ctx.strokeStyle='#d4726a'; ctx.lineWidth=2; ctx.setLineDash([4,3]);
+    rr(b.x-2,b.y-2,b.w+4,b.h+4,8); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle='#d4726a';
+    ctx.beginPath(); ctx.arc(b.x+b.w,b.y+b.h,7,0,Math.PI*2); ctx.fill();
   }
   ctx.restore();
 }
 
-function drawPin(x, y, name, color) {
-  const c = color || '#d4726a';
+function drawPin(x,y,name,color){
+  const c=color||'#d4726a';
   ctx.save();
-  ctx.fillStyle = c;
-  ctx.beginPath();
-  ctx.arc(x, y-14, 9, 0, Math.PI*2);
-  ctx.fill();
-  ctx.fillStyle = '#fff';
-  ctx.font = '600 11px DM Sans';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('📍', x, y-14);
-  ctx.strokeStyle = c;
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(x, y-5);
-  ctx.lineTo(x, y);
-  ctx.stroke();
-  const metrics = ctx.measureText(name);
-  const lw = metrics.width + 12;
-  ctx.fillStyle = c;
-  ctx.beginPath();
-  roundRect(x - lw/2, y - 36, lw, 16, 4);
-  ctx.fill();
-  ctx.fillStyle = '#fff';
-  ctx.font = '600 10px DM Sans';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(name, x, y - 28);
+  ctx.fillStyle=c; ctx.beginPath(); ctx.arc(x,y-14,9,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#fff'; ctx.font='600 11px DM Sans'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('📍',x,y-14);
+  ctx.strokeStyle=c; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(x,y-5); ctx.lineTo(x,y); ctx.stroke();
+  const lw=ctx.measureText(name).width+12;
+  ctx.fillStyle=c; ctx.beginPath(); rr(x-lw/2,y-36,lw,16,4); ctx.fill();
+  ctx.fillStyle='#fff'; ctx.font='600 10px DM Sans'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(name,x,y-28);
   ctx.restore();
 }
 
-function roundRect(x,y,w,h,r) {
-  ctx.beginPath();
-  ctx.moveTo(x+r,y);
-  ctx.lineTo(x+w-r,y);
-  ctx.quadraticCurveTo(x+w,y,x+w,y+r);
-  ctx.lineTo(x+w,y+h-r);
-  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
-  ctx.lineTo(x+r,y+h);
-  ctx.quadraticCurveTo(x,y+h,x,y+h-r);
-  ctx.lineTo(x,y+r);
-  ctx.quadraticCurveTo(x,y,x+r,y);
-  ctx.closePath();
+function rr(x,y,w,h,r){
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);
+  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
 }
 
-function truncate(text, maxW, ctx) {
-  if (ctx.measureText(text).width <= maxW) return text;
-  while (text.length > 1 && ctx.measureText(text+'…').width > maxW) text = text.slice(0,-1);
-  return text+'…';
+function trunc(t,mw,c){
+  if(c.measureText(t).width<=mw)return t;
+  while(t.length>1&&c.measureText(t+'…').width>mw)t=t.slice(0,-1);
+  return t+'…';
 }
 
-function getPos(e) {
+// ════════════════════════════════════════
+//  COORDINATE HELPERS
+//  canvas is inside a scrollable wrapper — account for scroll offset
+// ════════════════════════════════════════
+function getCanvasPos(clientX, clientY) {
   const rect = canvas.getBoundingClientRect();
-  return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+  // getBoundingClientRect accounts for CSS transforms (browser zoom)
+  const scaleX = CANVAS_W / rect.width;
+  const scaleY = CANVAS_H / rect.height;
+  return {
+    x: (clientX - rect.left) * scaleX,
+    y: (clientY - rect.top)  * scaleY
+  };
 }
 
-function hitTest(x, y) {
-  for (let i = blocks.length-1; i >= 0; i--) {
-    const b = blocks[i];
-    if (x >= b.x && x <= b.x+b.w && y >= b.y && y <= b.y+b.h) return b;
+function hitTest(x,y){
+  for(let i=blocks.length-1;i>=0;i--){
+    const b=blocks[i];
+    if(x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h)return b;
   }
   return null;
 }
 
-function hitTestResizeHandle(b, x, y) {
-  const handleX = b.x + b.w;
-  const handleY = b.y + b.h;
-  const dx = x - handleX;
-  const dy = y - handleY;
-  return (dx*dx + dy*dy) <= 36;
-}
-
-function snap(v) { return Math.round(v/15)*15; }
+function nearResize(b,x,y){return Math.hypot(x-(b.x+b.w),y-(b.y+b.h))<14;}
+function snap(v){return Math.round(v/15)*15;}
 
 // ════════════════════════════════════════
-//  BLOCK SELECTION & PLACEMENT (NEW!)
+//  BLOCK PLACEMENT
 // ════════════════════════════════════════
-function selectBlockType(blockType, el) {
-  if (activeTool !== 'select') return;
-  
-  placingBlockType = blockType;
-  
-  // Alle Palette-Items entfernen
-  document.querySelectorAll('.palette-item').forEach(i => i.classList.remove('placing-mode'));
+function selectBlockType(blockType,el){
+  if(activeTool!=='select')return;
+  placingBlockType=blockType;
+  document.querySelectorAll('.palette-item').forEach(i=>i.classList.remove('placing-mode'));
   el.classList.add('placing-mode');
-  
-  // Panel auf Mobile schließen
-  if (window.innerWidth <= 768) {
+  canvas.style.cursor='crosshair';
+  // Close palette on mobile so canvas is visible
+  if(window.innerWidth<=768){
     document.getElementById('palette').classList.add('collapsed');
-    document.getElementById('toggle-left').textContent = '☰';
+    document.getElementById('toggle-left').textContent='☰';
   }
-  
-  showToast('🎯 Klick auf Canvas zum Platzieren von ' + BLOCK_DEFS[blockType].label);
-  
-  // Canvas Cursor ändern
-  canvas.style.cursor = 'crosshair';
-  
-  // Mobile Hinweis zeigen
-  const hint = document.getElementById('mobile-hint');
-  hint.textContent = '➡️ Klick zum Platzieren: ' + (BLOCK_DEFS[blockType].label || blockType);
-  hint.classList.add('show');
-  setTimeout(() => hint.classList.remove('show'), 2500);
+  showPlaceBanner('📍 Tippe auf die Karte zum Platzieren · Esc = Abbrechen');
 }
+window.selectBlockType=selectBlockType;
 
-function placeBlockAt(x, y) {
-  if (!placingBlockType) return;
-  
-  const def = BLOCK_DEFS[placingBlockType];
-  const block = {
-    id: nextId++,
-    type: placingBlockType,
-    x: snap(x - def.w/2),
-    y: snap(y - def.h/2),
-    w: def.w,
-    h: def.h,
-    color: def.color,
-    customLabel: def.isLabel ? 'Label' : undefined
+function placeBlockAt(x,y){
+  if(!placingBlockType)return;
+  const def=BLOCK_DEFS[placingBlockType];
+  const block={
+    id:nextId++,type:placingBlockType,
+    x:snap(x-def.w/2),y:snap(y-def.h/2),
+    w:def.w,h:def.h,color:def.color,customLabel:null
   };
-  
-  blocks.push(block);
-  selectedBlock = block;
+  blocks.push(block);selectedBlock=block;
   render();
-  
-  // Text bearbeiten wenn Label
-  if (def.isLabel || def.label) {
-    setTimeout(() => openTextEdit(block, x, y), 50);
-  }
-  
-  showToast('✅ ' + (def.label || placingBlockType) + ' platziert');
+  hidePlaceBanner();
+  const wasType=placingBlockType;
+  placingBlockType=null;
+  document.querySelectorAll('.palette-item').forEach(i=>i.classList.remove('placing-mode'));
+  canvas.style.cursor='default';
+  if(def.isLabel) setTimeout(()=>openTextEdit(block,window.innerWidth/2,window.innerHeight/2),80);
+  else showToast('✅ Platziert');
+}
+
+function placingItemAt(x,y){
+  if(!placingItem)return;
+  placingItem.x=x; placingItem.y=y; placingItem.placed=true;
+  const was=placingItem;
+  placingItem=null;
+  canvas.style.cursor='default';
+  hidePlaceBanner();
+  updateShoppingUI(); render();
+  showToast('📍 '+was.name+' platziert');
 }
 
 // ════════════════════════════════════════
-//  CANVAS CLICK (NEW!)
+//  MOUSE
 // ════════════════════════════════════════
-function onCanvasClick(e) {
-  if (placingBlockType) {
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    placeBlockAt(x, y);
-    
-    // Reset placement mode
-    placingBlockType = null;
-    document.querySelectorAll('.palette-item').forEach(i => i.classList.remove('placing-mode'));
-    canvas.style.cursor = 'default';
-  }
-}
-
-// ════════════════════════════════════════
-//  MOUSE/TOUCH INTERACTION
-// ════════════════════════════════════════
-function onMouseDown(e) {
-  if (e.button === 2) return;
+function onMouseDown(e){
+  if(e.button===2)return;
   closeCtxMenu(); closeTextPopup();
-  const {x,y} = getPos(e);
-  
-  if (placingBlockType) {
-    placeBlockAt(x, y);
-    placingBlockType = null;
-    document.querySelectorAll('.palette-item').forEach(i => i.classList.remove('placing-mode'));
-    canvas.style.cursor = 'default';
+  const{x,y}=getCanvasPos(e.clientX,e.clientY);
+
+  if(placingBlockType){ placeBlockAt(x,y); return; }
+  if(placingItem){ placingItemAt(x,y); return; }
+
+  if(activeTool==='delete'){
+    const b=hitTest(x,y);
+    if(b){blocks=blocks.filter(bl=>bl.id!==b.id);selectedBlock=null;render();}
+    return;
+  }
+
+  const b=hitTest(x,y);
+  if(b){
+    selectedBlock=b;
+    isDraggingBlock=nearResize(b,x,y)?'resize':'move';
+    dragOffX=x-b.x; dragOffY=y-b.y;
+    blocks=blocks.filter(bl=>bl.id!==b.id);blocks.push(b);
+  } else { selectedBlock=null; }
+  render();
+}
+
+function onMouseMove(e){
+  const{x,y}=getCanvasPos(e.clientX,e.clientY);
+  if(!isDraggingBlock||!selectedBlock){
+    const b=hitTest(x,y);
+    canvas.style.cursor=placingBlockType||placingItem?'crosshair':b?(nearResize(b,x,y)?'se-resize':'grab'):'default';
+    return;
+  }
+  canvas.style.cursor=isDraggingBlock==='resize'?'se-resize':'grabbing';
+  if(isDraggingBlock==='move'){selectedBlock.x=snap(x-dragOffX);selectedBlock.y=snap(y-dragOffY);}
+  else{selectedBlock.w=Math.max(20,snap(x-selectedBlock.x));selectedBlock.h=Math.max(14,snap(y-selectedBlock.y));}
+  render();
+}
+
+function onMouseUp(){ isDraggingBlock=false; }
+
+// ════════════════════════════════════════
+//  TOUCH — tap only (pinch/scroll handled natively by browser)
+// ════════════════════════════════════════
+let _touchStartX=0,_touchStartY=0,_touchStartTime=0,_touchMoved=false;
+let _lastTap=0, _touchDragBlock=null, _touchDragOffX=0, _touchDragOffY=0;
+
+function onTouchStart(e){
+  if(e.touches.length!==1)return; // let multi-touch go to browser (pinch zoom)
+  const t=e.touches[0];
+  const{x,y}=getCanvasPos(t.clientX,t.clientY);
+  _touchStartX=x; _touchStartY=y; _touchStartTime=Date.now(); _touchMoved=false;
+
+  // Check if placing
+  if(placingBlockType||placingItem) return; // handle on touchend
+
+  const b=hitTest(x,y);
+  if(b){
+    selectedBlock=b;
+    _touchDragBlock=b;
+    _touchDragOffX=x-b.x; _touchDragOffY=y-b.y;
+    blocks=blocks.filter(bl=>bl.id!==b.id);blocks.push(b);
     render();
-    return;
-  }
-  
-  if (activeTool === 'delete') {
-    const b = hitTest(x,y);
-    if (b) { blocks = blocks.filter(bl => bl.id !== b.id); selectedBlock = null; render(); }
-    return;
-  }
-  
-  const b = hitTest(x,y);
-  if (b) {
-    selectedBlock = b;
-    if (hitTestResizeHandle(b, x, y)) { isDraggingBlock = 'resize'; }
-    else { isDraggingBlock = 'move'; }
-    dragOffX = x - b.x;
-    dragOffY = y - b.y;
-    blocks = blocks.filter(bl => bl.id !== b.id);
-    blocks.push(b);
   } else {
-    selectedBlock = null;
+    selectedBlock=null; _touchDragBlock=null; render();
   }
-  render();
+
+  // Listen for move to detect drag vs tap
+  canvas.addEventListener('touchmove', _onTouchMoveInternal, {passive:true});
 }
 
-function onMouseMove(e) {
-  const {x,y} = getPos(e);
-  
-  if (!isDraggingBlock || !selectedBlock) {
-    const b = hitTest(x,y);
-    if (b && hitTestResizeHandle(b, x, y)) { canvas.style.cursor = 'se-resize'; }
-    else if (b) { canvas.style.cursor = 'grab'; }
-    else { canvas.style.cursor = 'default'; }
+function _onTouchMoveInternal(e){
+  if(e.touches.length!==1){ _touchDragBlock=null; return; }
+  const t=e.touches[0];
+  const{x,y}=getCanvasPos(t.clientX,t.clientY);
+  const dx=x-_touchStartX, dy=y-_touchStartY;
+  if(Math.hypot(dx,dy)>8) _touchMoved=true;
+
+  if(_touchDragBlock&&_touchMoved){
+    _touchDragBlock.x=snap(x-_touchDragOffX);
+    _touchDragBlock.y=snap(y-_touchDragOffY);
+    render();
+  }
+}
+
+function onTouchEnd(e){
+  canvas.removeEventListener('touchmove',_onTouchMoveInternal);
+  const elapsed=Date.now()-_touchStartTime;
+  _touchDragBlock=null;
+
+  if(_touchMoved) return; // was a drag/scroll, not a tap
+
+  // It's a tap
+  const{x,y}={x:_touchStartX,y:_touchStartY};
+
+  // Double-tap to edit label
+  const now=Date.now();
+  const doubleTap=(now-_lastTap)<350;
+  _lastTap=now;
+
+  if(placingBlockType){ placeBlockAt(x,y); return; }
+  if(placingItem){ placingItemAt(x,y); return; }
+
+  if(activeTool==='delete'){
+    const b=hitTest(x,y);
+    if(b){blocks=blocks.filter(bl=>bl.id!==b.id);selectedBlock=null;render();}
     return;
   }
-  
-  canvas.style.cursor = isDraggingBlock === 'resize' ? 'se-resize' : 'grabbing';
-  
-  if (isDraggingBlock === 'move') {
-    selectedBlock.x = snap(x - dragOffX);
-    selectedBlock.y = snap(y - dragOffY);
-  } else {
-    const def = BLOCK_DEFS[selectedBlock.type];
-    const minWidth = def.isLabel ? 40 : 20;
-    const minHeight = def.isLabel ? 20 : 14;
-    selectedBlock.w = Math.max(minWidth, snap(x - selectedBlock.x));
-    selectedBlock.h = Math.max(minHeight, snap(y - selectedBlock.y));
-  }
-  render();
-}
 
-function onMouseUp() { 
-  isDraggingBlock = false; 
-  if (selectedBlock) {
-    window._saveToFirebase && window._saveToFirebase({ blocks, shoppingItems, marketName: document.getElementById('market-name').value });
+  const b=hitTest(x,y);
+  if(b&&doubleTap){
+    openTextEdit(b,window.innerWidth/2,Math.min(window.innerHeight*0.4,300));
   }
 }
 
-let touchDragging = false;
-function onTouchStart(e) {
-  e.preventDefault();
-  const t = e.touches[0];
-  onMouseDown({button:0, clientX:t.clientX, clientY:t.clientY});
-  touchDragging = true;
-}
-function onTouchMove(e) {
-  e.preventDefault();
-  if (!touchDragging) return;
-  const t = e.touches[0];
-  onMouseMove({clientX:t.clientX, clientY:t.clientY});
-}
-function onTouchEnd(e) { touchDragging = false; onMouseUp(); }
-
-function selectTool(tool, el) {
-  activeTool = tool;
-  document.querySelectorAll('.palette-item[data-tool]').forEach(i => i.classList.remove('selected-tool'));
+// ════════════════════════════════════════
+//  TOOLS
+// ════════════════════════════════════════
+function selectTool(tool,el){
+  activeTool=tool;
+  document.querySelectorAll('.palette-item[data-tool]').forEach(i=>i.classList.remove('selected-tool'));
   el.classList.add('selected-tool');
-  document.querySelectorAll('.palette-item[data-block]').forEach(i => i.classList.remove('placing-mode'));
-  placingBlockType = null;
-  canvas.style.cursor = tool === 'delete' ? 'not-allowed' : 'default';
-  if (window.innerWidth <= 768) {
-    document.getElementById('palette').classList.add('collapsed');
-    document.getElementById('toggle-left').textContent = '☰';
+  document.querySelectorAll('.palette-item[data-block]').forEach(i=>i.classList.remove('placing-mode'));
+  placingBlockType=null;
+  canvas.style.cursor=tool==='delete'?'not-allowed':'default';
+  hidePlaceBanner();
+  if(window.innerWidth<=768){document.getElementById('palette').classList.add('collapsed');document.getElementById('toggle-left').textContent='☰';}
+}
+window.selectTool=selectTool;
+
+function toggleLeftPanel(){
+  const p=document.getElementById('palette');
+  p.classList.toggle('collapsed');
+  document.getElementById('toggle-left').textContent=p.classList.contains('collapsed')?'☰':'✕';
+}
+window.toggleLeftPanel=toggleLeftPanel;
+
+function toggleRightPanel(){
+  const p=document.getElementById('shopping-panel');
+  p.classList.toggle('collapsed');
+  document.getElementById('toggle-right').textContent=p.classList.contains('collapsed')?'🛒':'✕';
+}
+window.toggleRightPanel=toggleRightPanel;
+
+// ════════════════════════════════════════
+//  CONTEXT MENU
+// ════════════════════════════════════════
+function closeCtxMenu(){document.getElementById('ctx-menu').classList.remove('show');}
+window.closeCtxMenu=closeCtxMenu;
+window.ctxEdit=()=>{closeCtxMenu();if(ctxTarget)openTextEdit(ctxTarget,window.innerWidth/2,window.innerHeight*0.4);};
+window.ctxDuplicate=()=>{closeCtxMenu();if(!ctxTarget)return;const c={...ctxTarget,id:nextId++,x:ctxTarget.x+20,y:ctxTarget.y+20};blocks.push(c);selectedBlock=c;render();};
+window.ctxDelete=()=>{closeCtxMenu();if(!ctxTarget)return;blocks=blocks.filter(b=>b.id!==ctxTarget.id);selectedBlock=null;render();};
+document.addEventListener('click',e=>{if(!e.target.closest('.ctx-menu'))closeCtxMenu();if(!e.target.closest('.text-popup')&&!e.target.closest('#supermarkt-canvas'))closeTextPopup();});
+
+// ════════════════════════════════════════
+//  TEXT EDIT
+// ════════════════════════════════════════
+function openTextEdit(block,cx,cy){
+  textEditTarget=block;
+  const popup=document.getElementById('text-popup');
+  const input=document.getElementById('text-popup-input');
+  input.value=block.customLabel||'';
+  popup.style.left=Math.max(10,Math.min(cx,window.innerWidth-300))+'px';
+  popup.style.top=Math.max(60,Math.min(cy,window.innerHeight-100))+'px';
+  popup.classList.add('show');input.focus();input.select();
+}
+function confirmTextEdit(){
+  if(!textEditTarget)return;
+  const val=document.getElementById('text-popup-input').value.trim();
+  textEditTarget.customLabel=val||null;
+  if(BLOCK_DEFS[textEditTarget.type].isLabel&&val){
+    const tmp=ctx.font;ctx.font='600 13px DM Sans';
+    textEditTarget.w=Math.max(60,ctx.measureText(val).width+16);
+    ctx.font=tmp;
   }
+  closeTextPopup();render();
 }
-window.selectTool = selectTool;
+function cancelTextEdit(){closeTextPopup();}
+function closeTextPopup(){document.getElementById('text-popup').classList.remove('show');textEditTarget=null;}
+window.confirmTextEdit=confirmTextEdit;window.cancelTextEdit=cancelTextEdit;
 
-function toggleLeftPanel() {
-  const palette = document.getElementById('palette');
-  palette.classList.toggle('collapsed');
-  if (palette.classList.contains('collapsed')) {
-    document.getElementById('toggle-left').textContent = '☰';
-  } else {
-    document.getElementById('toggle-left').textContent = '✕';
+// ════════════════════════════════════════
+//  SHOPPING LIST
+// ════════════════════════════════════════
+const COLORS=['#d4726a','#7a9e8a','#c9a05a','#a070c0','#4090c0','#e08050'];
+let colorIdx=0;
+
+function addShoppingItem(){
+  const input=document.getElementById('sp-new-item');
+  const name=input.value.trim();if(!name)return;
+  shoppingItems.push({id:Date.now(),name,color:COLORS[colorIdx++%COLORS.length],placed:false,done:false});
+  input.value='';updateShoppingUI();
+}
+window.addShoppingItem=addShoppingItem;
+
+function updateShoppingUI(){
+  const list=document.getElementById('sp-list');
+  document.getElementById('sp-market-name').textContent=document.getElementById('market-name').value||'Kein Supermarkt';
+  if(shoppingItems.length===0){
+    list.innerHTML='<div class="sp-empty">Produkte hinzufügen, dann auf Karte platzieren 📍</div>';
+    document.getElementById('sp-progress-bar').style.width='0%';
+    document.getElementById('sp-stats-text').textContent='0 Produkte';
+    document.getElementById('sp-done-text').textContent='0 erledigt';
+    render();return;
   }
-  setTimeout(() => resizeCanvas(), 300);
-}
-window.toggleLeftPanel = toggleLeftPanel;
-
-function toggleRightPanel() {
-  const panel = document.getElementById('shopping-panel');
-  panel.classList.toggle('collapsed');
-  if (panel.classList.contains('collapsed')) {
-    document.getElementById('toggle-right').textContent = '🛒';
-  } else {
-    document.getElementById('toggle-right').textContent = '✕';
-  }
-  setTimeout(() => resizeCanvas(), 300);
-}
-window.toggleRightPanel = toggleRightPanel;
-
-function closeCtxMenu() { document.getElementById('ctx-menu').classList.remove('show'); }
-window.closeCtxMenu = closeCtxMenu;
-
-window.ctxEdit = () => { closeCtxMenu(); if (ctxTarget) openTextEdit(ctxTarget, window.innerWidth/2, window.innerHeight/2); };
-window.ctxDuplicate = () => { closeCtxMenu(); if (!ctxTarget) return; const copy = {...ctxTarget, id:nextId++, x:ctxTarget.x+20, y:ctxTarget.y+20}; blocks.push(copy); selectedBlock = copy; render(); };
-window.ctxDelete = () => { closeCtxMenu(); if (!ctxTarget) return; blocks = blocks.filter(b => b.id !== ctxTarget.id); selectedBlock = null; render(); };
-
-document.addEventListener('click', e => {
-  if (!e.target.closest('.ctx-menu')) closeCtxMenu();
-  if (!e.target.closest('.text-popup') && !e.target.closest('#supermarkt-canvas')) closeTextPopup();
-});
-
-function openTextEdit(block, cx, cy) {
-  textEditTarget = block;
-  const popup = document.getElementById('text-popup');
-  const input = document.getElementById('text-popup-input');
-  const def = BLOCK_DEFS[block.type];
-  input.value = block.customLabel !== undefined ? block.customLabel : def.label;
-  popup.style.left = Math.max(10, Math.min(cx, window.innerWidth-290))+'px';
-  popup.style.top = Math.max(10, cy-60)+'px';
-  popup.classList.add('show');
-  input.focus(); input.select();
-}
-
-function confirmTextEdit() {
-  if (!textEditTarget) return;
-  const val = document.getElementById('text-popup-input').value.trim();
-  textEditTarget.customLabel = val;
-  if (BLOCK_DEFS[textEditTarget.type].isLabel) {
-    const tmp = ctx.font; ctx.font='600 13px DM Sans';
-    textEditTarget.w = Math.max(60, ctx.measureText(val).width + 16);
-    ctx.font = tmp;
-  }
-  closeTextPopup(); render();
-}
-
-function cancelTextEdit() { closeTextPopup(); }
-
-function closeTextPopup() {
-  document.getElementById('text-popup').classList.remove('show');
-  textEditTarget = null;
-}
-
-window.confirmTextEdit = confirmTextEdit;
-window.cancelTextEdit = cancelTextEdit;
-
-const ITEM_COLORS = ['#d4726a','#7a9e8a','#c9a05a','#a070c0','#4090c0','#e08050'];
-let colorIdx = 0;
-
-function addShoppingItem() {
-  const input = document.getElementById('sp-new-item');
-  const name = input.value.trim();
-  if (!name) return;
-  const item = { id: Date.now(), name, color: ITEM_COLORS[colorIdx++ % ITEM_COLORS.length], placed:false, done:false };
-  shoppingItems.push(item);
-  input.value = '';
-  updateShoppingUI();
-  showToast('➕ ' + name);
-}
-
-function updateShoppingUI() {
-  const list = document.getElementById('sp-list');
-  const marketName = document.getElementById('market-name').value || 'Kein Supermarkt';
-  document.getElementById('sp-market-name').textContent = marketName;
-  if (shoppingItems.length === 0) {
-    list.innerHTML = '<div class="sp-empty">Produkte hinzufügen</div>';
-    document.getElementById('sp-progress-bar').style.width = '0%';
-    document.getElementById('sp-stats-text').textContent = '0 Produkte';
-    document.getElementById('sp-done-text').textContent = '0 erledigt';
-    render();
-    return;
-  }
-  list.innerHTML = '';
-  shoppingItems.forEach(item => {
-    const div = document.createElement('div');
-    div.className = 'sp-item' + (item.placed&&!item.done?' placed':'') + (item.done?' done':'') + (placingItem&&placingItem.id===item.id?' placing':'');
-    div.innerHTML = `
+  list.innerHTML='';
+  shoppingItems.forEach(item=>{
+    const div=document.createElement('div');
+    div.className='sp-item'+(item.placed&&!item.done?' placed':'')+(item.done?' done':'')+(placingItem&&placingItem.id===item.id?' placing':'');
+    div.innerHTML=`
       <div class="sp-item-dot" style="${item.placed?'background:'+item.color+';border-color:'+item.color:''}"></div>
       <div style="flex:1;min-width:0;">
         <div class="sp-item-name">${item.name}</div>
         ${item.placed&&!item.done?'<div class="sp-item-loc" style="color:'+item.color+'">📍 Platziert</div>':''}
-        ${!item.placed?'<div class="sp-item-loc">Klick → platzieren</div>':''}
+        ${!item.placed&&!item.done?'<div class="sp-item-loc">Antippen → auf Karte platzieren</div>':''}
         ${item.done?'<div class="sp-item-loc">✓ Erledigt</div>':''}
       </div>
       <div class="sp-item-actions">
-        ${item.placed&&!item.done?`<button class="sp-icon-btn" title="Erledigt" onclick="markDone(${item.id})">✓</button>`:''}
-        ${item.done?`<button class="sp-icon-btn" title="Rückgängig" onclick="undoDone(${item.id})">↩</button>`:''}
-        <button class="sp-icon-btn" title="Löschen" onclick="removeItem(${item.id})">✕</button>
+        ${item.placed&&!item.done?`<button class="sp-icon-btn" onclick="markDone(${item.id})">✓</button>`:''}
+        ${item.done?`<button class="sp-icon-btn" onclick="undoDone(${item.id})">↩</button>`:''}
+        <button class="sp-icon-btn" onclick="removeItem(${item.id})">✕</button>
       </div>`;
-    if (!item.placed && !item.done) div.onclick = (e) => { if (e.target.closest('.sp-icon-btn')) return; startPlacingItem(item); };
-    else if (item.placed && !item.done) div.onclick = (e) => { if (e.target.closest('.sp-icon-btn')) return; showToast('📍 ' + item.name); };
+    if(!item.placed&&!item.done) div.onclick=(e)=>{if(e.target.closest('.sp-icon-btn'))return;startPlacingItem(item);};
     list.appendChild(div);
   });
-  const total = shoppingItems.length;
-  const done = shoppingItems.filter(i=>i.done).length;
-  const pct = total > 0 ? (done/total*100) : 0;
-  document.getElementById('sp-progress-bar').style.width = pct+'%';
-  document.getElementById('sp-stats-text').textContent = total + ' Produkt' + (total!==1?'e':'');
-  document.getElementById('sp-done-text').textContent = done + ' erledigt';
+  const total=shoppingItems.length,done=shoppingItems.filter(i=>i.done).length;
+  document.getElementById('sp-progress-bar').style.width=(total>0?done/total*100:0)+'%';
+  document.getElementById('sp-stats-text').textContent=total+' Produkt'+(total!==1?'e':'');
+  document.getElementById('sp-done-text').textContent=done+' erledigt';
   render();
 }
 
-function startPlacingItem(item) {
-  placingItem = item;
-  canvas.style.cursor = 'crosshair';
-  showToast('🖱 Klick zum Platzieren von "' + item.name + '"');
+function startPlacingItem(item){
+  placingItem=item;
+  canvas.style.cursor='crosshair';
+  // Close shopping panel so canvas is fully visible — especially on mobile
+  document.getElementById('shopping-panel').classList.add('collapsed');
+  document.getElementById('toggle-right').textContent='🛒';
+  showPlaceBanner('📍 Tippe auf die Karte um "'+item.name+'" zu platzieren · Esc = Abbrechen');
   updateShoppingUI();
-  if (window.innerWidth <= 768) {
-    document.getElementById('shopping-panel').classList.add('collapsed');
-    document.getElementById('toggle-right').textContent = '🛒';
-  }
 }
 
-window.markDone = (id) => { const item = shoppingItems.find(i=>i.id===id); if (item) { item.done = true; updateShoppingUI(); } };
-window.undoDone = (id) => { const item = shoppingItems.find(i=>i.id===id); if (item) { item.done = false; updateShoppingUI(); } };
-window.removeItem = (id) => { shoppingItems = shoppingItems.filter(i=>i.id!==id); if (placingItem && placingItem.id===id) { placingItem=null; canvas.style.cursor='default'; } updateShoppingUI(); };
-window.addShoppingItem = addShoppingItem;
-
-let toastT;
-function showToast(msg) {
-  clearTimeout(toastT);
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  toastT = setTimeout(()=>t.classList.remove('show'), 3000);
-}
-window.showToast = showToast;
-
-function closeModal() { document.getElementById('modal').classList.remove('show'); }
-window.closeModal = closeModal;
-
-window.confirmClear = () => {
-  document.getElementById('modal-title').textContent = 'Karte leeren?';
-  document.getElementById('modal-text').textContent = 'Alle Blöcke und Produkte werden entfernt.';
-  document.getElementById('modal-confirm-btn').onclick = () => { blocks=[]; selectedBlock=null; render(); closeModal(); showToast('🗑 Karte geleert'); };
-  document.getElementById('modal').classList.add('show');
+window.markDone=(id)=>{const i=shoppingItems.find(i=>i.id===id);if(i){i.done=true;updateShoppingUI();}};
+window.undoDone=(id)=>{const i=shoppingItems.find(i=>i.id===id);if(i){i.done=false;updateShoppingUI();}};
+window.removeItem=(id)=>{
+  shoppingItems=shoppingItems.filter(i=>i.id!==id);
+  if(placingItem&&placingItem.id===id){placingItem=null;canvas.style.cursor='default';hidePlaceBanner();}
+  updateShoppingUI();
 };
 
-function cleanForFirestore(obj) {
-  if (Array.isArray(obj)) return obj.map(cleanForFirestore);
-  if (obj !== null && typeof obj === 'object') {
-    const out = {};
-    for (const [k, v] of Object.entries(obj)) {
-      if (v !== undefined) out[k] = cleanForFirestore(v);
-    }
-    return out;
-  }
+// ════════════════════════════════════════
+//  PLACE BANNER
+// ════════════════════════════════════════
+function showPlaceBanner(msg){
+  const b=document.getElementById('place-banner');
+  b.textContent=msg; b.classList.add('show');
+}
+function hidePlaceBanner(){document.getElementById('place-banner').classList.remove('show');}
+
+// ════════════════════════════════════════
+//  SAVE / LOAD
+// ════════════════════════════════════════
+function cleanForFirestore(obj){
+  if(Array.isArray(obj))return obj.map(cleanForFirestore);
+  if(obj!==null&&typeof obj==='object'){const out={};for(const[k,v]of Object.entries(obj)){if(v!==undefined)out[k]=cleanForFirestore(v);}return out;}
   return obj;
 }
 
-window.saveMap = async () => {
-  const name = document.getElementById('market-name').value.trim();
-  if (!name) { showToast('⚠️ Namen eingeben'); document.getElementById('market-name').focus(); return; }
-  const raw = { name, blocks, shoppingItems, nextId, savedAt: new Date().toISOString() };
-  const data = cleanForFirestore(raw);
-  try {
-    if (window._saveToFirebase) {
-      await window._saveToFirebase(data);
-      showToast('💾 "' + name + '" gespeichert!');
-    } else {
-      localStorage.setItem('supermarkt_backup', JSON.stringify(data));
-      showToast('💾 Lokal gespeichert');
-    }
-  } catch(e) { showToast('❌ Fehler: ' + e.message); }
+window.saveMap=async()=>{
+  const name=document.getElementById('market-name').value.trim();
+  if(!name){showToast('⚠️ Namen eingeben');document.getElementById('market-name').focus();return;}
+  const data=cleanForFirestore({name,blocks,shoppingItems,nextId,savedAt:new Date().toISOString()});
+  try{
+    if(window._saveToFirebase){await window._saveToFirebase(data);showToast('💾 "'+name+'" gespeichert!');}
+    else{localStorage.setItem('supermarkt_backup',JSON.stringify(data));showToast('💾 Lokal gespeichert');}
+  }catch(e){showToast('❌ '+e.message);}
 };
 
-window.loadMap = async () => {
-  let data = window._pendingLoad;
-  if (!data && window._loadFromFirebase) data = await window._loadFromFirebase();
-  if (!data) { showToast('Keine gespeicherte Karte'); return; }
-  blocks = data.blocks || [];
-  shoppingItems = data.shoppingItems || [];
-  nextId = data.nextId || blocks.length + 1;
-  document.getElementById('market-name').value = data.name || '';
-  window._pendingLoad = null;
-  updateShoppingUI();
-  render();
-  showToast('📂 "' + data.name + '" geladen!');
+window.loadMap=async()=>{
+  let data=window._pendingLoad;
+  if(!data&&window._loadFromFirebase)data=await window._loadFromFirebase();
+  if(!data){showToast('Keine gespeicherte Karte');return;}
+  blocks=data.blocks||[];shoppingItems=data.shoppingItems||[];
+  nextId=data.nextId||blocks.length+1;
+  document.getElementById('market-name').value=data.name||'';
+  window._pendingLoad=null;
+  updateShoppingUI();render();
+  showToast('📂 "'+data.name+'" geladen!');
 };
 
-canvas && canvas.addEventListener('contextmenu', e=>e.preventDefault());
+// ════════════════════════════════════════
+//  CLEAR / MODAL / TOAST
+// ════════════════════════════════════════
+window.confirmClear=()=>{
+  document.getElementById('modal-title').textContent='Karte leeren?';
+  document.getElementById('modal-text').textContent='Alle Blöcke und Produkte werden entfernt.';
+  document.getElementById('modal-confirm-btn').onclick=()=>{blocks=[];selectedBlock=null;render();closeModal();showToast('🗑 Karte geleert');};
+  document.getElementById('modal').classList.add('show');
+};
+function closeModal(){document.getElementById('modal').classList.remove('show');}
+window.closeModal=closeModal;
 
-document.addEventListener('keydown', e => {
-  if (e.key==='Escape') { 
-    closeCtxMenu(); 
-    closeTextPopup(); 
-    placingItem=null; 
-    placingBlockType=null;
-    document.querySelectorAll('.palette-item').forEach(i => i.classList.remove('placing-mode'));
-    canvas.style.cursor='default'; 
-    updateShoppingUI(); 
+let toastT;
+function showToast(msg){
+  clearTimeout(toastT);const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  toastT=setTimeout(()=>t.classList.remove('show'),3000);
+}
+window.showToast=showToast;
+
+// ════════════════════════════════════════
+//  KEYBOARD
+// ════════════════════════════════════════
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    closeCtxMenu();closeTextPopup();
+    placingItem=null;placingBlockType=null;
+    document.querySelectorAll('.palette-item').forEach(i=>i.classList.remove('placing-mode'));
+    canvas&&(canvas.style.cursor='default');
+    hidePlaceBanner();updateShoppingUI();
   }
-  if ((e.key==='Delete'||e.key==='Backspace') && selectedBlock && document.activeElement===document.body) {
-    blocks = blocks.filter(b=>b.id!==selectedBlock.id);
-    selectedBlock=null; render();
+  if((e.key==='Delete'||e.key==='Backspace')&&selectedBlock&&document.activeElement===document.body){
+    blocks=blocks.filter(b=>b.id!==selectedBlock.id);selectedBlock=null;render();
   }
-  if (e.key==='s' && (e.ctrlKey||e.metaKey)) { e.preventDefault(); window.saveMap(); }
+  if(e.key==='s'&&(e.ctrlKey||e.metaKey)){e.preventDefault();window.saveMap();}
 });
 </script>
 </body>
