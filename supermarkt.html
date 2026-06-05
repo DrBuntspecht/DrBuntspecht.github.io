@@ -447,8 +447,12 @@ function render() {
   for(let x=0;x<CANVAS_W;x+=30){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,CANVAS_H);ctx.stroke();}
   for(let y=0;y<CANVAS_H;y+=30){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(CANVAS_W,y);ctx.stroke();}
   blocks.forEach(b=>drawBlock(b));
+  // Draw done items first (behind), then active on top
   shoppingItems.forEach(item=>{
-    if(item.x!==undefined&&item.y!==undefined&&!item.done) drawPin(item.x,item.y,item.name,item.color);
+    if(item.x!==undefined&&item.y!==undefined&&item.done) drawPin(item.x,item.y,item.name,item.color,true);
+  });
+  shoppingItems.forEach(item=>{
+    if(item.x!==undefined&&item.y!==undefined&&!item.done) drawPin(item.x,item.y,item.name,item.color,false);
   });
 }
 
@@ -487,19 +491,70 @@ function drawBlock(b) {
   ctx.restore();
 }
 
-function drawPin(x,y,name,color){
-  const c=color||'#d4726a';
+function drawPin(x,y,name,color,done){
+  const c = done ? '#9ab89a' : (color||'#d4726a');
   ctx.save();
-  ctx.fillStyle=c; ctx.beginPath(); ctx.arc(x,y-14,9,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle='#fff'; ctx.font='600 11px DM Sans'; ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText('📍',x,y-14);
-  ctx.strokeStyle=c; ctx.lineWidth=2;
+  ctx.globalAlpha = done ? 0.55 : 1;
+
+  // Pin circle
+  ctx.fillStyle = done ? '#c8e0c8' : c;
+  ctx.strokeStyle = c;
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(x,y-16,11,0,Math.PI*2);
+  ctx.fill(); ctx.stroke();
+
+  // Icon: checkmark if done, pin emoji if not
+  ctx.globalAlpha = done ? 0.8 : 1;
+  ctx.fillStyle = done ? '#2d7a2d' : '#fff';
+  ctx.font = done ? 'bold 13px sans-serif' : '600 12px DM Sans';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(done ? '✓' : '📍', x, y-16);
+
+  // Stem
+  ctx.globalAlpha = done ? 0.4 : 1;
+  ctx.strokeStyle = done ? '#9ab89a' : c;
+  ctx.lineWidth = done ? 1.5 : 2;
   ctx.beginPath(); ctx.moveTo(x,y-5); ctx.lineTo(x,y); ctx.stroke();
-  const lw=ctx.measureText(name).width+12;
-  ctx.fillStyle=c; ctx.beginPath(); rr(x-lw/2,y-36,lw,16,4); ctx.fill();
-  ctx.fillStyle='#fff'; ctx.font='600 10px DM Sans'; ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText(name,x,y-28);
+
+  // Label pill
+  ctx.globalAlpha = done ? 0.5 : 1;
+  ctx.font = '600 11px DM Sans,sans-serif';
+  const lw = ctx.measureText(name).width + 16;
+  ctx.fillStyle = done ? '#b0c8b0' : c;
+  ctx.beginPath(); rr(x-lw/2, y-40, lw, 18, 5); ctx.fill();
+
+  // Strikethrough line over label if done
+  if (done) {
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1.5;
+    ctx.globalAlpha = 0.7;
+    ctx.beginPath();
+    ctx.moveTo(x-lw/2+4, y-31);
+    ctx.lineTo(x+lw/2-4, y-31);
+    ctx.stroke();
+  }
+
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = '#fff';
+  ctx.font = '600 11px DM Sans,sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(name, x, y-31);
+
   ctx.restore();
+}
+
+// Returns the shopping item whose pin was tapped (within hit radius), or null
+function hitTestPin(x,y){
+  for(let i=shoppingItems.length-1;i>=0;i--){
+    const item=shoppingItems[i];
+    if(item.x===undefined||item.y===undefined)continue;
+    // Hit area: circle around pin head + stem
+    if(Math.hypot(x-item.x,y-(item.y-16))<=18) return item;
+    // also label pill
+    const lw=80;
+    if(x>=item.x-lw/2&&x<=item.x+lw/2&&y>=item.y-40&&y<=item.y-22) return item;
+  }
+  return null;
 }
 
 function rr(x,y,w,h,r){
@@ -601,6 +656,17 @@ function onMouseDown(e){
   if(placingBlockType){ placeBlockAt(x,y); return; }
   if(placingItem){ placingItemAt(x,y); return; }
 
+  // Tap on an existing placed pin → toggle done
+  if(activeTool==='select'&&!placingBlockType){
+    const pin=hitTestPin(x,y);
+    if(pin){
+      pin.done=!pin.done;
+      updateShoppingUI();
+      showToast(pin.done?'✅ '+pin.name+' erledigt':'↩ '+pin.name+' zurückgesetzt');
+      return;
+    }
+  }
+
   if(activeTool==='delete'){
     const b=hitTest(x,y);
     if(b){blocks=blocks.filter(bl=>bl.id!==b.id);selectedBlock=null;render();}
@@ -693,6 +759,17 @@ function onTouchEnd(e){
 
   if(placingBlockType){ placeBlockAt(x,y); return; }
   if(placingItem){ placingItemAt(x,y); return; }
+
+  // Tap on an existing placed pin → toggle done
+  if(activeTool==='select'&&!placingBlockType){
+    const pin=hitTestPin(x,y);
+    if(pin){
+      pin.done=!pin.done;
+      updateShoppingUI();
+      showToast(pin.done?'✅ '+pin.name+' erledigt':'↩ '+pin.name+' zurückgesetzt');
+      return;
+    }
+  }
 
   if(activeTool==='delete'){
     const b=hitTest(x,y);
