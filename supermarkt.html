@@ -543,6 +543,7 @@ body.shopping-mode .sp-icon-btn {
     <div class="modal-title">ℹ️ Bedienungshinweise</div>  
     <div class="modal-text" style="font-size:15px;line-height:1.7;">  
       <b>Supermarkt-Planer – Kurzanleitung:</b><br><br>  
+      <b>📱 Einkaufsmodus:</b> Markt gebaut? Dann aktiviere den Modus und hake deine Einkaufsliste ab, ohne ausversehen den Markt zu verbaseln.<br>  
       <b>🖱 Blöcke platzieren:</b> Wähle links einen Baustein (z.B. Regal, Obst, Kasse) und tippe auf die Karte.<br>  
       <b>🖱 Blöcke verschieben:</b> Wähle das Pfeil-Werkzeug und ziehe Blöcke mit dem Finger.<br>  
       <b>🗑 Blöcke löschen:</b> Wähle das Mülleimer-Werkzeug und tippe auf einen Block.<br>  
@@ -1451,6 +1452,15 @@ document.addEventListener('keydown',e=>{
     blocks=blocks.filter(b=>b.id!==selectedBlock.id);selectedBlock=null;render();  
   }  
   if(e.key==='s'&&(e.ctrlKey||e.metaKey)){e.preventDefault();window.saveMap();}  
+});
+  // Bedienungshinweise-Modal ESC und Klick außerhalb schließen  
+document.addEventListener('keydown', function(e) {  
+  if (e.key === 'Escape') {  
+    closeHelpModal();  
+  }  
+});  
+document.getElementById('help-modal').addEventListener('mousedown', function(e) {  
+  if (e.target === this) closeHelpModal();  
 });  
 </script>  
 </body>  
