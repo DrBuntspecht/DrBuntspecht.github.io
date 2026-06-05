@@ -402,23 +402,27 @@ body.shopping-mode .sp-icon-btn {
   <!-- Mobile Dropdown -->  
   <div class="topbar-menu-mobile" id="topbar-menu-mobile">  
     <button class="btn btn-ghost mobile-menu-btn" id="btn-mobile-menu" onclick="toggleMobileMenu()">☰</button>  
-    <div class="mobile-dropdown" id="mobile-dropdown">  
-      <button class="mobile-menu-item" onclick="showHelpModal(); toggleMobileMenu();">  
-        <span>ℹ️ Bedienungshinweise</span>  
-      </button>  
-      <button class="mobile-menu-item" id="dropdown-shopping-mode" onclick="toggleShoppingMode(); toggleMobileMenu();">  
-        <span>🛒 Einkaufsmodus</span>  
-      </button>  
-      <button class="mobile-menu-item" onclick="confirmClear(); toggleMobileMenu();">  
-        <span>🗑 Karte leeren</span>  
-      </button>  
-      <button class="mobile-menu-item" onclick="loadMap(); toggleMobileMenu();">  
-        <span>📂 Laden</span>  
-      </button>  
-      <button class="mobile-menu-item" onclick="saveMap(); toggleMobileMenu();">  
-        <span>💾 Speichern</span>  
-      </button>  
-    </div>  
+       <div class="mobile-dropdown" id="mobile-dropdown">  
+     <button class="mobile-menu-item" onclick="showHelpModal(); toggleMobileMenu();">  
+       <span>ℹ️ Bedienungshinweise</span>  
+     </button>  
+     <button class="mobile-menu-item" id="dropdown-shopping-mode" onclick="toggleShoppingMode(); toggleMobileMenu();">  
+       <span>🛒 Einkaufsmodus</span>  
+     </button>  
+     <button class="mobile-menu-item" onclick="confirmClear(); toggleMobileMenu();">  
+       <span>🗑 Karte leeren</span>  
+     </button>  
+     <button class="mobile-menu-item" onclick="loadMap(); toggleMobileMenu();">  
+       <span>📂 Laden</span>  
+     </button>  
+     <button class="mobile-menu-item" onclick="saveMap(); toggleMobileMenu();">  
+       <span>💾 Speichern</span>  
+     </button>  
+     <!-- NEU: Zur Hauptseite -->  
+     <button class="mobile-menu-item" onclick="window.location.href='index.html'; toggleMobileMenu();">  
+       <span>🏠 Zur Hauptseite</span>  
+     </button>  
+   </div>   
   </div>  
 </div>  
   
