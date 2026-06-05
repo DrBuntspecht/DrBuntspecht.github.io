@@ -665,6 +665,15 @@ let lastTouchDist = null, lastTouchMid = null;
 let pinDragItem = null, pinDragOffset = {x:0,y:0}, pinDragActive = false, pinDragTimeout = null;  
 let blockLongPressTimeout = null;  
 let blockLongPressTarget = null;  
+let autoSaveTimeout;  
+function autoSave() {  
+  clearTimeout(autoSaveTimeout);  
+  autoSaveTimeout = setTimeout(() => {  
+    if (typeof window.saveMap === "function") {  
+      window.saveMap();  
+    }  
+  }, 400); // 400ms nach der letzten Änderung speichern  
+}  
 // ════════════════════════════════════════  
 //  CANVAS INIT  
 // ════════════════════════════════════════  
@@ -868,7 +877,8 @@ function placeBlockAt(x,y){
   blocks.push(block);selectedBlock=block;  
   render();  
   hidePlaceBanner();  
-  placingBlockType=null;  
+  placingBlockType=null; 
+  autoSave();  
   document.querySelectorAll('.palette-item').forEach(i=>i.classList.remove('placing-mode'));  
   canvas.style.cursor='default';  
   if(def.isLabel) setTimeout(()=>openTextEdit(block,window.innerWidth/2,window.innerHeight/2),80);  
@@ -947,11 +957,11 @@ function onMouseDown(e){
     }  
   }  
   
-  if(activeTool==='delete'){  
-    const b=hitTest(x,y);  
-    if(b){blocks=blocks.filter(bl=>bl.id!==b.id);selectedBlock=null;render();}  
-    return;  
-  }  
+ if(activeTool==='delete'){  
+  const b=hitTest(x,y);  
+  if(b){blocks=blocks.filter(bl=>bl.id!==b.id);selectedBlock=null;render();autoSave();}  
+  return;  
+}  
   
   const b=hitTest(x,y);  
   if(b){  
@@ -992,9 +1002,11 @@ function onMouseUp(e){
     pinDragActive = false;  
     pinDragItem = null;  
     render();  
+    autoSave();  
     return;  
   }  
-  isDraggingBlock=false;  
+  isDraggingBlock=false;
+  autoSave();  
 }  
   
 // ════════════════════════════════════════  
@@ -1126,11 +1138,11 @@ function onTouchEnd(e){
     }    
   }    
     
-  if(activeTool==='delete'){    
-    const b=hitTest(x,y);    
-    if(b){blocks=blocks.filter(bl=>bl.id!==b.id);selectedBlock=null;render();}    
-    return;    
-  }    
+ if(activeTool==='delete'){  
+  const b=hitTest(x,y);  
+  if(b){blocks=blocks.filter(bl=>bl.id!==b.id);selectedBlock=null;render();autoSave();}  
+  return;  
+}  
     
   const b=hitTest(x,y);    
   if(b&&doubleTap){    
@@ -1245,7 +1257,14 @@ function closeCtxMenu(){document.getElementById('ctx-menu').classList.remove('sh
 window.closeCtxMenu=closeCtxMenu;  
 window.ctxEdit=()=>{closeCtxMenu();if(ctxTarget)openTextEdit(ctxTarget,window.innerWidth/2,window.innerHeight*0.4);};  
 window.ctxDuplicate=()=>{closeCtxMenu();if(!ctxTarget)return;const c={...ctxTarget,id:nextId++,x:ctxTarget.x+20,y:ctxTarget.y+20};blocks.push(c);selectedBlock=c;render();};  
-window.ctxDelete=()=>{closeCtxMenu();if(!ctxTarget)return;blocks=blocks.filter(b=>b.id!==ctxTarget.id);selectedBlock=null;render();};  
+window.ctxDelete=()=>{  
+  closeCtxMenu();  
+  if(!ctxTarget)return;  
+  blocks=blocks.filter(b=>b.id!==ctxTarget.id);  
+  selectedBlock=null;  
+  render();  
+  autoSave();  
+};  
 document.addEventListener('click',e=>{if(!e.target.closest('.ctx-menu'))closeCtxMenu();if(!e.target.closest('.text-popup')&&!e.target.closest('#supermarkt-canvas'))closeTextPopup();});  
   
 // ════════════════════════════════════════  
@@ -1270,6 +1289,7 @@ function confirmTextEdit(){
     ctx.font=tmp;  
   }  
   closeTextPopup();render();  
+  autoSave();
 }  
 function cancelTextEdit(){closeTextPopup();}  
 function closeTextPopup(){document.getElementById('text-popup').classList.remove('show');textEditTarget=null;}  
@@ -1286,6 +1306,7 @@ function addShoppingItem(){
   const name=input.value.trim();if(!name)return;  
   shoppingItems.push({id:Date.now(),name,color:COLORS[colorIdx++%COLORS.length],placed:false,done:false});  
   input.value='';updateShoppingUI();  
+  autoSave();  
 }  
 window.addShoppingItem=addShoppingItem;  
   
@@ -1353,6 +1374,7 @@ window.markDone=(id)=>{
     i.done=true;  
     updateShoppingUI();  
     showToast('✅ '+i.name+' erledigt');  
+    autoSave();  
   }  
 };  
 window.undoDone=(id)=>{  
@@ -1360,13 +1382,15 @@ window.undoDone=(id)=>{
   if(i){  
     i.done=false;  
     updateShoppingUI();  
-    showToast('↩ '+i.name+' zurückgesetzt');  
+    showToast('↩ '+i.name+' zurückgesetzt');
+    autoSave();  
   }  
 };  
 window.removeItem=(id)=>{  
   shoppingItems=shoppingItems.filter(i=>i.id!==id);  
   if(placingItem&&placingItem.id===id){placingItem=null;canvas.style.cursor='default';hidePlaceBanner();}  
   updateShoppingUI();  
+  autoSave();  
 };  
   
 // ════════════════════════════════════════  
