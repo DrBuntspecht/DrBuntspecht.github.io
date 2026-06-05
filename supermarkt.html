@@ -1,1044 +1,1183 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>Supermarkt-Planer – Dr. Buntspecht</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg: #fdf6f0;
-  --surface: #fff8f3;
-  --surface2: #ffeee3;
-  --accent: #d4726a;
-  --accent2: #7a9e8a;
-  --gold: #c9a05a;
-  --ink: #2d1f1a;
-  --muted: #8a7060;
-  --border: rgba(180,140,120,0.18);
-  --shadow: rgba(180,120,100,0.12);
-}
-
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif; height:100vh; display:flex; flex-direction:column; overflow:hidden; }
-
-/* ── TOPBAR ── */
-.topbar {
-  height:54px; background:var(--surface);
-  border-bottom:1px solid var(--border);
-  display:flex; align-items:center; justify-content:space-between;
-  padding:0 12px; flex-shrink:0; gap:6px;
-  box-shadow:0 2px 8px var(--shadow);
-}
-.topbar-logo { font-family:'Playfair Display',serif; font-size:14px; font-weight:900; color:var(--ink); white-space:nowrap; }
-.topbar-logo span { color:var(--accent); font-style:italic; }
-.topbar-name { flex:1; border:1px solid var(--border); border-radius:8px; padding:6px 10px; font-family:'DM Sans',sans-serif; font-size:12px; color:var(--ink); background:#fff; outline:none; max-width:180px; transition:border-color 0.2s; }
-.topbar-name:focus { border-color:var(--accent); }
-.topbar-actions { display:flex; gap:4px; flex-shrink:0; }
-
-.btn { font-family:'DM Sans',sans-serif; font-size:11px; font-weight:600; padding:6px 10px; border-radius:8px; border:none; cursor:pointer; transition:all 0.15s; white-space:nowrap; }
-.btn:active { transform:scale(0.95); }
-.btn-primary { background:var(--accent); color:#fff; }
-.btn-primary:hover { filter:brightness(1.08); }
-.btn-sage { background:var(--accent2); color:#fff; }
-.btn-ghost { background:transparent; border:1px solid var(--border); color:var(--muted); }
-.btn-ghost:hover { background:var(--surface2); color:var(--ink); }
-
-.mode-btn {
-  background:#fff;
-  border:1px solid var(--border);
-  color:var(--ink);
-}
-.mode-btn.active {
-  background:var(--accent2);
-  color:#fff;
-  border-color:transparent;
-}
-
-/* ── MAIN LAYOUT ── */
-.editor-layout { display:flex; flex:1; overflow:hidden; position:relative; }
-
-/* ── LEFT PANEL ── */
-.palette {
-  width:160px; flex-shrink:0;
-  background:var(--surface);
-  border-right:1px solid var(--border);
-  overflow-y:auto; padding:10px 8px;
-  display:flex; flex-direction:column; gap:4px;
-  position:absolute; left:0; top:0; bottom:0; z-index:20;
-  transition:transform 0.3s ease;
-}
-.palette.collapsed { transform:translateX(-100%); }
-
-.palette-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--muted); padding:6px 4px 4px; }
-.palette-divider { height:1px; background:var(--border); margin:6px 0; }
-
-.palette-item {
-  display:flex; align-items:center; gap:8px;
-  padding:10px 12px; border-radius:10px;
-  cursor:pointer; border:1.5px solid transparent;
-  transition:all 0.15s; user-select:none;
-  background:#fff; min-height:44px;
-}
-.palette-item:hover { border-color:var(--border); box-shadow:0 2px 8px var(--shadow); }
-.palette-item:active { transform:scale(0.97); }
-.palette-item.selected-tool { border-color:var(--accent); background:rgba(212,114,106,0.06); }
-.palette-item.placing-mode { border-color:var(--accent); background:rgba(212,114,106,0.12); }
-
-.pi-icon { width:28px; height:20px; border-radius:4px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:13px; }
-.pi-label { font-size:12px; font-weight:500; color:var(--ink); }
-.pi-sub { font-size:9px; color:var(--muted); margin-top:1px; }
-
-/* ── CANVAS ── */
-.canvas-wrap {
-  flex:1; position:relative;
-  overflow:auto;
-  background-color: #f9f2ea;
-  cursor:default;
-}
-
-#canvas-container {
-  position:relative;
-  transform-origin: 0 0;
-}
-
-#supermarkt-canvas {
-  position:absolute; top:0; left:0;
-  touch-action: pan-x pan-y pinch-zoom;
-  display:block;
-}
-
-/* Einkaufsmodus: Canvas und linke Palette sperren */
-body.shopping-mode .palette,
-body.shopping-mode #canvas-wrap {
-  pointer-events:none;
-}
-
-body.shopping-mode .shopping-panel {
-  pointer-events:auto;
-}
-
-body.shopping-mode #supermarkt-canvas {
-  cursor:default !important;
-}
-
-.toggle-btn {
-  position:absolute; top:50%; transform:translateY(-50%);
-  width:36px; height:44px;
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:8px; cursor:pointer;
-  display:flex; align-items:center; justify-content:center;
-  font-size:18px; z-index:30;
-  box-shadow:0 2px 8px var(--shadow); transition:all 0.2s;
-  min-width:44px;
-}
-.toggle-btn:hover { background:var(--surface2); }
-.toggle-btn:active { transform:translateY(-50%) scale(0.95); }
-.toggle-left { left:8px; }
-.toggle-right { right:8px; }
-
-/* ── RIGHT PANEL ── */
-.shopping-panel {
-  width:240px; flex-shrink:0;
-  background:var(--surface); border-left:1px solid var(--border);
-  display:flex; flex-direction:column; overflow:hidden;
-  position:absolute; right:0; top:0; bottom:0; z-index:20;
-  transition:transform 0.3s ease;
-}
-.shopping-panel.collapsed { transform:translateX(100%); }
-
-.sp-header { padding:12px 14px 8px; border-bottom:1px solid var(--border); }
-.sp-title { font-family:'Playfair Display',serif; font-size:15px; font-weight:700; color:var(--ink); margin-bottom:2px; }
-.sp-sub { font-size:11px; color:var(--muted); }
-
-.sp-add { display:flex; gap:6px; padding:10px 12px; border-bottom:1px solid var(--border); }
-.sp-input { flex:1; border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-family:'DM Sans',sans-serif; font-size:13px; color:var(--ink); background:#fff; outline:none; min-height:44px; }
-.sp-input:focus { border-color:var(--accent); }
-.sp-add-btn { background:var(--accent); color:#fff; border:none; border-radius:8px; width:44px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:20px; flex-shrink:0; }
-
-.sp-list { flex:1; overflow-y:auto; padding:8px; display:flex; flex-direction:column; gap:4px; }
-
-.sp-item {
-  display:flex; align-items:center; gap:8px;
-  padding:10px 12px; border-radius:10px;
-  background:#fff; border:1.5px solid var(--border);
-  cursor:pointer; transition:all 0.15s; min-height:48px;
-}
-.sp-item:active { transform:scale(0.98); }
-.sp-item:hover { border-color:var(--accent); }
-.sp-item.placing { border-color:var(--accent); background:rgba(212,114,106,0.06); box-shadow:0 2px 8px var(--shadow); }
-.sp-item.placed { border-color:var(--accent2); background:rgba(122,158,138,0.06); }
-.sp-item.done { opacity:0.5; }
-.sp-item.done .sp-item-name { text-decoration:line-through; }
-
-.sp-item-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; border:2px solid var(--muted); transition:all 0.2s; }
-.sp-item.placed .sp-item-dot { background:var(--accent2); border-color:var(--accent2); }
-.sp-item.done .sp-item-dot { background:var(--muted); border-color:var(--muted); }
-.sp-item-name { flex:1; font-size:13px; font-weight:500; color:var(--ink); min-width:0; }
-.sp-item-loc { font-size:10px; color:var(--accent2); margin-top:1px; }
-.sp-item-actions { display:flex; gap:4px; }
-.sp-icon-btn { background:none; border:none; cursor:pointer; font-size:16px; padding:6px; border-radius:6px; color:var(--muted); min-width:36px; min-height:36px; display:flex; align-items:center; justify-content:center; }
-.sp-icon-btn:active { background:var(--surface2); }
-
-.sp-empty { text-align:center; padding:32px 12px; color:var(--muted); font-size:13px; font-style:italic; }
-.sp-footer { padding:10px 12px; border-top:1px solid var(--border); }
-.sp-progress { height:4px; background:var(--surface2); border-radius:2px; margin-bottom:6px; overflow:hidden; }
-.sp-progress-bar { height:100%; background:var(--accent2); border-radius:2px; transition:width 0.4s ease; }
-.sp-stats { font-size:11px; color:var(--muted); display:flex; justify-content:space-between; }
-
-/* ── PLACE HINT BANNER ── */
-.place-banner {
-  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px);
-  background:var(--accent); color:#fff;
-  padding:12px 22px; border-radius:50px;
-  font-size:14px; font-weight:600;
-  z-index:500; white-space:nowrap;
-  box-shadow:0 4px 20px rgba(212,114,106,0.4);
-  transition:transform 0.4s cubic-bezier(0.34,1.4,0.64,1);
-  max-width:90vw; text-align:center;
-}
-.place-banner.show { transform:translateX(-50%) translateY(0); }
-
-/* ── CONTEXT MENU ── */
-.ctx-menu { position:fixed; z-index:500; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:6px; box-shadow:0 8px 32px var(--shadow); min-width:160px; opacity:0; pointer-events:none; transform:scale(0.95); transition:all 0.15s; }
-.ctx-menu.show { opacity:1; pointer-events:all; transform:scale(1); }
-.ctx-item { padding:12px 14px; border-radius:8px; cursor:pointer; font-size:14px; color:var(--ink); display:flex; align-items:center; gap:8px; transition:background 0.1s; min-height:44px; }
-.ctx-item:active { background:var(--surface2); }
-.ctx-item:hover { background:var(--surface2); }
-.ctx-item.danger { color:var(--accent); }
-
-/* ── TEXT POPUP ── */
-.text-popup { position:fixed; z-index:600; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px; box-shadow:0 8px 32px var(--shadow); display:none; gap:8px; align-items:center; min-width:280px; }
-.text-popup.show { display:flex; }
-.text-popup input { border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--ink); background:#fff; outline:none; flex:1; min-height:44px; }
-.text-popup input:focus { border-color:var(--accent); }
-
-/* ── MODAL ── */
-.modal-overlay { position:fixed; inset:0; z-index:1000; background:rgba(45,31,26,0.5); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.25s; padding:20px; }
-.modal-overlay.show { opacity:1; pointer-events:all; }
-.modal-box { background:var(--surface); border-radius:20px; padding:24px; max-width:340px; width:100%; box-shadow:0 16px 48px rgba(0,0,0,0.15); }
-.modal-title { font-family:'Playfair Display',serif; font-size:20px; font-weight:700; margin-bottom:8px; }
-.modal-text { font-size:14px; color:var(--muted); line-height:1.6; margin-bottom:20px; }
-.modal-actions { display:flex; gap:8px; justify-content:flex-end; }
-
-/* ── TOAST ── */
-.toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(60px); background:var(--ink); color:#fff; padding:12px 20px; border-radius:50px; font-size:14px; z-index:2000; transition:transform 0.35s cubic-bezier(0.34,1.4,0.64,1); white-space:nowrap; box-shadow:0 4px 20px rgba(0,0,0,0.2); max-width:90%; text-align:center; }
-.toast.show { transform:translateX(-50%) translateY(0); }
-
-::-webkit-scrollbar { width:5px; }
-::-webkit-scrollbar-track { background:transparent; }
-::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
-</style>
-</head>
-<body>
-
-<!-- TOPBAR -->
-<div class="topbar">
-  <div class="topbar-logo">Dr.<span>Buntspecht</span> <span style="color:var(--muted);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:400;">· Marktplaner</span></div>
-  <input class="topbar-name" id="market-name" placeholder="Supermarkt…" maxlength="40">
-  <div class="topbar-actions">
-    <button class="btn btn-ghost mode-btn" id="btn-shopping-mode" onclick="toggleShoppingMode()">🛒 Einkaufsmodus</button>
-    <button class="btn btn-ghost" id="btn-clear" onclick="confirmClear()" style="display:none">🗑</button>
-    <button class="btn btn-sage" id="btn-load" onclick="loadMap()" style="display:none">📂</button>
-    <button class="btn btn-primary" id="btn-save" onclick="saveMap()">💾</button>
-  </div>
-</div>
-
-<!-- EDITOR -->
-<div class="editor-layout" id="editor-layout">
-
-  <!-- LEFT PANEL -->
-  <div class="palette" id="palette">
-    <div class="palette-title">Werkzeuge</div>
-    <div class="palette-item selected-tool" data-tool="select" onclick="selectTool('select',this)">
-      <div class="pi-icon">🖱</div>
-      <div><div class="pi-label">Auswählen</div><div class="pi-sub">Verschieben</div></div>
-    </div>
-    <div class="palette-item" data-tool="delete" onclick="selectTool('delete',this)">
-      <div class="pi-icon">🗑</div>
-      <div><div class="pi-label">Löschen</div><div class="pi-sub">Klick auf Block</div></div>
-    </div>
-    <div class="palette-divider"></div>
-    <div class="palette-title">Bausteine</div>
-    <div class="palette-item" data-block="regal" onclick="selectBlockType('regal',this)">
-      <div class="pi-icon" style="background:#a8e0a8;border-radius:3px;width:32px;height:14px;"></div>
-      <div><div class="pi-label">Regal</div><div class="pi-sub">grün</div></div>
-    </div>
-    <div class="palette-item" data-block="obst" onclick="selectBlockType('obst',this)">
-      <div class="pi-icon" style="background:#f0c080;border-radius:3px;width:24px;height:24px;"></div>
-      <div><div class="pi-label">Obst</div><div class="pi-sub">gelb</div></div>
-    </div>
-    <div class="palette-item" data-block="kuehl" onclick="selectBlockType('kuehl',this)">
-      <div class="pi-icon" style="background:#a8c4e0;border-radius:3px;width:28px;height:16px;"></div>
-      <div><div class="pi-label">Kühlregal</div><div class="pi-sub">blau</div></div>
-    </div>
-    <div class="palette-item" data-block="eingang" onclick="selectBlockType('eingang',this)">
-      <div class="pi-icon" style="background:#8a7060;border-radius:3px;width:22px;height:22px;"></div>
-      <div><div class="pi-label">Eingang</div><div class="pi-sub">grau</div></div>
-    </div>
-    <div class="palette-item" data-block="kasse" onclick="selectBlockType('kasse',this)">
-      <div class="pi-icon" style="background:#c8a8e0;border-radius:3px;width:20px;height:20px;"></div>
-      <div><div class="pi-label">Kasse</div><div class="pi-sub">lila</div></div>
-    </div>
-    <div class="palette-divider"></div>
-    <div class="palette-title">Text</div>
-    <div class="palette-item" data-block="label" onclick="selectBlockType('label',this)">
-      <div class="pi-icon" style="color:#2d5a8a;font-size:16px;font-weight:700;">T</div>
-      <div><div class="pi-label">Label</div><div class="pi-sub">Text-Feld</div></div>
-    </div>
-  </div>
-
-  <!-- TOGGLE BUTTONS -->
-  <button class="toggle-btn toggle-left" id="toggle-left" onclick="toggleLeftPanel()">☰</button>
-  <button class="toggle-btn toggle-right" id="toggle-right" onclick="toggleRightPanel()">🛒</button>
-
-  <!-- CANVAS WRAP -->
-  <div class="canvas-wrap" id="canvas-wrap">
-    <div id="canvas-container">
-      <canvas id="supermarkt-canvas"></canvas>
-    </div>
-  </div>
-
-  <!-- RIGHT PANEL -->
-  <div class="shopping-panel" id="shopping-panel">
-    <div class="sp-header">
-      <div class="sp-title">🛒 Einkaufsliste</div>
-      <div class="sp-sub" id="sp-market-name">Kein Supermarkt</div>
-    </div>
-    <div class="sp-add">
-      <input class="sp-input" id="sp-new-item" placeholder="Produkt…" onkeydown="if(event.key==='Enter')addShoppingItem()">
-      <button class="sp-add-btn" onclick="addShoppingItem()">+</button>
-    </div>
-    <div class="sp-list" id="sp-list">
-      <div class="sp-empty">Produkte hinzufügen</div>
-    </div>
-    <div class="sp-footer">
-      <div class="sp-progress"><div class="sp-progress-bar" id="sp-progress-bar" style="width:0%"></div></div>
-      <div class="sp-stats">
-        <span id="sp-stats-text">0 Produkte</span>
-        <span id="sp-done-text">0 erledigt</span>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- LOGIN GATE -->
-<div id="login-gate" style="display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px;text-align:center;">
-  <div style="font-size:48px;">🔒</div>
-  <div style="font-family:'Playfair Display',serif;font-size:22px;color:var(--ink);">Bitte einloggen</div>
-  <div style="font-size:14px;color:var(--muted);">Der Marktplaner ist nur für angemeldete Nutzer.</div>
-  <a href="index.html" class="btn btn-primary" style="margin-top:8px;padding:10px 18px;">← Zur Startseite</a>
-</div>
-
-<!-- PLACE BANNER -->
-<div class="place-banner" id="place-banner">📍 Tippe auf die Karte zum Platzieren · Esc = Abbrechen</div>
-
-<!-- CONTEXT MENU -->
-<div class="ctx-menu" id="ctx-menu">
-  <div class="ctx-item" onclick="ctxEdit()">✏️ Text bearbeiten</div>
-  <div class="ctx-item" onclick="ctxDuplicate()">📋 Duplizieren</div>
-  <div class="ctx-item danger" onclick="ctxDelete()">🗑 Löschen</div>
-</div>
-
-<!-- TEXT POPUP -->
-<div class="text-popup" id="text-popup">
-  <input id="text-popup-input" placeholder="Beschriftung…" onkeydown="if(event.key==='Enter')confirmTextEdit()">
-  <button class="btn btn-primary" style="padding:8px 14px;" onclick="confirmTextEdit()">OK</button>
-  <button class="btn btn-ghost" style="padding:8px 12px;" onclick="cancelTextEdit()">✕</button>
-</div>
-
-<!-- MODAL -->
-<div class="modal-overlay" id="modal">
-  <div class="modal-box">
-    <div class="modal-title" id="modal-title">Karte leeren?</div>
-    <div class="modal-text" id="modal-text">Alle Blöcke werden entfernt.</div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal()">Abbrechen</button>
-      <button class="btn btn-primary" id="modal-confirm-btn">Leeren</button>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<!-- FIREBASE -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-const app = initializeApp({
-  apiKey: "AIzaSyCTSYRwq9G9inKW-bEnLC90I19J4oTTkp8",
-  authDomain: "drbuntspecht-f92ba.firebaseapp.com",
-  projectId: "drbuntspecht-f92ba",
-  storageBucket: "drbuntspecht-f92ba.firebasestorage.app",
-  messagingSenderId: "1075490932089",
-  appId: "1:1075490932089:web:44f532194f78e41f539ba8"
-});
-
-const auth = getAuth(app);
-const db = getFirestore(app);
-let currentUser = null;
-
-onAuthStateChanged(auth, async user => {
-  currentUser = user;
-  if (user) {
-    document.getElementById('editor-layout').style.display = 'flex';
-    document.getElementById('login-gate').style.display = 'none';
-    document.getElementById('btn-clear').style.display = 'inline-block';
-    document.getElementById('btn-load').style.display = 'inline-block';
-    document.getElementById('palette').classList.add('collapsed');
-    document.getElementById('shopping-panel').classList.add('collapsed');
-    initCanvas();
-    const snap = await getDoc(doc(db, 'supermarkets', user.uid));
-    if (snap.exists()) { window._pendingLoad = snap.data(); showToast('📂 Gespeicherte Karte gefunden — klick 📂'); }
-  } else {
-    document.getElementById('editor-layout').style.display = 'none';
-    document.getElementById('login-gate').style.display = 'flex';
-  }
-});
-
-window._saveToFirebase = async (data) => { if (!currentUser) return; await setDoc(doc(db,'supermarkets',currentUser.uid), data); };
-window._loadFromFirebase = async () => { if (!currentUser) return null; const s=await getDoc(doc(db,'supermarkets',currentUser.uid)); return s.exists()?s.data():null; };
-</script>
-
-<script>
-// ════════════════════════════════════════
-//  BLOCK DEFINITIONS
-// ════════════════════════════════════════
-const BLOCK_DEFS = {
-  'regal':   { w:120, h:28,  color:'#a8e0a8', labelColor:'#2d5a8a' },
-  'obst':    { w:70,  h:70,  color:'#f0c080', labelColor:'#2d5a8a' },
-  'kuehl':   { w:130, h:32,  color:'#a8c4e0', labelColor:'#2d5a8a' },
-  'eingang': { w:50,  h:50,  color:'#8a7060', labelColor:'#fff' },
-  'kasse':   { w:50,  h:50,  color:'#c8a8e0', labelColor:'#2d5a8a' },
-  'label':   { w:80,  h:28,  color:'rgba(212,114,106,0.12)', labelColor:'#2d5a8a', isLabel:true }
-};
-
-// ════════════════════════════════════════
-//  STATE
-// ════════════════════════════════════════
-let blocks = [], shoppingItems = [];
-let selectedBlock = null, placingItem = null, placingBlockType = null;
-let activeTool = 'select', ctxTarget = null, textEditTarget = null;
-let canvas, ctx;
-let isDraggingBlock = false, dragOffX = 0, dragOffY = 0;
-let nextId = 1;
-const CANVAS_W = 1400;
-const CANVAS_H = 1000;
-let shoppingMode = false;
-
-// ════════════════════════════════════════
-//  CANVAS INIT
-// ════════════════════════════════════════
-function initCanvas() {
-  canvas = document.getElementById('supermarkt-canvas');
-  ctx = canvas.getContext('2d');
-
-  canvas.width = CANVAS_W;
-  canvas.height = CANVAS_H;
-  document.getElementById('canvas-container').style.width = CANVAS_W + 'px';
-  document.getElementById('canvas-container').style.height = CANVAS_H + 'px';
-
-  canvas.addEventListener('mousedown', onMouseDown);
-  canvas.addEventListener('mousemove', onMouseMove);
-  canvas.addEventListener('mouseup', onMouseUp);
-  canvas.addEventListener('contextmenu', e => e.preventDefault());
-
-  canvas.addEventListener('touchstart', onTouchStart, {passive:true});
-  canvas.addEventListener('touchend', onTouchEnd, {passive:true});
-
-  render();
-  updateShoppingUI();
-  applyShoppingModeUI();
-}
-
-// ════════════════════════════════════════
-//  RENDER
-// ════════════════════════════════════════
-function render() {
-  if (!ctx) return;
-  ctx.clearRect(0,0,CANVAS_W,CANVAS_H);
-  ctx.strokeStyle='rgba(180,140,120,0.12)';
-  ctx.lineWidth=1;
-  for(let x=0;x<CANVAS_W;x+=30){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,CANVAS_H);ctx.stroke();}
-  for(let y=0;y<CANVAS_H;y+=30){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(CANVAS_W,y);ctx.stroke();}
-  blocks.forEach(b=>drawBlock(b));
-  shoppingItems.forEach(item=>{
-    if(item.x!==undefined&&item.y!==undefined&&item.done) drawPin(item.x,item.y,item.name,item.color,true);
-  });
-  shoppingItems.forEach(item=>{
-    if(item.x!==undefined&&item.y!==undefined&&!item.done) drawPin(item.x,item.y,item.name,item.color,false);
-  });
-}
-
-function drawBlock(b) {
-  const def=BLOCK_DEFS[b.type];
-  if(!def)return;
-  const isSel=selectedBlock&&selectedBlock.id===b.id;
-  ctx.save();
-  if(isSel){ctx.shadowColor='rgba(212,114,106,0.4)';ctx.shadowBlur=12;}
-  if(def.isLabel){
-    ctx.fillStyle='rgba(212,114,106,0.1)';
-    ctx.strokeStyle='rgba(212,114,106,0.4)';
-    ctx.lineWidth=1; ctx.setLineDash([4,3]);
-    rr(b.x,b.y,b.w,b.h,4); ctx.fill(); ctx.stroke(); ctx.setLineDash([]);
-  } else {
-    ctx.fillStyle=b.color||def.color;
-    rr(b.x,b.y,b.w,b.h,6); ctx.fill();
-    ctx.strokeStyle=isSel?'#d4726a':'rgba(0,0,0,0.08)';
-    ctx.lineWidth=isSel?2:1; ctx.stroke();
-  }
-  ctx.shadowBlur=0;
-  const lbl=b.customLabel!=null?b.customLabel:'';
-  if(lbl&&b.w>20){
-    ctx.fillStyle=def.isLabel?'#2d5a8a':def.labelColor;
-    const fs=def.isLabel?13:Math.min(b.h*0.42,13);
-    ctx.font=`${def.isLabel?'600 ':''}${fs}px DM Sans,sans-serif`;
-    ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText(trunc(lbl,b.w-10,ctx),b.x+b.w/2,b.y+b.h/2);
-  }
-  if(isSel){
-    ctx.strokeStyle='#d4726a'; ctx.lineWidth=2; ctx.setLineDash([4,3]);
-    rr(b.x-2,b.y-2,b.w+4,b.h+4,8); ctx.stroke(); ctx.setLineDash([]);
-    ctx.fillStyle='#d4726a';
-    ctx.beginPath(); ctx.arc(b.x+b.w,b.y+b.h,7,0,Math.PI*2); ctx.fill();
-  }
-  ctx.restore();
-}
-
-function drawPin(x,y,name,color,done){
-  const c = done ? '#9ab89a' : (color||'#d4726a');
-  ctx.save();
-  ctx.globalAlpha = done ? 0.55 : 1;
-  ctx.fillStyle = done ? '#c8e0c8' : c;
-  ctx.strokeStyle = c;
-  ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.arc(x,y-16,11,0,Math.PI*2);
-  ctx.fill(); ctx.stroke();
-  ctx.globalAlpha = done ? 0.8 : 1;
-  ctx.fillStyle = done ? '#2d7a2d' : '#fff';
-  ctx.font = done ? 'bold 13px sans-serif' : '600 12px DM Sans';
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText(done ? '✓' : '📍', x, y-16);
-  ctx.globalAlpha = done ? 0.4 : 1;
-  ctx.strokeStyle = done ? '#9ab89a' : c;
-  ctx.lineWidth = done ? 1.5 : 2;
-  ctx.beginPath(); ctx.moveTo(x,y-5); ctx.lineTo(x,y); ctx.stroke();
-  ctx.globalAlpha = done ? 0.5 : 1;
-  ctx.font = '600 11px DM Sans,sans-serif';
-  const lw = ctx.measureText(name).width + 16;
-  ctx.fillStyle = done ? '#b0c8b0' : c;
-  ctx.beginPath(); rr(x-lw/2, y-40, lw, 18, 5); ctx.fill();
-  if (done) {
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 1.5;
-    ctx.globalAlpha = 0.7;
-    ctx.beginPath();
-    ctx.moveTo(x-lw/2+4, y-31);
-    ctx.lineTo(x+lw/2-4, y-31);
-    ctx.stroke();
-  }
-  ctx.globalAlpha = 1;
-  ctx.fillStyle = '#fff';
-  ctx.font = '600 11px DM Sans,sans-serif';
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText(name, x, y-31);
-  ctx.restore();
-}
-
-function hitTestPin(x,y){
-  for(let i=shoppingItems.length-1;i>=0;i--){
-    const item=shoppingItems[i];
-    if(item.x===undefined||item.y===undefined)continue;
-    if(Math.hypot(x-item.x,y-(item.y-16))<=18) return item;
-    const lw=80;
-    if(x>=item.x-lw/2&&x<=item.x+lw/2&&y>=item.y-40&&y<=item.y-22) return item;
-  }
-  return null;
-}
-
-function rr(x,y,w,h,r){
-  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);
-  ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);
-  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);
-  ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);
-  ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
-}
-
-function trunc(t,mw,c){
-  if(c.measureText(t).width<=mw)return t;
-  while(t.length>1&&c.measureText(t+'…').width>mw)t=t.slice(0,-1);
-  return t+'…';
-}
-
-function getCanvasPos(clientX, clientY) {
-  const rect = canvas.getBoundingClientRect();
-  const scaleX = CANVAS_W / rect.width;
-  const scaleY = CANVAS_H / rect.height;
-  return {
-    x: (clientX - rect.left) * scaleX,
-    y: (clientY - rect.top)  * scaleY
-  };
-}
-
-function hitTest(x,y){
-  for(let i=blocks.length-1;i>=0;i--){
-    const b=blocks[i];
-    if(x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h)return b;
-  }
-  return null;
-}
-
-function nearResize(b,x,y){return Math.hypot(x-(b.x+b.w),y-(b.y+b.h))<14;}
-function snap(v){return Math.round(v/15)*15;}
-
-// ════════════════════════════════════════
-//  BLOCK PLACEMENT
-// ════════════════════════════════════════
-function selectBlockType(blockType,el){
-  if(activeTool!=='select' || shoppingMode) return;
-  placingBlockType=blockType;
-  document.querySelectorAll('.palette-item').forEach(i=>i.classList.remove('placing-mode'));
-  el.classList.add('placing-mode');
-  canvas.style.cursor='crosshair';
-  if(window.innerWidth<=768){
-    document.getElementById('palette').classList.add('collapsed');
-    document.getElementById('toggle-left').textContent='☰';
-  }
-  showPlaceBanner('📍 Tippe auf die Karte zum Platzieren · Esc = Abbrechen');
-}
-window.selectBlockType=selectBlockType;
-
-function placeBlockAt(x,y){
-  if(!placingBlockType || shoppingMode) return;
-  const def=BLOCK_DEFS[placingBlockType];
-  const block={
-    id:nextId++,type:placingBlockType,
-    x:snap(x-def.w/2),y:snap(y-def.h/2),
-    w:def.w,h:def.h,color:def.color,customLabel:null
-  };
-  blocks.push(block);selectedBlock=block;
-  render();
-  hidePlaceBanner();
-  placingBlockType=null;
-  document.querySelectorAll('.palette-item').forEach(i=>i.classList.remove('placing-mode'));
-  canvas.style.cursor='default';
-  if(def.isLabel) setTimeout(()=>openTextEdit(block,window.innerWidth/2,window.innerHeight/2),80);
-  else showToast('✅ Platziert');
-}
-
-function placingItemAt(x,y){
-  if(!placingItem) return;
-  placingItem.x=x; placingItem.y=y; placingItem.placed=true;
-  const was=placingItem;
-  placingItem=null;
-  canvas.style.cursor='default';
-  hidePlaceBanner();
-  updateShoppingUI(); render();
-  showToast('📍 '+was.name+' platziert');
-}
-
-// ════════════════════════════════════════
-//  MOUSE
-// ════════════════════════════════════════
-function onMouseDown(e){
-  if(e.button===2)return;
-  closeCtxMenu(); closeTextPopup();
-  const{x,y}=getCanvasPos(e.clientX,e.clientY);
-
-  if(placingBlockType && !shoppingMode){ placeBlockAt(x,y); return; }
-  if(placingItem){ placingItemAt(x,y); return; }
-
-  if(shoppingMode){
-    const pin=hitTestPin(x,y);
-    if(pin){
-      pin.done=!pin.done;
-      updateShoppingUI();
-      showToast(pin.done?'✅ '+pin.name+' erledigt':'↩ '+pin.name+' zurückgesetzt');
-    }
-    return;
-  }
-
-  if(activeTool==='select'&&!placingBlockType){
-    const pin=hitTestPin(x,y);
-    if(pin){
-      pin.done=!pin.done;
-      updateShoppingUI();
-      showToast(pin.done?'✅ '+pin.name+' erledigt':'↩ '+pin.name+' zurückgesetzt');
-      return;
-    }
-  }
-
-  if(activeTool==='delete'){
-    const b=hitTest(x,y);
-    if(b){blocks=blocks.filter(bl=>bl.id!==b.id);selectedBlock=null;render();}
-    return;
-  }
-
-  const b=hitTest(x,y);
-  if(b){
-    selectedBlock=b;
-    isDraggingBlock=nearResize(b,x,y)?'resize':'move';
-    dragOffX=x-b.x; dragOffY=y-b.y;
-    blocks=blocks.filter(bl=>bl.id!==b.id);blocks.push(b);
-  } else { selectedBlock=null; }
-  render();
-}
-
-function onMouseMove(e){
-  if(shoppingMode) return;
-  const{x,y}=getCanvasPos(e.clientX,e.clientY);
-  if(!isDraggingBlock||!selectedBlock){
-    const b=hitTest(x,y);
-    canvas.style.cursor=placingBlockType||placingItem?'crosshair':b?(nearResize(b,x,y)?'se-resize':'grab'):'default';
-    return;
-  }
-  canvas.style.cursor=isDraggingBlock==='resize'?'se-resize':'grabbing';
-  if(isDraggingBlock==='move'){selectedBlock.x=snap(x-dragOffX);selectedBlock.y=snap(y-dragOffY);}
-  else{selectedBlock.w=Math.max(20,snap(x-selectedBlock.x));selectedBlock.h=Math.max(14,snap(y-selectedBlock.y));}
-  render();
-}
-
-function onMouseUp(){ isDraggingBlock=false; }
-
-// ════════════════════════════════════════
-//  TOUCH
-// ════════════════════════════════════════
-let _touchStartX=0,_touchStartY=0,_touchStartTime=0,_touchMoved=false;
-let _lastTap=0, _touchDragBlock=null, _touchDragOffX=0, _touchDragOffY=0;
-
-function onTouchStart(e){
-  if(e.touches.length!==1)return;
-  const t=e.touches[0];
-  const{x,y}=getCanvasPos(t.clientX,t.clientY);
-  _touchStartX=x; _touchStartY=y; _touchStartTime=Date.now(); _touchMoved=false;
-
-  if(placingBlockType||placingItem) return;
-  if(shoppingMode) return;
-
-  const b=hitTest(x,y);
-  if(b){
-    selectedBlock=b;
-    _touchDragBlock=b;
-    _touchDragOffX=x-b.x; _touchDragOffY=y-b.y;
-    blocks=blocks.filter(bl=>bl.id!==b.id);blocks.push(b);
-    render();
-  } else {
-    selectedBlock=null; _touchDragBlock=null; render();
-  }
-
-  canvas.addEventListener('touchmove', _onTouchMoveInternal, {passive:true});
-}
-
-function _onTouchMoveInternal(e){
-  if(e.touches.length!==1){ _touchDragBlock=null; return; }
-  const t=e.touches[0];
-  const{x,y}=getCanvasPos(t.clientX,t.clientY);
-  const dx=x-_touchStartX, dy=y-_touchStartY;
-  if(Math.hypot(dx,dy)>8) _touchMoved=true;
-
-  if(_touchDragBlock&&_touchMoved){
-    _touchDragBlock.x=snap(x-_touchDragOffX);
-    _touchDragBlock.y=snap(y-_touchDragOffY);
-    render();
-  }
-}
-
-function onTouchEnd(e){
-  canvas.removeEventListener('touchmove',_onTouchMoveInternal);
-  const elapsed=Date.now()-_touchStartTime;
-  _touchDragBlock=null;
-
-  if(_touchMoved) return;
-
-  const{x,y}={x:_touchStartX,y:_touchStartY};
-  const now=Date.now();
-  const doubleTap=(now-_lastTap)<350;
-  _lastTap=now;
-
-  if(placingBlockType){ placeBlockAt(x,y); return; }
-  if(placingItem){ placingItemAt(x,y); return; }
-
-  if(shoppingMode){
-    const pin=hitTestPin(x,y);
-    if(pin){
-      pin.done=!pin.done;
-      updateShoppingUI();
-      showToast(pin.done?'✅ '+pin.name+' erledigt':'↩ '+pin.name+' zurückgesetzt');
-    }
-    return;
-  }
-
-  if(activeTool==='select'&&!placingBlockType){
-    const pin=hitTestPin(x,y);
-    if(pin){
-      pin.done=!pin.done;
-      updateShoppingUI();
-      showToast(pin.done?'✅ '+pin.name+' erledigt':'↩ '+pin.name+' zurückgesetzt');
-      return;
-    }
-  }
-
-  if(activeTool==='delete'){
-    const b=hitTest(x,y);
-    if(b){blocks=blocks.filter(bl=>bl.id!==b.id);selectedBlock=null;render();}
-    return;
-  }
-
-  const b=hitTest(x,y);
-  if(b&&doubleTap){
-    openTextEdit(b,window.innerWidth/2,Math.min(window.innerHeight*0.4,300));
-  }
-}
-
-// ════════════════════════════════════════
-//  TOOLS
-// ════════════════════════════════════════
-function selectTool(tool,el){
-  if(shoppingMode) return;
-  activeTool=tool;
-  document.querySelectorAll('.palette-item[data-tool]').forEach(i=>i.classList.remove('selected-tool'));
-  el.classList.add('selected-tool');
-  document.querySelectorAll('.palette-item[data-block]').forEach(i=>i.classList.remove('placing-mode'));
-  placingBlockType=null;
-  canvas.style.cursor=tool==='delete'?'not-allowed':'default';
-  hidePlaceBanner();
-  if(window.innerWidth<=768){
-    document.getElementById('palette').classList.add('collapsed');
-    document.getElementById('toggle-left').textContent='☰';
-  }
-}
-window.selectTool=selectTool;
-
-function toggleLeftPanel(){
-  const p=document.getElementById('palette');
-  p.classList.toggle('collapsed');
-  document.getElementById('toggle-left').textContent=p.classList.contains('collapsed')?'☰':'✕';
-}
-window.toggleLeftPanel=toggleLeftPanel;
-
-function toggleRightPanel(){
-  const p=document.getElementById('shopping-panel');
-  p.classList.toggle('collapsed');
-  document.getElementById('toggle-right').textContent=p.classList.contains('collapsed')?'🛒':'✕';
-}
-window.toggleRightPanel=toggleRightPanel;
-
-// ════════════════════════════════════════
-//  SHOPPING MODE
-// ════════════════════════════════════════
-function applyShoppingModeUI(){
-  document.body.classList.toggle('shopping-mode', shoppingMode);
-  const btn = document.getElementById('btn-shopping-mode');
-  btn.classList.toggle('active', shoppingMode);
-  btn.textContent = shoppingMode ? '🛍 Einkaufsmodus aktiv' : '🛒 Einkaufsmodus';
-  if (shoppingMode) {
-    placingBlockType = null;
-    placingItem = null;
-    closeCtxMenu();
-    closeTextPopup();
-    hidePlaceBanner();
-    document.querySelectorAll('.palette-item').forEach(i=>i.classList.remove('placing-mode'));
-    canvas && (canvas.style.cursor='default');
-  }
-}
-function toggleShoppingMode(){
-  shoppingMode = !shoppingMode;
-  applyShoppingModeUI();
-  if (shoppingMode) {
-    if (window.innerWidth <= 768) {
-      document.getElementById('shopping-panel').classList.remove('collapsed');
-      document.getElementById('toggle-right').textContent = '✕';
-    }
-    showToast('🛒 Einkaufsmodus aktiviert');
-  } else {
-    showToast('🖱 Bearbeitungsmodus aktiviert');
-  }
-}
-window.toggleShoppingMode = toggleShoppingMode;
-
-// ════════════════════════════════════════
-//  CONTEXT MENU
-// ════════════════════════════════════════
-function closeCtxMenu(){document.getElementById('ctx-menu').classList.remove('show');}
-window.closeCtxMenu=closeCtxMenu;
-window.ctxEdit=()=>{closeCtxMenu();if(ctxTarget)openTextEdit(ctxTarget,window.innerWidth/2,window.innerHeight*0.4);};
-window.ctxDuplicate=()=>{closeCtxMenu();if(!ctxTarget)return;const c={...ctxTarget,id:nextId++,x:ctxTarget.x+20,y:ctxTarget.y+20};blocks.push(c);selectedBlock=c;render();};
-window.ctxDelete=()=>{closeCtxMenu();if(!ctxTarget)return;blocks=blocks.filter(b=>b.id!==ctxTarget.id);selectedBlock=null;render();};
-document.addEventListener('click',e=>{if(!e.target.closest('.ctx-menu'))closeCtxMenu();if(!e.target.closest('.text-popup')&&!e.target.closest('#supermarkt-canvas'))closeTextPopup();});
-
-// ════════════════════════════════════════
-//  TEXT EDIT
-// ════════════════════════════════════════
-function openTextEdit(block,cx,cy){
-  textEditTarget=block;
-  const popup=document.getElementById('text-popup');
-  const input=document.getElementById('text-popup-input');
-  input.value=block.customLabel||'';
-  popup.style.left=Math.max(10,Math.min(cx,window.innerWidth-300))+'px';
-  popup.style.top=Math.max(60,Math.min(cy,window.innerHeight-100))+'px';
-  popup.classList.add('show');input.focus();input.select();
-}
-function confirmTextEdit(){
-  if(!textEditTarget)return;
-  const val=document.getElementById('text-popup-input').value.trim();
-  textEditTarget.customLabel=val||null;
-  if(BLOCK_DEFS[textEditTarget.type].isLabel&&val){
-    const tmp=ctx.font;ctx.font='600 13px DM Sans';
-    textEditTarget.w=Math.max(60,ctx.measureText(val).width+16);
-    ctx.font=tmp;
-  }
-  closeTextPopup();render();
-}
-function cancelTextEdit(){closeTextPopup();}
-function closeTextPopup(){document.getElementById('text-popup').classList.remove('show');textEditTarget=null;}
-window.confirmTextEdit=confirmTextEdit;window.cancelTextEdit=cancelTextEdit;
-
-// ════════════════════════════════════════
-//  SHOPPING LIST
-// ════════════════════════════════════════
-const COLORS=['#d4726a','#7a9e8a','#c9a05a','#a070c0','#4090c0','#e08050'];
-let colorIdx=0;
-
-function addShoppingItem(){
-  const input=document.getElementById('sp-new-item');
-  const name=input.value.trim();if(!name)return;
-  shoppingItems.push({id:Date.now(),name,color:COLORS[colorIdx++%COLORS.length],placed:false,done:false});
-  input.value='';updateShoppingUI();
-}
-window.addShoppingItem=addShoppingItem;
-
-function updateShoppingUI(){
-  const list=document.getElementById('sp-list');
-  document.getElementById('sp-market-name').textContent=document.getElementById('market-name').value||'Kein Supermarkt';
-  if(shoppingItems.length===0){
-    list.innerHTML='<div class="sp-empty">Produkte hinzufügen, dann auf Karte platzieren 📍</div>';
-    document.getElementById('sp-progress-bar').style.width='0%';
-    document.getElementById('sp-stats-text').textContent='0 Produkte';
-    document.getElementById('sp-done-text').textContent='0 erledigt';
-    render();return;
-  }
-  list.innerHTML='';
-  shoppingItems.forEach(item=>{
-    const div=document.createElement('div');
-    div.className='sp-item'+(item.placed&&!item.done?' placed':'')+(item.done?' done':'')+(placingItem&&placingItem.id===item.id?' placing':'');
-    div.innerHTML=`
-      <div class="sp-item-dot" style="${item.placed?'background:'+item.color+';border-color:'+item.color:''}"></div>
-      <div style="flex:1;min-width:0;">
-        <div class="sp-item-name">${item.name}</div>
-        ${item.placed&&!item.done?'<div class="sp-item-loc" style="color:'+item.color+'">📍 Platziert</div>':''}
-        ${!item.placed&&!item.done?'<div class="sp-item-loc">Antippen → auf Karte platzieren</div>':''}
-        ${item.done?'<div class="sp-item-loc">✓ Erledigt</div>':''}
-      </div>
-      <div class="sp-item-actions">
-        ${item.placed&&!item.done?`<button class="sp-icon-btn" onclick="markDone(${item.id})">✓</button>`:''}
-        ${item.done?`<button class="sp-icon-btn" onclick="undoDone(${item.id})">↩</button>`:''}
-        <button class="sp-icon-btn" onclick="removeItem(${item.id})">✕</button>
-      </div>`;
-    if(!item.placed&&!item.done) div.onclick=(e)=>{if(e.target.closest('.sp-icon-btn'))return;startPlacingItem(item);};
-    list.appendChild(div);
-  });
-  const total=shoppingItems.length,done=shoppingItems.filter(i=>i.done).length;
-  document.getElementById('sp-progress-bar').style.width=(total>0?done/total*100:0)+'%';
-  document.getElementById('sp-stats-text').textContent=total+' Produkt'+(total!==1?'e':'');
-  document.getElementById('sp-done-text').textContent=done+' erledigt';
-  render();
-}
-
-function startPlacingItem(item){
-  placingItem=item;
-  canvas.style.cursor='crosshair';
-  document.getElementById('shopping-panel').classList.add('collapsed');
-  document.getElementById('toggle-right').textContent='🛒';
-  showPlaceBanner('📍 Tippe auf die Karte um "'+item.name+'" zu platzieren · Esc = Abbrechen');
-  updateShoppingUI();
-}
-
-window.markDone=(id)=>{const i=shoppingItems.find(i=>i.id===id);if(i){i.done=true;updateShoppingUI();}};
-window.undoDone=(id)=>{const i=shoppingItems.find(i=>i.id===id);if(i){i.done=false;updateShoppingUI();}};
-window.removeItem=(id)=>{
-  shoppingItems=shoppingItems.filter(i=>i.id!==id);
-  if(placingItem&&placingItem.id===id){placingItem=null;canvas.style.cursor='default';hidePlaceBanner();}
-  updateShoppingUI();
-};
-
-// ════════════════════════════════════════
-//  PLACE BANNER
-// ════════════════════════════════════════
-function showPlaceBanner(msg){
-  const b=document.getElementById('place-banner');
-  b.textContent=msg; b.classList.add('show');
-}
-function hidePlaceBanner(){document.getElementById('place-banner').classList.remove('show');}
-
-// ════════════════════════════════════════
-//  SAVE / LOAD
-// ════════════════════════════════════════
-function cleanForFirestore(obj){
-  if(Array.isArray(obj))return obj.map(cleanForFirestore);
-  if(obj!==null&&typeof obj==='object'){const out={};for(const[k,v]of Object.entries(obj)){if(v!==undefined)out[k]=cleanForFirestore(v);}return out;}
-  return obj;
-}
-
-window.saveMap=async()=>{
-  const name=document.getElementById('market-name').value.trim();
-  if(!name){showToast('⚠️ Namen eingeben');document.getElementById('market-name').focus();return;}
-  const data=cleanForFirestore({name,blocks,shoppingItems,nextId,savedAt:new Date().toISOString()});
-  try{
-    if(window._saveToFirebase){await window._saveToFirebase(data);showToast('💾 "'+name+'" gespeichert!');}
-    else{localStorage.setItem('supermarkt_backup',JSON.stringify(data));showToast('💾 Lokal gespeichert');}
-  }catch(e){showToast('❌ '+e.message);}
-};
-
-window.loadMap=async()=>{
-  let data=window._pendingLoad;
-  if(!data&&window._loadFromFirebase)data=await window._loadFromFirebase();
-  if(!data){showToast('Keine gespeicherte Karte');return;}
-  blocks=data.blocks||[];shoppingItems=data.shoppingItems||[];
-  nextId=data.nextId||blocks.length+1;
-  document.getElementById('market-name').value=data.name||'';
-  window._pendingLoad=null;
-  updateShoppingUI();render();
-  showToast('📂 "'+data.name+'" geladen!');
-};
-
-// ════════════════════════════════════════
-//  CLEAR / MODAL / TOAST
-// ════════════════════════════════════════
-window.confirmClear=()=>{
-  document.getElementById('modal-title').textContent='Karte leeren?';
-  document.getElementById('modal-text').textContent='Alle Blöcke und Produkte werden entfernt.';
-  document.getElementById('modal-confirm-btn').onclick=()=>{blocks=[];selectedBlock=null;render();closeModal();showToast('🗑 Karte geleert');};
-  document.getElementById('modal').classList.add('show');
-};
-function closeModal(){document.getElementById('modal').classList.remove('show');}
-window.closeModal=closeModal;
-
-let toastT;
-function showToast(msg){
-  clearTimeout(toastT);const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  toastT=setTimeout(()=>t.classList.remove('show'),3000);
-}
-window.showToast=showToast;
-
-// ════════════════════════════════════════
-//  KEYBOARD
-// ════════════════════════════════════════
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){
-    closeCtxMenu();closeTextPopup();
-    placingItem=null;placingBlockType=null;
-    document.querySelectorAll('.palette-item').forEach(i=>i.classList.remove('placing-mode'));
-    canvas&&(canvas.style.cursor='default');
-    hidePlaceBanner();updateShoppingUI();
-  }
-  if((e.key==='Delete'||e.key==='Backspace')&&selectedBlock&&document.activeElement===document.body&&!shoppingMode){
-    blocks=blocks.filter(b=>b.id!==selectedBlock.id);selectedBlock=null;render();
-  }
-  if(e.key==='s'&&(e.ctrlKey||e.metaKey)){e.preventDefault();window.saveMap();}
-});
-</script>
-</body>
-</html>
+<!DOCTYPE html>  
+<html lang="de">  
+<head>  
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">  
+<title>Supermarkt-Planer – Dr. Buntspecht</title>  
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">  
+<style>  
+:root {  
+  --bg: #fdf6f0;  
+  --surface: #fff8f3;  
+  --surface2: #ffeee3;  
+  --accent: #d4726a;  
+  --accent2: #7a9e8a;  
+  --gold: #c9a05a;  
+  --ink: #2d1f1a;  
+  --muted: #8a7060;  
+  --border: rgba(180,140,120,0.18);  
+  --shadow: rgba(180,120,100,0.12);  
+}  
+  
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }  
+body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif; height:100vh; display:flex; flex-direction:column; overflow:hidden; }  
+  
+/* ── TOPBAR ── */  
+.topbar {  
+  height:54px; background:var(--surface);  
+  border-bottom:1px solid var(--border);  
+  display:flex; align-items:center; justify-content:space-between;  
+  padding:0 12px; flex-shrink:0; gap:6px;  
+  box-shadow:0 2px 8px var(--shadow);  
+}  
+.topbar-logo { font-family:'Playfair Display',serif; font-size:14px; font-weight:900; color:var(--ink); white-space:nowrap; }  
+.topbar-logo span { color:var(--accent); font-style:italic; }  
+.topbar-name { flex:1; border:1px solid var(--border); border-radius:8px; padding:6px 10px; font-family:'DM Sans',sans-serif; font-size:12px; color:var(--ink); background:#fff; outline:none; max-width:180px; transition:border-color 0.2s; }  
+.topbar-name:focus { border-color:var(--accent); }  
+.topbar-actions { display:flex; gap:4px; flex-shrink:0; }  
+  
+.btn { font-family:'DM Sans',sans-serif; font-size:11px; font-weight:600; padding:6px 10px; border-radius:8px; border:none; cursor:pointer; transition:all 0.15s; white-space:nowrap; }  
+.btn:active { transform:scale(0.95); }  
+.btn-primary { background:var(--accent); color:#fff; }  
+.btn-primary:hover { filter:brightness(1.08); }  
+.btn-sage { background:var(--accent2); color:#fff; }  
+.btn-ghost { background:transparent; border:1px solid var(--border); color:var(--muted); }  
+.btn-ghost:hover { background:var(--surface2); color:var(--ink); }  
+  
+.mode-btn {  
+  background:#fff;  
+  border:1px solid var(--border);  
+  color:var(--ink);  
+}  
+.mode-btn.active {  
+  background:var(--accent2);  
+  color:#fff;  
+  border-color:transparent;  
+}  
+  
+/* ── MOBILE TOPBAR DROPDOWN ── */  
+.topbar-menu-mobile {  
+  display:none;  
+  position:relative;  
+  flex-shrink:0;  
+}  
+.mobile-menu-btn {  
+  min-width:40px;  
+  height:36px;  
+  font-size:20px;  
+  display:flex;  
+  align-items:center;  
+  justify-content:center;  
+}  
+.mobile-dropdown {  
+  position:absolute;  
+  right:0;  
+  top:44px;  
+  width:220px;  
+  background:var(--surface);  
+  border:1px solid var(--border);  
+  border-radius:14px;  
+  box-shadow:0 12px 40px rgba(45,31,26,0.18);  
+  padding:8px;  
+  display:none;  
+  flex-direction:column;  
+  gap:4px;  
+  z-index:2000;  
+}  
+.mobile-dropdown.show { display:flex; }  
+.mobile-dropdown::before {  
+  content:"";  
+  position:absolute;  
+  right:14px;  
+  top:-7px;  
+  width:12px;  
+  height:12px;  
+  background:var(--surface);  
+  border-left:1px solid var(--border);  
+  border-top:1px solid var(--border);  
+  transform:rotate(45deg);  
+}  
+.mobile-menu-item {  
+  width:100%;  
+  border:none;  
+  background:#fff;  
+  color:var(--ink);  
+  border-radius:10px;  
+  padding:11px 12px;  
+  text-align:left;  
+  font-family:'DM Sans',sans-serif;  
+  font-size:13px;  
+  display:flex;  
+  align-items:center;  
+  gap:8px;  
+  cursor:pointer;  
+  transition:background 0.12s, transform 0.05s;  
+}  
+.mobile-menu-item span {  
+  white-space:nowrap;  
+  overflow:hidden;  
+  text-overflow:ellipsis;  
+}  
+.mobile-menu-item:hover {  
+  background:var(--surface2);  
+}  
+.mobile-menu-item:active {  
+  transform:scale(0.97);  
+}  
+  
+/* ── RESPONSIVE TOPBAR ── */  
+@media (max-width: 768px) {  
+  .topbar-actions { display:none; }  
+  .topbar-name { max-width:120px; }  
+  .topbar-menu-mobile { display:flex; }  
+}  
+@media (min-width: 769px) {  
+  .topbar-menu-mobile { display:none; }  
+}  
+  
+/* ── MAIN LAYOUT ── */  
+.editor-layout { display:flex; flex:1; overflow:hidden; position:relative; }  
+  
+/* ── LEFT PANEL ── */  
+.palette {  
+  width:160px; flex-shrink:0;  
+  background:var(--surface);  
+  border-right:1px solid var(--border);  
+  overflow-y:auto; padding:10px 8px;  
+  display:flex; flex-direction:column; gap:4px;  
+  position:absolute; left:0; top:0; bottom:0; z-index:20;  
+  transition:transform 0.3s ease;  
+}  
+.palette.collapsed { transform:translateX(-100%); }  
+  
+.palette-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--muted); padding:6px 4px 4px; }  
+.palette-divider { height:1px; background:var(--border); margin:6px 0; }  
+  
+.palette-item {  
+  display:flex; align-items:center; gap:8px;  
+  padding:10px 12px; border-radius:10px;  
+  cursor:pointer; border:1.5px solid transparent;  
+  transition:all 0.15s; user-select:none;  
+  background:#fff; min-height:44px;  
+}  
+.palette-item:hover { border-color:var(--border); box-shadow:0 2px 8px var(--shadow); }  
+.palette-item:active { transform:scale(0.97); }  
+.palette-item.selected-tool { border-color:var(--accent); background:rgba(212,114,106,0.06); }  
+.palette-item.placing-mode { border-color:var(--accent); background:rgba(212,114,106,0.12); }  
+  
+.pi-icon { width:28px; height:20px; border-radius:4px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:13px; }  
+.pi-label { font-size:12px; font-weight:500; color:var(--ink); }  
+.pi-sub { font-size:9px; color:var(--muted); margin-top:1px; }  
+  
+/* ── CANVAS ── */  
+.canvas-wrap {  
+  flex:1; position:relative;  
+  overflow:auto;  
+  background-color: #f9f2ea;  
+  cursor:default;  
+}  
+  
+#canvas-container {  
+  position:relative;  
+  transform-origin: 0 0;  
+}  
+  
+#supermarkt-canvas {  
+  position:absolute; top:0; left:0;  
+  touch-action: pan-x pan-y pinch-zoom;  
+  display:block;  
+}  
+  
+/* Einkaufsmodus: Canvas und linke Palette sperren */  
+body.shopping-mode .palette,  
+body.shopping-mode #canvas-wrap {  
+  pointer-events:none;  
+}  
+  
+body.shopping-mode .shopping-panel {  
+  pointer-events:auto;  
+}  
+  
+body.shopping-mode #supermarkt-canvas {  
+  cursor:default !important;  
+}  
+  
+.toggle-btn {  
+  position:absolute; top:50%; transform:translateY(-50%);  
+  width:36px; height:44px;  
+  background:var(--surface); border:1px solid var(--border);  
+  border-radius:8px; cursor:pointer;  
+  display:flex; align-items:center; justify-content:center;  
+  font-size:18px; z-index:30;  
+  box-shadow:0 2px 8px var(--shadow); transition:all 0.2s;  
+  min-width:44px;  
+}  
+.toggle-btn:hover { background:var(--surface2); }  
+.toggle-btn:active { transform:translateY(-50%) scale(0.95); }  
+.toggle-left { left:8px; }  
+.toggle-right { right:8px; }  
+  
+/* ── RIGHT PANEL ── */  
+.shopping-panel {  
+  width:240px; flex-shrink:0;  
+  background:var(--surface); border-left:1px solid var(--border);  
+  display:flex; flex-direction:column; overflow:hidden;  
+  position:absolute; right:0; top:0; bottom:0; z-index:20;  
+  transition:transform 0.3s ease;  
+}  
+.shopping-panel.collapsed { transform:translateX(100%); }  
+  
+.sp-header { padding:12px 14px 8px; border-bottom:1px solid var(--border); }  
+.sp-title { font-family:'Playfair Display',serif; font-size:15px; font-weight:700; color:var(--ink); margin-bottom:2px; }  
+.sp-sub { font-size:11px; color:var(--muted); }  
+  
+.sp-add { display:flex; gap:6px; padding:10px 12px; border-bottom:1px solid var(--border); }  
+.sp-input { flex:1; border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-family:'DM Sans',sans-serif; font-size:13px; color:var(--ink); background:#fff; outline:none; min-height:44px; }  
+.sp-input:focus { border-color:var(--accent); }  
+.sp-add-btn { background:var(--accent); color:#fff; border:none; border-radius:8px; width:44px; height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:20px; flex-shrink:0; }  
+  
+.sp-list { flex:1; overflow-y:auto; padding:8px; display:flex; flex-direction:column; gap:4px; }  
+  
+.sp-item {  
+  display:flex; align-items:center; gap:8px;  
+  padding:10px 12px; border-radius:10px;  
+  background:#fff; border:1.5px solid var(--border);  
+  cursor:pointer; transition:all 0.15s; min-height:48px;  
+}  
+.sp-item:active { transform:scale(0.98); }  
+.sp-item:hover { border-color:var(--accent); }  
+.sp-item.placing { border-color:var(--accent); background:rgba(212,114,106,0.06); box-shadow:0 2px 8px var(--shadow); }  
+.sp-item.placed { border-color:var(--accent2); background:rgba(122,158,138,0.06); }  
+.sp-item.done { opacity:0.5; }  
+.sp-item.done .sp-item-name { text-decoration:line-through; }  
+  
+.sp-item-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; border:2px solid var(--muted); transition:all 0.2s; }  
+.sp-item.placed .sp-item-dot { background:var(--accent2); border-color:var(--accent2); }  
+.sp-item.done .sp-item-dot { background:var(--muted); border-color:var(--muted); }  
+.sp-item-name { flex:1; font-size:13px; font-weight:500; color:var(--ink); min-width:0; }  
+.sp-item-loc { font-size:10px; color:var(--accent2); margin-top:1px; }  
+.sp-item-actions { display:flex; gap:4px; }  
+.sp-icon-btn { background:none; border:none; cursor:pointer; font-size:16px; padding:6px; border-radius:6px; color:var(--muted); min-width:36px; min-height:36px; display:flex; align-items:center; justify-content:center; }  
+.sp-icon-btn:active { background:var(--surface2); }  
+  
+.sp-empty { text-align:center; padding:32px 12px; color:var(--muted); font-size:13px; font-style:italic; }  
+.sp-footer { padding:10px 12px; border-top:1px solid var(--border); }  
+.sp-progress { height:4px; background:var(--surface2); border-radius:2px; margin-bottom:6px; overflow:hidden; }  
+.sp-progress-bar { height:100%; background:var(--accent2); border-radius:2px; transition:width 0.4s ease; }  
+.sp-stats { font-size:11px; color:var(--muted); display:flex; justify-content:space-between; }  
+  
+/* ── PLACE HINT BANNER ── */  
+.place-banner {  
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px);  
+  background:var(--accent); color:#fff;  
+  padding:12px 22px; border-radius:50px;  
+  font-size:14px; font-weight:600;  
+  z-index:500; white-space:nowrap;  
+  box-shadow:0 4px 20px rgba(212,114,106,0.4);  
+  transition:transform 0.4s cubic-bezier(0.34,1.4,0.64,1);  
+  max-width:90vw; text-align:center;  
+}  
+.place-banner.show { transform:translateX(-50%) translateY(0); }  
+  
+/* ── CONTEXT MENU ── */  
+.ctx-menu { position:fixed; z-index:500; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:6px; box-shadow:0 8px 32px var(--shadow); min-width:160px; opacity:0; pointer-events:none; transform:scale(0.95); transition:all 0.15s; }  
+.ctx-menu.show { opacity:1; pointer-events:all; transform:scale(1); }  
+.ctx-item { padding:12px 14px; border-radius:8px; cursor:pointer; font-size:14px; color:var(--ink); display:flex; align-items:center; gap:8px; transition:background 0.1s; min-height:44px; }  
+.ctx-item:active { background:var(--surface2); }  
+.ctx-item:hover { background:var(--surface2); }  
+.ctx-item.danger { color:var(--accent); }  
+  
+/* ── TEXT POPUP ── */  
+.text-popup { position:fixed; z-index:600; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px; box-shadow:0 8px 32px var(--shadow); display:none; gap:8px; align-items:center; min-width:280px; }  
+.text-popup.show { display:flex; }  
+.text-popup input { border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--ink); background:#fff; outline:none; flex:1; min-height:44px; }  
+.text-popup input:focus { border-color:var(--accent); }  
+  
+/* ── MODAL ── */  
+.modal-overlay { position:fixed; inset:0; z-index:1000; background:rgba(45,31,26,0.5); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.25s; padding:20px; }  
+.modal-overlay.show { opacity:1; pointer-events:all; }  
+.modal-box { background:var(--surface); border-radius:20px; padding:24px; max-width:340px; width:100%; box-shadow:0 16px 48px rgba(0,0,0,0.15); }  
+.modal-title { font-family:'Playfair Display',serif; font-size:20px; font-weight:700; margin-bottom:8px; }  
+.modal-text { font-size:14px; color:var(--muted); line-height:1.6; margin-bottom:20px; }  
+.modal-actions { display:flex; gap:8px; justify-content:flex-end; }  
+  
+/* ── TOAST ── */  
+.toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(60px); background:var(--ink); color:#fff; padding:12px 20px; border-radius:50px; font-size:14px; z-index:2000; transition:transform 0.35s cubic-bezier(0.34,1.4,0.64,1); white-space:nowrap; box-shadow:0 4px 20px rgba(0,0,0,0.2); max-width:90%; text-align:center; }  
+.toast.show { transform:translateX(-50%) translateY(0); }  
+  
+::-webkit-scrollbar { width:5px; }  
+::-webkit-scrollbar-track { background:transparent; }  
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }  
+</style>  
+</head>  
+<body>  
+  
+<!-- TOPBAR -->  
+<div class="topbar">  
+  <div class="topbar-logo">Dr.<span>Buntspecht</span> <span style="color:var(--muted);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:400;">· Marktplaner</span></div>  
+  <input class="topbar-name" id="market-name" placeholder="Supermarkt…" maxlength="40">  
+  <!-- Desktop-Actions -->  
+  <div class="topbar-actions">  
+    <button class="btn btn-ghost mode-btn" id="btn-shopping-mode" onclick="toggleShoppingMode()">🛒 Einkaufsmodus</button>  
+    <button class="btn btn-ghost" id="btn-clear" onclick="confirmClear()" style="display:none">🗑</button>  
+    <button class="btn btn-sage" id="btn-load" onclick="loadMap()" style="display:none">📂</button>  
+    <button class="btn btn-primary" id="btn-save" onclick="saveMap()">💾</button>  
+  </div>  
+  <!-- Mobile Dropdown -->  
+  <div class="topbar-menu-mobile" id="topbar-menu-mobile">  
+    <button class="btn btn-ghost mobile-menu-btn" id="btn-mobile-menu" onclick="toggleMobileMenu()">☰</button>  
+    <div class="mobile-dropdown" id="mobile-dropdown">  
+      <button class="mobile-menu-item" id="dropdown-shopping-mode" onclick="toggleShoppingMode(); toggleMobileMenu();">  
+        <span>🛒 Einkaufsmodus</span>  
+      </button>  
+      <button class="mobile-menu-item" onclick="confirmClear(); toggleMobileMenu();">  
+        <span>🗑 Karte leeren</span>  
+      </button>  
+      <button class="mobile-menu-item" onclick="loadMap(); toggleMobileMenu();">  
+        <span>📂 Laden</span>  
+      </button>  
+      <button class="mobile-menu-item" onclick="saveMap(); toggleMobileMenu();">  
+        <span>💾 Speichern</span>  
+      </button>  
+    </div>  
+  </div>  
+</div>  
+  
+<!-- EDITOR -->  
+<div class="editor-layout" id="editor-layout">  
+  
+  <!-- LEFT PANEL -->  
+  <div class="palette" id="palette">  
+    <div class="palette-title">Werkzeuge</div>  
+    <div class="palette-item selected-tool" data-tool="select" onclick="selectTool('select',this)">  
+      <div class="pi-icon">🖱</div>  
+      <div><div class="pi-label">Auswählen</div><div class="pi-sub">Verschieben</div></div>  
+    </div>  
+    <div class="palette-item" data-tool="delete" onclick="selectTool('delete',this)">  
+      <div class="pi-icon">🗑</div>  
+      <div><div class="pi-label">Löschen</div><div class="pi-sub">Klick auf Block</div></div>  
+    </div>  
+    <div class="palette-divider"></div>  
+    <div class="palette-title">Bausteine</div>  
+    <div class="palette-item" data-block="regal" onclick="selectBlockType('regal',this)">  
+      <div class="pi-icon" style="background:#a8e0a8;border-radius:3px;width:32px;height:14px;"></div>  
+      <div><div class="pi-label">Regal</div><div class="pi-sub">grün</div></div>  
+    </div>  
+    <div class="palette-item" data-block="obst" onclick="selectBlockType('obst',this)">  
+      <div class="pi-icon" style="background:#f0c080;border-radius:3px;width:24px;height:24px;"></div>  
+      <div><div class="pi-label">Obst</div><div class="pi-sub">gelb</div></div>  
+    </div>  
+    <div class="palette-item" data-block="kuehl" onclick="selectBlockType('kuehl',this)">  
+      <div class="pi-icon" style="background:#a8c4e0;border-radius:3px;width:28px;height:16px;"></div>  
+      <div><div class="pi-label">Kühlregal</div><div class="pi-sub">blau</div></div>  
+    </div>  
+    <div class="palette-item" data-block="eingang" onclick="selectBlockType('eingang',this)">  
+      <div class="pi-icon" style="background:#8a7060;border-radius:3px;width:22px;height:22px;"></div>  
+      <div><div class="pi-label">Eingang</div><div class="pi-sub">grau</div></div>  
+    </div>  
+    <div class="palette-item" data-block="kasse" onclick="selectBlockType('kasse',this)">  
+      <div class="pi-icon" style="background:#c8a8e0;border-radius:3px;width:20px;height:20px;"></div>  
+      <div><div class="pi-label">Kasse</div><div class="pi-sub">lila</div></div>  
+    </div>  
+    <div class="palette-divider"></div>  
+    <div class="palette-title">Text</div>  
+    <div class="palette-item" data-block="label" onclick="selectBlockType('label',this)">  
+      <div class="pi-icon" style="color:#2d5a8a;font-size:16px;font-weight:700;">T</div>  
+      <div><div class="pi-label">Label</div><div class="pi-sub">Text-Feld</div></div>  
+    </div>  
+  </div>  
+  
+  <!-- TOGGLE BUTTONS -->  
+  <button class="toggle-btn toggle-left" id="toggle-left" onclick="toggleLeftPanel()">☰</button>  
+  <button class="toggle-btn toggle-right" id="toggle-right" onclick="toggleRightPanel()">🛒</button>  
+  
+  <!-- CANVAS WRAP -->  
+  <div class="canvas-wrap" id="canvas-wrap">  
+    <div id="canvas-container">  
+      <canvas id="supermarkt-canvas"></canvas>  
+    </div>  
+  </div>  
+  
+  <!-- RIGHT PANEL -->  
+  <div class="shopping-panel" id="shopping-panel">  
+    <div class="sp-header">  
+      <div class="sp-title">🛒 Einkaufsliste</div>  
+      <div class="sp-sub" id="sp-market-name">Kein Supermarkt</div>  
+    </div>  
+    <div class="sp-add">  
+      <input class="sp-input" id="sp-new-item" placeholder="Produkt…" onkeydown="if(event.key==='Enter')addShoppingItem()">  
+      <button class="sp-add-btn" onclick="addShoppingItem()">+</button>  
+    </div>  
+    <div class="sp-list" id="sp-list">  
+      <div class="sp-empty">Produkte hinzufügen</div>  
+    </div>  
+    <div class="sp-footer">  
+      <div class="sp-progress"><div class="sp-progress-bar" id="sp-progress-bar" style="width:0%"></div></div>  
+      <div class="sp-stats">  
+        <span id="sp-stats-text">0 Produkte</span>  
+        <span id="sp-done-text">0 erledigt</span>  
+      </div>  
+    </div>  
+  </div>  
+</div>  
+  
+<!-- LOGIN GATE -->  
+<div id="login-gate" style="display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px;text-align:center;">  
+  <div style="font-size:48px;">🔒</div>  
+  <div style="font-family:'Playfair Display',serif;font-size:22px;color:var(--ink);">Bitte einloggen</div>  
+  <div style="font-size:14px;color:var(--muted);">Der Marktplaner ist nur für angemeldete Nutzer.</div>  
+  <a href="index.html" class="btn btn-primary" style="margin-top:8px;padding:10px 18px;">← Zur Startseite</a>  
+</div>  
+  
+<!-- PLACE BANNER -->  
+<div class="place-banner" id="place-banner">📍 Tippe auf die Karte zum Platzieren · Esc = Abbrechen</div>  
+  
+<!-- CONTEXT MENU -->  
+<div class="ctx-menu" id="ctx-menu">  
+  <div class="ctx-item" onclick="ctxEdit()">✏️ Text bearbeiten</div>  
+  <div class="ctx-item" onclick="ctxDuplicate()">📋 Duplizieren</div>  
+  <div class="ctx-item danger" onclick="ctxDelete()">🗑 Löschen</div>  
+</div>  
+  
+<!-- TEXT POPUP -->  
+<div class="text-popup" id="text-popup">  
+  <input id="text-popup-input" placeholder="Beschriftung…" onkeydown="if(event.key==='Enter')confirmTextEdit()">  
+  <button class="btn btn-primary" style="padding:8px 14px;" onclick="confirmTextEdit()">OK</button>  
+  <button class="btn btn-ghost" style="padding:8px 12px;" onclick="cancelTextEdit()">✕</button>  
+</div>  
+  
+<!-- MODAL -->  
+<div class="modal-overlay" id="modal">  
+  <div class="modal-box">  
+    <div class="modal-title" id="modal-title">Karte leeren?</div>  
+    <div class="modal-text" id="modal-text">Alle Blöcke werden entfernt.</div>  
+    <div class="modal-actions">  
+      <button class="btn btn-ghost" onclick="closeModal()">Abbrechen</button>  
+      <button class="btn btn-primary" id="modal-confirm-btn">Leeren</button>  
+    </div>  
+  </div>  
+</div>  
+  
+<div class="toast" id="toast"></div>  
+  
+<!-- FIREBASE -->  
+<script type="module">  
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";  
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";  
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";  
+  
+const app = initializeApp({  
+  apiKey: "AIzaSyCTSYRwq9G9inKW-bEnLC90I19J4oTTkp8",  
+  authDomain: "drbuntspecht-f92ba.firebaseapp.com",  
+  projectId: "drbuntspecht-f92ba",  
+  storageBucket: "drbuntspecht-f92ba.firebasestorage.app",  
+  messagingSenderId: "1075490932089",  
+  appId: "1:1075490932089:web:44f532194f78e41f539ba8"  
+});  
+  
+const auth = getAuth(app);  
+const db = getFirestore(app);  
+let currentUser = null;  
+  
+onAuthStateChanged(auth, async user => {  
+  currentUser = user;  
+  if (user) {  
+    document.getElementById('editor-layout').style.display = 'flex';  
+    document.getElementById('login-gate').style.display = 'none';  
+    document.getElementById('btn-clear').style.display = 'inline-block';  
+    document.getElementById('btn-load').style.display = 'inline-block';  
+    document.getElementById('palette').classList.add('collapsed');  
+    document.getElementById('shopping-panel').classList.add('collapsed');  
+    initCanvas();  
+    const snap = await getDoc(doc(db, 'supermarkets', user.uid));  
+    if (snap.exists()) { window._pendingLoad = snap.data(); showToast('📂 Gespeicherte Karte gefunden — klick 📂'); }  
+  } else {  
+    document.getElementById('editor-layout').style.display = 'none';  
+    document.getElementById('login-gate').style.display = 'flex';  
+  }  
+});  
+  
+window._saveToFirebase = async (data) => { if (!currentUser) return; await setDoc(doc(db,'supermarkets',currentUser.uid), data); };  
+window._loadFromFirebase = async () => { if (!currentUser) return null; const s=await getDoc(doc(db,'supermarkets',currentUser.uid)); return s.exists()?s.data():null; };  
+</script>  
+  
+<script>  
+// ════════════════════════════════════════  
+//  BLOCK DEFINITIONS  
+// ════════════════════════════════════════  
+const BLOCK_DEFS = {  
+  'regal':   { w:120, h:28,  color:'#a8e0a8', labelColor:'#2d5a8a' },  
+  'obst':    { w:70,  h:70,  color:'#f0c080', labelColor:'#2d5a8a' },  
+  'kuehl':   { w:130, h:32,  color:'#a8c4e0', labelColor:'#2d5a8a' },  
+  'eingang': { w:50,  h:50,  color:'#8a7060', labelColor:'#fff' },  
+  'kasse':   { w:50,  h:50,  color:'#c8a8e0', labelColor:'#2d5a8a' },  
+  'label':   { w:80,  h:28,  color:'rgba(212,114,106,0.12)', labelColor:'#2d5a8a', isLabel:true }  
+};  
+  
+// ════════════════════════════════════════  
+//  STATE  
+// ════════════════════════════════════════  
+let blocks = [], shoppingItems = [];  
+let selectedBlock = null, placingItem = null, placingBlockType = null;  
+let activeTool = 'select', ctxTarget = null, textEditTarget = null;  
+let canvas, ctx;  
+let isDraggingBlock = false, dragOffX = 0, dragOffY = 0;  
+let nextId = 1;  
+const CANVAS_W = 1400;  
+const CANVAS_H = 1000;  
+let shoppingMode = false;  
+  
+// ════════════════════════════════════════  
+//  CANVAS INIT  
+// ════════════════════════════════════════  
+function initCanvas() {  
+  canvas = document.getElementById('supermarkt-canvas');  
+  ctx = canvas.getContext('2d');  
+  
+  canvas.width = CANVAS_W;  
+  canvas.height = CANVAS_H;  
+  document.getElementById('canvas-container').style.width = CANVAS_W + 'px';  
+  document.getElementById('canvas-container').style.height = CANVAS_H + 'px';  
+  
+  canvas.addEventListener('mousedown', onMouseDown);  
+  canvas.addEventListener('mousemove', onMouseMove);  
+  canvas.addEventListener('mouseup', onMouseUp);  
+  canvas.addEventListener('contextmenu', e => e.preventDefault());  
+  
+  canvas.addEventListener('touchstart', onTouchStart, {passive:true});  
+  canvas.addEventListener('touchend', onTouchEnd, {passive:true});  
+  
+  render();  
+  updateShoppingUI();  
+  applyShoppingModeUI();  
+}  
+  
+// ════════════════════════════════════════  
+//  RENDER  
+// ════════════════════════════════════════  
+function render() {  
+  if (!ctx) return;  
+  ctx.clearRect(0,0,CANVAS_W,CANVAS_H);  
+  ctx.strokeStyle='rgba(180,140,120,0.12)';  
+  ctx.lineWidth=1;  
+  for(let x=0;x<CANVAS_W;x+=30){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,CANVAS_H);ctx.stroke();}  
+  for(let y=0;y<CANVAS_H;y+=30){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(CANVAS_W,y);ctx.stroke();}  
+  blocks.forEach(b=>drawBlock(b));  
+  shoppingItems.forEach(item=>{  
+    if(item.x!==undefined&&item.y!==undefined&&item.done) drawPin(item.x,item.y,item.name,item.color,true);  
+  });  
+  shoppingItems.forEach(item=>{  
+    if(item.x!==undefined&&item.y!==undefined&&!item.done) drawPin(item.x,item.y,item.name,item.color,false);  
+  });  
+}  
+  
+function drawBlock(b) {  
+  const def=BLOCK_DEFS[b.type];  
+  if(!def)return;  
+  const isSel=selectedBlock&&selectedBlock.id===b.id;  
+  ctx.save();  
+  if(isSel){ctx.shadowColor='rgba(212,114,106,0.4)';ctx.shadowBlur=12;}  
+  if(def.isLabel){  
+    ctx.fillStyle='rgba(212,114,106,0.1)';  
+    ctx.strokeStyle='rgba(212,114,106,0.4)';  
+    ctx.lineWidth=1; ctx.setLineDash([4,3]);  
+    rr(b.x,b.y,b.w,b.h,4); ctx.fill(); ctx.stroke(); ctx.setLineDash([]);  
+  } else {  
+    ctx.fillStyle=b.color||def.color;  
+    rr(b.x,b.y,b.w,b.h,6); ctx.fill();  
+    ctx.strokeStyle=isSel?'#d4726a':'rgba(0,0,0,0.08)';  
+    ctx.lineWidth=isSel?2:1; ctx.stroke();  
+  }  
+  ctx.shadowBlur=0;  
+  const lbl=b.customLabel!=null?b.customLabel:'';  
+  if(lbl&&b.w>20){  
+    ctx.fillStyle=def.isLabel?'#2d5a8a':def.labelColor;  
+    const fs=def.isLabel?13:Math.min(b.h*0.42,13);  
+    ctx.font=`${def.isLabel?'600 ':''}${fs}px DM Sans,sans-serif`;  
+    ctx.textAlign='center'; ctx.textBaseline='middle';  
+    ctx.fillText(trunc(lbl,b.w-10,ctx),b.x+b.w/2,b.y+b.h/2);  
+  }  
+  if(isSel){  
+    ctx.strokeStyle='#d4726a'; ctx.lineWidth=2; ctx.setLineDash([4,3]);  
+    rr(b.x-2,b.y-2,b.w+4,b.h+4,8); ctx.stroke(); ctx.setLineDash([]);  
+    ctx.fillStyle='#d4726a';  
+    ctx.beginPath(); ctx.arc(b.x+b.w,b.y+b.h,7,0,Math.PI*2); ctx.fill();  
+  }  
+  ctx.restore();  
+}  
+  
+function drawPin(x,y,name,color,done){  
+  const c = done ? '#9ab89a' : (color||'#d4726a');  
+  ctx.save();  
+  ctx.globalAlpha = done ? 0.55 : 1;  
+  ctx.fillStyle = done ? '#c8e0c8' : c;  
+  ctx.strokeStyle = c;  
+  ctx.lineWidth = 2;  
+  ctx.beginPath(); ctx.arc(x,y-16,11,0,Math.PI*2);  
+  ctx.fill(); ctx.stroke();  
+  ctx.globalAlpha = done ? 0.8 : 1;  
+  ctx.fillStyle = done ? '#2d7a2d' : '#fff';  
+  ctx.font = done ? 'bold 13px sans-serif' : '600 12px DM Sans';  
+  ctx.textAlign='center'; ctx.textBaseline='middle';  
+  ctx.fillText(done ? '✓' : '📍', x, y-16);  
+  ctx.globalAlpha = done ? 0.4 : 1;  
+  ctx.strokeStyle = done ? '#9ab89a' : c;  
+  ctx.lineWidth = done ? 1.5 : 2;  
+  ctx.beginPath(); ctx.moveTo(x,y-5); ctx.lineTo(x,y); ctx.stroke();  
+  ctx.globalAlpha = done ? 0.5 : 1;  
+  ctx.font = '600 11px DM Sans,sans-serif';  
+  const lw = ctx.measureText(name).width + 16;  
+  ctx.fillStyle = done ? '#b0c8b0' : c;  
+  ctx.beginPath(); rr(x-lw/2, y-40, lw, 18, 5); ctx.fill();  
+  if (done) {  
+    ctx.strokeStyle = '#fff';  
+    ctx.lineWidth = 1.5;  
+    ctx.globalAlpha = 0.7;  
+    ctx.beginPath();  
+    ctx.moveTo(x-lw/2+4, y-31);  
+    ctx.lineTo(x+lw/2-4, y-31);  
+    ctx.stroke();  
+  }  
+  ctx.globalAlpha = 1;  
+  ctx.fillStyle = '#fff';  
+  ctx.font = '600 11px DM Sans,sans-serif';  
+  ctx.textAlign='center'; ctx.textBaseline='middle';  
+  ctx.fillText(name, x, y-31);  
+  ctx.restore();  
+}  
+  
+function hitTestPin(x,y){  
+  for(let i=shoppingItems.length-1;i>=0;i--){  
+    const item=shoppingItems[i];  
+    if(item.x===undefined||item.y===undefined)continue;  
+    if(Math.hypot(x-item.x,y-(item.y-16))<=18) return item;  
+    const lw=80;  
+    if(x>=item.x-lw/2&&x<=item.x+lw/2&&y>=item.y-40&&y<=item.y-22) return item;  
+  }  
+  return null;  
+}  
+  
+function rr(x,y,w,h,r){  
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);  
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);  
+  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);  
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);  
+  ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();  
+}  
+  
+function trunc(t,mw,c){  
+  if(c.measureText(t).width<=mw)return t;  
+  while(t.length>1&&c.measureText(t+'…').width>mw)t=t.slice(0,-1);  
+  return t+'…';  
+}  
+  
+function getCanvasPos(clientX, clientY) {  
+  const rect = canvas.getBoundingClientRect();  
+  const scaleX = CANVAS_W / rect.width;  
+  const scaleY = CANVAS_H / rect.height;  
+  return {  
+    x: (clientX - rect.left) * scaleX,  
+    y: (clientY - rect.top)  * scaleY  
+  };  
+}  
+  
+function hitTest(x,y){  
+  for(let i=blocks.length-1;i>=0;i--){  
+    const b=blocks[i];  
+    if(x>=b.x&&x<=b.x+b.w&&y>=b.y&&y<=b.y+b.h)return b;  
+  }  
+  return null;  
+}  
+  
+function nearResize(b,x,y){return Math.hypot(x-(b.x+b.w),y-(b.y+b.h))<14;}  
+function snap(v){return Math.round(v/15)*15;}  
+  
+// ════════════════════════════════════════  
+//  BLOCK PLACEMENT  
+// ════════════════════════════════════════  
+function selectBlockType(blockType,el){  
+  if(activeTool!=='select' || shoppingMode) return;  
+  placingBlockType=blockType;  
+  document.querySelectorAll('.palette-item').forEach(i=>i.classList.remove('placing-mode'));  
+  el.classList.add('placing-mode');  
+  canvas.style.cursor='crosshair';  
+  if(window.innerWidth<=768){  
+    document.getElementById('palette').classList.add('collapsed');  
+    document.getElementById('toggle-left').textContent='☰';  
+  }  
+  showPlaceBanner('📍 Tippe auf die Karte zum Platzieren · Esc = Abbrechen');  
+}  
+window.selectBlockType=selectBlockType;  
+  
+function placeBlockAt(x,y){  
+  if(!placingBlockType || shoppingMode) return;  
+  const def=BLOCK_DEFS[placingBlockType];  
+  const block={  
+    id:nextId++,type:placingBlockType,  
+    x:snap(x-def.w/2),y:snap(y-def.h/2),  
+    w:def.w,h:def.h,color:def.color,customLabel:null  
+  };  
+  blocks.push(block);selectedBlock=block;  
+  render();  
+  hidePlaceBanner();  
+  placingBlockType=null;  
+  document.querySelectorAll('.palette-item').forEach(i=>i.classList.remove('placing-mode'));  
+  canvas.style.cursor='default';  
+  if(def.isLabel) setTimeout(()=>openTextEdit(block,window.innerWidth/2,window.innerHeight/2),80);  
+  else showToast('✅ Platziert');  
+}  
+  
+function placingItemAt(x,y){  
+  if(!placingItem) return;  
+  placingItem.x=x; placingItem.y=y; placingItem.placed=true;  
+  const was=placingItem;  
+  placingItem=null;  
+  canvas.style.cursor='default';  
+  hidePlaceBanner();  
+  updateShoppingUI(); render();  
+  showToast('📍 '+was.name+' platziert');  
+}  
+  
+// ════════════════════════════════════════  
+//  MOUSE  
+// ════════════════════════════════════════  
+function onMouseDown(e){  
+  if(e.button===2)return;  
+  closeCtxMenu(); closeTextPopup();  
+  const{x,y}=getCanvasPos(e.clientX,e.clientY);  
+  
+  if(placingBlockType && !shoppingMode){ placeBlockAt(x,y); return; }  
+  if(placingItem){ placingItemAt(x,y); return; }  
+  
+  if(shoppingMode){  
+    const pin=hitTestPin(x,y);  
+    if(pin){  
+      pin.done=!pin.done;  
+      updateShoppingUI();  
+      showToast(pin.done?'✅ '+pin.name+' erledigt':'↩ '+pin.name+' zurückgesetzt');  
+    }  
+    return;  
+  }  
+  
+  if(activeTool==='select'&&!placingBlockType){  
+    const pin=hitTestPin(x,y);  
+    if(pin){  
+      pin.done=!pin.done;  
+      updateShoppingUI();  
+      showToast(pin.done?'✅ '+pin.name+' erledigt':'↩ '+pin.name+' zurückgesetzt');  
+      return;  
+    }  
+  }  
+  
+  if(activeTool==='delete'){  
+    const b=hitTest(x,y);  
+    if(b){blocks=blocks.filter(bl=>bl.id!==b.id);selectedBlock=null;render();}  
+    return;  
+  }  
+  
+  const b=hitTest(x,y);  
+  if(b){  
+    selectedBlock=b;  
+    isDraggingBlock=nearResize(b,x,y)?'resize':'move';  
+    dragOffX=x-b.x; dragOffY=y-b.y;  
+    blocks=blocks.filter(bl=>bl.id!==b.id);blocks.push(b);  
+  } else { selectedBlock=null; }  
+  render();  
+}  
+  
+function onMouseMove(e){  
+  if(shoppingMode) return;  
+  const{x,y}=getCanvasPos(e.clientX,e.clientY);  
+  if(!isDraggingBlock||!selectedBlock){  
+    const b=hitTest(x,y);  
+    canvas.style.cursor=placingBlockType||placingItem?'crosshair':b?(nearResize(b,x,y)?'se-resize':'grab'):'default';  
+    return;  
+  }  
+  canvas.style.cursor=isDraggingBlock==='resize'?'se-resize':'grabbing';  
+  if(isDraggingBlock==='move'){selectedBlock.x=snap(x-dragOffX);selectedBlock.y=snap(y-dragOffY);}  
+  else{selectedBlock.w=Math.max(20,snap(x-selectedBlock.x));selectedBlock.h=Math.max(14,snap(y-selectedBlock.y));}  
+  render();  
+}  
+  
+function onMouseUp(){ isDraggingBlock=false; }  
+  
+// ════════════════════════════════════════  
+//  TOUCH  
+// ════════════════════════════════════════  
+let _touchStartX=0,_touchStartY=0,_touchStartTime=0,_touchMoved=false;  
+let _lastTap=0, _touchDragBlock=null, _touchDragOffX=0, _touchDragOffY=0;  
+  
+function onTouchStart(e){  
+  if(e.touches.length!==1)return;  
+  const t=e.touches[0];  
+  const{x,y}=getCanvasPos(t.clientX,t.clientY);  
+  _touchStartX=x; _touchStartY=y; _touchStartTime=Date.now(); _touchMoved=false;  
+  
+  if(placingBlockType||placingItem) return;  
+  if(shoppingMode) return;  
+  
+  const b=hitTest(x,y);  
+  if(b){  
+    selectedBlock=b;  
+    _touchDragBlock=b;  
+    _touchDragOffX=x-b.x; _touchDragOffY=y-b.y;  
+    blocks=blocks.filter(bl=>bl.id!==b.id);blocks.push(b);  
+    render();  
+  } else {  
+    selectedBlock=null; _touchDragBlock=null; render();  
+  }  
+  
+  canvas.addEventListener('touchmove', _onTouchMoveInternal, {passive:true});  
+}  
+  
+function _onTouchMoveInternal(e){  
+  if(e.touches.length!==1){ _touchDragBlock=null; return; }  
+  const t=e.touches[0];  
+  const{x,y}=getCanvasPos(t.clientX,t.clientY);  
+  const dx=x-_touchStartX, dy=y-_touchStartY;  
+  if(Math.hypot(dx,dy)>8) _touchMoved=true;  
+  
+  if(_touchDragBlock&&_touchMoved){  
+    _touchDragBlock.x=snap(x-_touchDragOffX);  
+    _touchDragBlock.y=snap(y-_touchDragOffY);  
+    render();  
+  }  
+}  
+  
+function onTouchEnd(e){  
+  canvas.removeEventListener('touchmove',_onTouchMoveInternal);  
+  const elapsed=Date.now()-_touchStartTime;  
+  _touchDragBlock=null;  
+  
+  if(_touchMoved) return;  
+  
+  const{x,y}={x:_touchStartX,y:_touchStartY};  
+  const now=Date.now();  
+  const doubleTap=(now-_lastTap)<350;  
+  _lastTap=now;  
+  
+  if(placingBlockType){ placeBlockAt(x,y); return; }  
+  if(placingItem){ placingItemAt(x,y); return; }  
+  
+  if(shoppingMode){  
+    const pin=hitTestPin(x,y);  
+    if(pin){  
+      pin.done=!pin.done;  
+      updateShoppingUI();  
+      showToast(pin.done?'✅ '+pin.name+' erledigt':'↩ '+pin.name+' zurückgesetzt');  
+    }  
+    return;  
+  }  
+  
+  if(activeTool==='select'&&!placingBlockType){  
+    const pin=hitTestPin(x,y);  
+    if(pin){  
+      pin.done=!pin.done;  
+      updateShoppingUI();  
+      showToast(pin.done?'✅ '+pin.name+' erledigt':'↩ '+pin.name+' zurückgesetzt');  
+      return;  
+    }  
+  }  
+  
+  if(activeTool==='delete'){  
+    const b=hitTest(x,y);  
+    if(b){blocks=blocks.filter(bl=>bl.id!==b.id);selectedBlock=null;render();}  
+    return;  
+  }  
+  
+  const b=hitTest(x,y);  
+  if(b&&doubleTap){  
+    openTextEdit(b,window.innerWidth/2,Math.min(window.innerHeight*0.4,300));  
+  }  
+}  
+  
+// ════════════════════════════════════════  
+//  TOOLS  
+// ════════════════════════════════════════  
+function selectTool(tool,el){  
+  if(shoppingMode) return;  
+  activeTool=tool;  
+  document.querySelectorAll('.palette-item[data-tool]').forEach(i=>i.classList.remove('selected-tool'));  
+  el.classList.add('selected-tool');  
+  document.querySelectorAll('.palette-item[data-block]').forEach(i=>i.classList.remove('placing-mode'));  
+  placingBlockType=null;  
+  canvas.style.cursor=tool==='delete'?'not-allowed':'default';  
+  hidePlaceBanner();  
+  if(window.innerWidth<=768){  
+    document.getElementById('palette').classList.add('collapsed');  
+    document.getElementById('toggle-left').textContent='☰';  
+  }  
+}  
+window.selectTool=selectTool;  
+  
+function toggleLeftPanel(){  
+  const p=document.getElementById('palette');  
+  p.classList.toggle('collapsed');  
+  document.getElementById('toggle-left').textContent=p.classList.contains('collapsed')?'☰':'✕';  
+}  
+window.toggleLeftPanel=toggleLeftPanel;  
+  
+function toggleRightPanel(){  
+  const p=document.getElementById('shopping-panel');  
+  p.classList.toggle('collapsed');  
+  document.getElementById('toggle-right').textContent=p.classList.contains('collapsed')?'🛒':'✕';  
+}  
+window.toggleRightPanel=toggleRightPanel;  
+  
+// ════════════════════════════════════════  
+//  SHOPPING MODE  
+// ════════════════════════════════════════  
+function applyShoppingModeUI(){  
+  document.body.classList.toggle('shopping-mode', shoppingMode);  
+  const btn = document.getElementById('btn-shopping-mode');  
+  if (btn) {  
+    btn.classList.toggle('active', shoppingMode);  
+    btn.textContent = shoppingMode ? '🛍 Einkaufsmodus aktiv' : '🛒 Einkaufsmodus';  
+  }  
+  // Mobile Dropdown-Text aktualisieren  
+  const ddBtn = document.getElementById('dropdown-shopping-mode');  
+  if (ddBtn) {  
+    ddBtn.querySelector('span').textContent = shoppingMode ? '🛍 Einkaufsmodus aktiv' : '🛒 Einkaufsmodus';  
+  }  
+  if (shoppingMode) {  
+    placingBlockType = null;  
+    placingItem = null;  
+    closeCtxMenu();  
+    closeTextPopup();  
+    hidePlaceBanner();  
+    document.querySelectorAll('.palette-item').forEach(i=>i.classList.remove('placing-mode'));  
+    canvas && (canvas.style.cursor='default');  
+  }  
+}  
+function toggleShoppingMode(){  
+  shoppingMode = !shoppingMode;  
+  applyShoppingModeUI();  
+  if (shoppingMode) {  
+    if (window.innerWidth <= 768) {  
+      document.getElementById('shopping-panel').classList.remove('collapsed');  
+      document.getElementById('toggle-right').textContent = '✕';  
+    }  
+    showToast('🛒 Einkaufsmodus aktiviert');  
+  } else {  
+    showToast('🖱 Bearbeitungsmodus aktiviert');  
+  }  
+}  
+window.toggleShoppingMode = toggleShoppingMode;  
+  
+// ════════════════════════════════════════  
+//  CONTEXT MENU  
+// ════════════════════════════════════════  
+function closeCtxMenu(){document.getElementById('ctx-menu').classList.remove('show');}  
+window.closeCtxMenu=closeCtxMenu;  
+window.ctxEdit=()=>{closeCtxMenu();if(ctxTarget)openTextEdit(ctxTarget,window.innerWidth/2,window.innerHeight*0.4);};  
+window.ctxDuplicate=()=>{closeCtxMenu();if(!ctxTarget)return;const c={...ctxTarget,id:nextId++,x:ctxTarget.x+20,y:ctxTarget.y+20};blocks.push(c);selectedBlock=c;render();};  
+window.ctxDelete=()=>{closeCtxMenu();if(!ctxTarget)return;blocks=blocks.filter(b=>b.id!==ctxTarget.id);selectedBlock=null;render();};  
+document.addEventListener('click',e=>{if(!e.target.closest('.ctx-menu'))closeCtxMenu();if(!e.target.closest('.text-popup')&&!e.target.closest('#supermarkt-canvas'))closeTextPopup();});  
+  
+// ════════════════════════════════════════  
+//  TEXT EDIT  
+// ════════════════════════════════════════  
+function openTextEdit(block,cx,cy){  
+  textEditTarget=block;  
+  const popup=document.getElementById('text-popup');  
+  const input=document.getElementById('text-popup-input');  
+  input.value=block.customLabel||'';  
+  popup.style.left=Math.max(10,Math.min(cx,window.innerWidth-300))+'px';  
+  popup.style.top=Math.max(60,Math.min(cy,window.innerHeight-100))+'px';  
+  popup.classList.add('show');input.focus();input.select();  
+}  
+function confirmTextEdit(){  
+  if(!textEditTarget)return;  
+  const val=document.getElementById('text-popup-input').value.trim();  
+  textEditTarget.customLabel=val||null;  
+  if(BLOCK_DEFS[textEditTarget.type].isLabel&&val){  
+    const tmp=ctx.font;ctx.font='600 13px DM Sans';  
+    textEditTarget.w=Math.max(60,ctx.measureText(val).width+16);  
+    ctx.font=tmp;  
+  }  
+  closeTextPopup();render();  
+}  
+function cancelTextEdit(){closeTextPopup();}  
+function closeTextPopup(){document.getElementById('text-popup').classList.remove('show');textEditTarget=null;}  
+window.confirmTextEdit=confirmTextEdit;window.cancelTextEdit=cancelTextEdit;  
+  
+// ════════════════════════════════════════  
+//  SHOPPING LIST  
+// ════════════════════════════════════════  
+const COLORS=['#d4726a','#7a9e8a','#c9a05a','#a070c0','#4090c0','#e08050'];  
+let colorIdx=0;  
+  
+function addShoppingItem(){  
+  const input=document.getElementById('sp-new-item');  
+  const name=input.value.trim();if(!name)return;  
+  shoppingItems.push({id:Date.now(),name,color:COLORS[colorIdx++%COLORS.length],placed:false,done:false});  
+  input.value='';updateShoppingUI();  
+}  
+window.addShoppingItem=addShoppingItem;  
+  
+function updateShoppingUI(){  
+  const list=document.getElementById('sp-list');  
+  document.getElementById('sp-market-name').textContent=document.getElementById('market-name').value||'Kein Supermarkt';  
+  if(shoppingItems.length===0){  
+    list.innerHTML='<div class="sp-empty">Produkte hinzufügen, dann auf Karte platzieren 📍</div>';  
+    document.getElementById('sp-progress-bar').style.width='0%';  
+    document.getElementById('sp-stats-text').textContent='0 Produkte';  
+    document.getElementById('sp-done-text').textContent='0 erledigt';  
+    render();return;  
+  }  
+  list.innerHTML='';  
+  shoppingItems.forEach(item=>{  
+    const div=document.createElement('div');  
+    div.className='sp-item'+(item.placed&&!item.done?' placed':'')+(item.done?' done':'')+(placingItem&&placingItem.id===item.id?' placing':'');  
+    div.innerHTML=`  
+      <div class="sp-item-dot" style="${item.placed?'background:'+item.color+';border-color:'+item.color:''}"></div>  
+      <div style="flex:1;min-width:0;">  
+        <div class="sp-item-name">${item.name}</div>  
+        ${item.placed&&!item.done?'<div class="sp-item-loc" style="color:'+item.color+'">📍 Platziert</div>':''}  
+        ${!item.placed&&!item.done?'<div class="sp-item-loc">Antippen → auf Karte platzieren</div>':''}  
+        ${item.done?'<div class="sp-item-loc">✓ Erledigt</div>':''}  
+      </div>  
+      <div class="sp-item-actions">  
+        ${item.placed&&!item.done?`<button class="sp-icon-btn" onclick="markDone(${item.id})">✓</button>`:''}  
+        ${item.done?`<button class="sp-icon-btn" onclick="undoDone(${item.id})">↩</button>`:''}  
+        <button class="sp-icon-btn" onclick="removeItem(${item.id})">✕</button>  
+      </div>`;  
+    if(!item.placed&&!item.done) div.onclick=(e)=>{if(e.target.closest('.sp-icon-btn'))return;startPlacingItem(item);};  
+    list.appendChild(div);  
+  });  
+  const total=shoppingItems.length,done=shoppingItems.filter(i=>i.done).length;  
+  document.getElementById('sp-progress-bar').style.width=(total>0?done/total*100:0)+'%';  
+  document.getElementById('sp-stats-text').textContent=total+' Produkt'+(total!==1?'e':'');  
+  document.getElementById('sp-done-text').textContent=done+' erledigt';  
+  render();  
+}  
+  
+function startPlacingItem(item){  
+  placingItem=item;  
+  canvas.style.cursor='crosshair';  
+  document.getElementById('shopping-panel').classList.add('collapsed');  
+  document.getElementById('toggle-right').textContent='🛒';  
+  showPlaceBanner('📍 Tippe auf die Karte um "'+item.name+'" zu platzieren · Esc = Abbrechen');  
+  updateShoppingUI();  
+}  
+  
+window.markDone=(id)=>{const i=shoppingItems.find(i=>i.id===id);if(i){i.done=true;updateShoppingUI();}};  
+window.undoDone=(id)=>{const i=shoppingItems.find(i=>i.id===id);if(i){i.done=false;updateShoppingUI();}};  
+window.removeItem=(id)=>{  
+  shoppingItems=shoppingItems.filter(i=>i.id!==id);  
+  if(placingItem&&placingItem.id===id){placingItem=null;canvas.style.cursor='default';hidePlaceBanner();}  
+  updateShoppingUI();  
+};  
+  
+// ════════════════════════════════════════  
+//  PLACE BANNER  
+// ════════════════════════════════════════  
+function showPlaceBanner(msg){  
+  const b=document.getElementById('place-banner');  
+  b.textContent=msg; b.classList.add('show');  
+}  
+function hidePlaceBanner(){document.getElementById('place-banner').classList.remove('show');}  
+  
+// ════════════════════════════════════════  
+//  SAVE / LOAD  
+// ════════════════════════════════════════  
+function cleanForFirestore(obj){  
+  if(Array.isArray(obj))return obj.map(cleanForFirestore);  
+  if(obj!==null&&typeof obj==='object'){const out={};for(const[k,v]of Object.entries(obj)){if(v!==undefined)out[k]=cleanForFirestore(v);}return out;}  
+  return obj;  
+}  
+  
+window.saveMap=async()=>{  
+  const name=document.getElementById('market-name').value.trim();  
+  if(!name){showToast('⚠️ Namen eingeben');document.getElementById('market-name').focus();return;}  
+  const data=cleanForFirestore({name,blocks,shoppingItems,nextId,savedAt:new Date().toISOString()});  
+  try{  
+    if(window._saveToFirebase){await window._saveToFirebase(data);showToast('💾 "'+name+'" gespeichert!');}  
+    else{localStorage.setItem('supermarkt_backup',JSON.stringify(data));showToast('💾 Lokal gespeichert');}  
+  }catch(e){showToast('❌ '+e.message);}  
+};  
+  
+window.loadMap=async()=>{  
+  let data=window._pendingLoad;  
+  if(!data&&window._loadFromFirebase)data=await window._loadFromFirebase();  
+  if(!data){showToast('Keine gespeicherte Karte');return;}  
+  blocks=data.blocks||[];shoppingItems=data.shoppingItems||[];  
+  nextId=data.nextId||blocks.length+1;  
+  document.getElementById('market-name').value=data.name||'';  
+  window._pendingLoad=null;  
+  updateShoppingUI();render();  
+  showToast('📂 "'+data.name+'" geladen!');  
+};  
+  
+// ════════════════════════════════════════  
+//  CLEAR / MODAL / TOAST  
+// ════════════════════════════════════════  
+window.confirmClear=()=>{  
+  document.getElementById('modal-title').textContent='Karte leeren?';  
+  document.getElementById('modal-text').textContent='Alle Blöcke und Produkte werden entfernt.';  
+  document.getElementById('modal-confirm-btn').onclick=()=>{blocks=[];selectedBlock=null;render();closeModal();showToast('🗑 Karte geleert');};  
+  document.getElementById('modal').classList.add('show');  
+};  
+function closeModal(){document.getElementById('modal').classList.remove('show');}  
+window.closeModal=closeModal;  
+  
+let toastT;  
+function showToast(msg){  
+  clearTimeout(toastT);const t=document.getElementById('toast');  
+  t.textContent=msg;t.classList.add('show');  
+  toastT=setTimeout(()=>t.classList.remove('show'),3000);  
+}  
+window.showToast=showToast;  
+  
+// ════════════════════════════════════════  
+//  MOBILE DROPDOWN LOGIK  
+// ════════════════════════════════════════  
+function toggleMobileMenu() {  
+  const dd = document.getElementById('mobile-dropdown');  
+  if (!dd) return;  
+  dd.classList.toggle('show');  
+  // Text für Einkaufsmodus-Eintrag aktualisieren  
+  const btn = document.getElementById('dropdown-shopping-mode');  
+  if (btn) {  
+    btn.querySelector('span').textContent = shoppingMode ? '🛍 Einkaufsmodus aktiv' : '🛒 Einkaufsmodus';  
+  }  
+}  
+window.toggleMobileMenu = toggleMobileMenu;  
+  
+// Schließe Dropdown bei Klick außerhalb  
+document.addEventListener('click', function(e) {  
+  const menu = document.getElementById('topbar-menu-mobile');  
+  const dd = document.getElementById('mobile-dropdown');  
+  if (!menu || !dd) return;  
+  if (!menu.contains(e.target)) {  
+    dd.classList.remove('show');  
+  }  
+});  
+  
+// Schließe Dropdown bei Resize (z.B. Wechsel auf Desktop)  
+window.addEventListener('resize', function() {  
+  const dd = document.getElementById('mobile-dropdown');  
+  if (dd && window.innerWidth > 768) {  
+    dd.classList.remove('show');  
+  }  
+});  
+  
+// ════════════════════════════════════════  
+//  KEYBOARD  
+// ════════════════════════════════════════  
+document.addEventListener('keydown',e=>{  
+  if(e.key==='Escape'){  
+    closeCtxMenu();closeTextPopup();  
+    placingItem=null;placingBlockType=null;  
+    document.querySelectorAll('.palette-item').forEach(i=>i.classList.remove('placing-mode'));  
+    canvas&&(canvas.style.cursor='default');  
+    hidePlaceBanner();updateShoppingUI();  
+  }  
+  if((e.key==='Delete'||e.key==='Backspace')&&selectedBlock&&document.activeElement===document.body&&!shoppingMode){  
+    blocks=blocks.filter(b=>b.id!==selectedBlock.id);selectedBlock=null;render();  
+  }  
+  if(e.key==='s'&&(e.ctrlKey||e.metaKey)){e.preventDefault();window.saveMap();}  
+});  
+</script>  
+</body>  
+</html>  
