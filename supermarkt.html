@@ -1138,9 +1138,320 @@ canvas && canvas.addEventListener('touchend', function(e) {
     lastTouchMid = null;  
   }  
 });  
+
+// ════════════════════════════════════════  
+//  TOOLS  
+// ════════════════════════════════════════  
+function selectTool(tool,el){  
+  if(shoppingMode) return;  
+  activeTool=tool;  
+  document.querySelectorAll('.palette-item[data-tool]').forEach(i=>i.classList.remove('selected-tool'));  
+  el.classList.add('selected-tool');  
+  document.querySelectorAll('.palette-item[data-block]').forEach(i=>i.classList.remove('placing-mode'));  
+  placingBlockType=null;  
+  canvas.style.cursor=tool==='delete'?'not-allowed':'default';  
+  hidePlaceBanner();  
+  if(window.innerWidth<=768){  
+    document.getElementById('palette').classList.add('collapsed');  
+    document.getElementById('toggle-left').textContent='☰';  
+  }  
+}  
+window.selectTool=selectTool;  
   
-// ... Rest wie gehabt (keine Änderungen im weiteren Code nötig)  
+function toggleLeftPanel(){  
+  const p=document.getElementById('palette');  
+  p.classList.toggle('collapsed');  
+  document.getElementById('toggle-left').textContent=p.classList.contains('collapsed')?'☰':'✕';  
+}  
+window.toggleLeftPanel=toggleLeftPanel;  
+  
+function toggleRightPanel(){  
+  const p=document.getElementById('shopping-panel');  
+  p.classList.toggle('collapsed');  
+  document.getElementById('toggle-right').textContent=p.classList.contains('collapsed')?'🛒':'✕';  
+}  
+window.toggleRightPanel=toggleRightPanel;  
+  
+// ════════════════════════════════════════  
+//  SHOPPING MODE  
+// ════════════════════════════════════════  
+function applyShoppingModeUI(){  
+  document.body.classList.toggle('shopping-mode', shoppingMode);  
+  const btn = document.getElementById('btn-shopping-mode');  
+  if (btn) {  
+    btn.classList.toggle('active', shoppingMode);  
+    btn.textContent = shoppingMode ? '🛍 Einkaufsmodus aktiv' : '🛒 Einkaufsmodus';  
+  }  
+  // Mobile Dropdown-Text aktualisieren  
+  const ddBtn = document.getElementById('dropdown-shopping-mode');  
+  if (ddBtn) {  
+    ddBtn.querySelector('span').textContent = shoppingMode ? '🛍 Einkaufsmodus aktiv' : '🛒 Einkaufsmodus';  
+  }  
+  if (shoppingMode) {  
+    placingBlockType = null;  
+    placingItem = null;  
+    closeCtxMenu();  
+    closeTextPopup();  
+    hidePlaceBanner();  
+    document.querySelectorAll('.palette-item').forEach(i=>i.classList.remove('placing-mode'));  
+    canvas && (canvas.style.cursor='default');  
+  }  
+}  
+function toggleShoppingMode(){  
+  shoppingMode = !shoppingMode;  
+  applyShoppingModeUI();  
+  if (shoppingMode) {  
+    if (window.innerWidth <= 768) {  
+      document.getElementById('shopping-panel').classList.remove('collapsed');  
+      document.getElementById('toggle-right').textContent = '✕';  
+    }  
+    showToast('🛒 Einkaufsmodus aktiviert');  
+  } else {  
+    showToast('🖱 Bearbeitungsmodus aktiviert');  
+  }  
+}  
+window.toggleShoppingMode = toggleShoppingMode;  
+  
+// ════════════════════════════════════════  
+//  CONTEXT MENU  
+// ════════════════════════════════════════  
+function closeCtxMenu(){document.getElementById('ctx-menu').classList.remove('show');}  
+window.closeCtxMenu=closeCtxMenu;  
+window.ctxEdit=()=>{closeCtxMenu();if(ctxTarget)openTextEdit(ctxTarget,window.innerWidth/2,window.innerHeight*0.4);};  
+window.ctxDuplicate=()=>{closeCtxMenu();if(!ctxTarget)return;const c={...ctxTarget,id:nextId++,x:ctxTarget.x+20,y:ctxTarget.y+20};blocks.push(c);selectedBlock=c;render();};  
+window.ctxDelete=()=>{closeCtxMenu();if(!ctxTarget)return;blocks=blocks.filter(b=>b.id!==ctxTarget.id);selectedBlock=null;render();};  
+document.addEventListener('click',e=>{if(!e.target.closest('.ctx-menu'))closeCtxMenu();if(!e.target.closest('.text-popup')&&!e.target.closest('#supermarkt-canvas'))closeTextPopup();});  
+  
+// ════════════════════════════════════════  
+//  TEXT EDIT  
+// ════════════════════════════════════════  
+function openTextEdit(block,cx,cy){  
+  textEditTarget=block;  
+  const popup=document.getElementById('text-popup');  
+  const input=document.getElementById('text-popup-input');  
+  input.value=block.customLabel||'';  
+  popup.style.left=Math.max(10,Math.min(cx,window.innerWidth-300))+'px';  
+  popup.style.top=Math.max(60,Math.min(cy,window.innerHeight-100))+'px';  
+  popup.classList.add('show');input.focus();input.select();  
+}  
+function confirmTextEdit(){  
+  if(!textEditTarget)return;  
+  const val=document.getElementById('text-popup-input').value.trim();  
+  textEditTarget.customLabel=val||null;  
+  if(BLOCK_DEFS[textEditTarget.type].isLabel&&val){  
+    const tmp=ctx.font;ctx.font='600 13px DM Sans';  
+    textEditTarget.w=Math.max(60,ctx.measureText(val).width+16);  
+    ctx.font=tmp;  
+  }  
+  closeTextPopup();render();  
+}  
+function cancelTextEdit(){closeTextPopup();}  
+function closeTextPopup(){document.getElementById('text-popup').classList.remove('show');textEditTarget=null;}  
+window.confirmTextEdit=confirmTextEdit;window.cancelTextEdit=cancelTextEdit;  
+  
+// ════════════════════════════════════════  
+//  SHOPPING LIST  
+// ════════════════════════════════════════  
+const COLORS=['#d4726a','#7a9e8a','#c9a05a','#a070c0','#4090c0','#e08050'];  
+let colorIdx=0;  
+  
+function addShoppingItem(){  
+  const input=document.getElementById('sp-new-item');  
+  const name=input.value.trim();if(!name)return;  
+  shoppingItems.push({id:Date.now(),name,color:COLORS[colorIdx++%COLORS.length],placed:false,done:false});  
+  input.value='';updateShoppingUI();  
+}  
+window.addShoppingItem=addShoppingItem;  
+  
+// NEU: Im Einkaufsmodus ist die Einkaufsliste voll interaktiv (Abhaken/Zurücksetzen)  
+function updateShoppingUI(){  
+  const list=document.getElementById('sp-list');  
+  document.getElementById('sp-market-name').textContent=document.getElementById('market-name').value||'Kein Supermarkt';  
+  if(shoppingItems.length===0){  
+    list.innerHTML='<div class="sp-empty">Produkte hinzufügen, dann auf Karte platzieren 📍</div>';  
+    document.getElementById('sp-progress-bar').style.width='0%';  
+    document.getElementById('sp-stats-text').textContent='0 Produkte';  
+    document.getElementById('sp-done-text').textContent='0 erledigt';  
+    render();return;  
+  }  
+  list.innerHTML='';  
+  shoppingItems.forEach(item=>{  
+    const div=document.createElement('div');  
+    div.className='sp-item'+(item.placed&&!item.done?' placed':'')+(item.done?' done':'')+(placingItem&&placingItem.id===item.id?' placing':'');  
+    div.innerHTML=`  
+      <div class="sp-item-dot" style="${item.placed?'background:'+item.color+';border-color:'+item.color:''}"></div>  
+      <div style="flex:1;min-width:0;">  
+        <div class="sp-item-name">${item.name}</div>  
+        ${item.placed&&!item.done?'<div class="sp-item-loc" style="color:'+item.color+'">📍 Platziert</div>':''}  
+        ${!item.placed&&!item.done?'<div class="sp-item-loc">Antippen → auf Karte platzieren</div>':''}  
+        ${item.done?'<div class="sp-item-loc">✓ Erledigt</div>':''}  
+      </div>  
+      <div class="sp-item-actions">  
+        ${item.placed&&!item.done?`<button class="sp-icon-btn" onclick="markDone(${item.id})">✓</button>`:''}  
+        ${item.done?`<button class="sp-icon-btn" onclick="undoDone(${item.id})">↩</button>`:''}  
+        <button class="sp-icon-btn" onclick="removeItem(${item.id})">✕</button>  
+      </div>`;  
+    // NEU: Im Einkaufsmodus ist das Abhaken/Zurücksetzen in der Liste immer möglich!  
+    if(!item.placed&&!item.done) {  
+      div.onclick=(e)=>{if(e.target.closest('.sp-icon-btn'))return;startPlacingItem(item);};  
+    } else if (shoppingMode && item.placed) {  
+      // Im Einkaufsmodus: Klick auf das Listenelement toggelt "done"  
+      div.onclick=(e)=>{  
+        if(e.target.closest('.sp-icon-btn'))return;  
+        item.done = !item.done;  
+        updateShoppingUI();  
+        showToast(item.done?'✅ '+item.name+' erledigt':'↩ '+item.name+' zurückgesetzt');  
+      };  
+    }  
+    list.appendChild(div);  
+  });  
+  const total=shoppingItems.length,done=shoppingItems.filter(i=>i.done).length;  
+  document.getElementById('sp-progress-bar').style.width=(total>0?done/total*100:0)+'%';  
+  document.getElementById('sp-stats-text').textContent=total+' Produkt'+(total!==1?'e':'');  
+  document.getElementById('sp-done-text').textContent=done+' erledigt';  
+  render();  
+}  
+  
+function startPlacingItem(item){  
+  placingItem=item;  
+  canvas.style.cursor='crosshair';  
+  document.getElementById('shopping-panel').classList.add('collapsed');  
+  document.getElementById('toggle-right').textContent='🛒';  
+  showPlaceBanner('📍 Tippe auf die Karte um "'+item.name+'" zu platzieren · Esc = Abbrechen');  
+  updateShoppingUI();  
+}  
+  
+window.markDone=(id)=>{  
+  const i=shoppingItems.find(i=>i.id===id);  
+  if(i){  
+    i.done=true;  
+    updateShoppingUI();  
+    showToast('✅ '+i.name+' erledigt');  
+  }  
+};  
+window.undoDone=(id)=>{  
+  const i=shoppingItems.find(i=>i.id===id);  
+  if(i){  
+    i.done=false;  
+    updateShoppingUI();  
+    showToast('↩ '+i.name+' zurückgesetzt');  
+  }  
+};  
+window.removeItem=(id)=>{  
+  shoppingItems=shoppingItems.filter(i=>i.id!==id);  
+  if(placingItem&&placingItem.id===id){placingItem=null;canvas.style.cursor='default';hidePlaceBanner();}  
+  updateShoppingUI();  
+};  
+  
+// ════════════════════════════════════════  
+//  PLACE BANNER  
+// ════════════════════════════════════════  
+function showPlaceBanner(msg){  
+  const b=document.getElementById('place-banner');  
+  b.textContent=msg; b.classList.add('show');  
+}  
+function hidePlaceBanner(){document.getElementById('place-banner').classList.remove('show');}  
+  
+// ════════════════════════════════════════  
+//  SAVE / LOAD  
+// ════════════════════════════════════════  
+function cleanForFirestore(obj){  
+  if(Array.isArray(obj))return obj.map(cleanForFirestore);  
+  if(obj!==null&&typeof obj==='object'){const out={};for(const[k,v]of Object.entries(obj)){if(v!==undefined)out[k]=cleanForFirestore(v);}return out;}  
+  return obj;  
+}  
+  
+window.saveMap=async()=>{  
+  const name=document.getElementById('market-name').value.trim();  
+  if(!name){showToast('⚠️ Namen eingeben');document.getElementById('market-name').focus();return;}  
+  const data=cleanForFirestore({name,blocks,shoppingItems,nextId,savedAt:new Date().toISOString()});  
+  try{  
+    if(window._saveToFirebase){await window._saveToFirebase(data);showToast('💾 "'+name+'" gespeichert!');}  
+    else{localStorage.setItem('supermarkt_backup',JSON.stringify(data));showToast('💾 Lokal gespeichert');}  
+  }catch(e){showToast('❌ '+e.message);}  
+};  
+  
+window.loadMap=async()=>{  
+  let data=window._pendingLoad;  
+  if(!data&&window._loadFromFirebase)data=await window._loadFromFirebase();  
+  if(!data){showToast('Keine gespeicherte Karte');return;}  
+  blocks=data.blocks||[];shoppingItems=data.shoppingItems||[];  
+  nextId=data.nextId||blocks.length+1;  
+  document.getElementById('market-name').value=data.name||'';  
+  window._pendingLoad=null;  
+  updateShoppingUI();render();  
+  showToast('📂 "'+data.name+'" geladen!');  
+};  
+  
+// ════════════════════════════════════════  
+//  CLEAR / MODAL / TOAST  
+// ════════════════════════════════════════  
+window.confirmClear=()=>{  
+  document.getElementById('modal-title').textContent='Karte leeren?';  
+  document.getElementById('modal-text').textContent='Alle Blöcke und Produkte werden entfernt.';  
+  document.getElementById('modal-confirm-btn').onclick=()=>{blocks=[];selectedBlock=null;render();closeModal();showToast('🗑 Karte geleert');};  
+  document.getElementById('modal').classList.add('show');  
+};  
+function closeModal(){document.getElementById('modal').classList.remove('show');}  
+window.closeModal=closeModal;  
+  
+let toastT;  
+function showToast(msg){  
+  clearTimeout(toastT);const t=document.getElementById('toast');  
+  t.textContent=msg;t.classList.add('show');  
+  toastT=setTimeout(()=>t.classList.remove('show'),3000);  
+}  
+window.showToast=showToast;  
+  
+// ════════════════════════════════════════  
+//  MOBILE DROPDOWN LOGIK  
+// ════════════════════════════════════════  
+function toggleMobileMenu() {  
+  const dd = document.getElementById('mobile-dropdown');  
+  if (!dd) return;  
+  dd.classList.toggle('show');  
+  // Text für Einkaufsmodus-Eintrag aktualisieren  
+  const btn = document.getElementById('dropdown-shopping-mode');  
+  if (btn) {  
+    btn.querySelector('span').textContent = shoppingMode ? '🛍 Einkaufsmodus aktiv' : '🛒 Einkaufsmodus';  
+  }  
+}  
+window.toggleMobileMenu = toggleMobileMenu;  
+  
+// Schließe Dropdown bei Klick außerhalb  
+document.addEventListener('click', function(e) {  
+  const menu = document.getElementById('topbar-menu-mobile');  
+  const dd = document.getElementById('mobile-dropdown');  
+  if (!menu || !dd) return;  
+  if (!menu.contains(e.target)) {  
+    dd.classList.remove('show');  
+  }  
+});  
+  
+// Schließe Dropdown bei Resize (z.B. Wechsel auf Desktop)  
+window.addEventListener('resize', function() {  
+  const dd = document.getElementById('mobile-dropdown');  
+  if (dd && window.innerWidth > 768) {  
+    dd.classList.remove('show');  
+  }  
+});  
+  
+// ════════════════════════════════════════  
+//  KEYBOARD  
+// ════════════════════════════════════════  
+document.addEventListener('keydown',e=>{  
+  if(e.key==='Escape'){  
+    closeCtxMenu();closeTextPopup();  
+    placingItem=null;placingBlockType=null;  
+    document.querySelectorAll('.palette-item').forEach(i=>i.classList.remove('placing-mode'));  
+    canvas&&(canvas.style.cursor='default');  
+    hidePlaceBanner();updateShoppingUI();  
+  }  
+  if((e.key==='Delete'||e.key==='Backspace')&&selectedBlock&&document.activeElement===document.body&&!shoppingMode){  
+    blocks=blocks.filter(b=>b.id!==selectedBlock.id);selectedBlock=null;render();  
+  }  
+  if(e.key==='s'&&(e.ctrlKey||e.metaKey)){e.preventDefault();window.saveMap();}  
+});  
 </script>  
-<!-- ... Rest wie gehabt ... -->  
 </body>  
 </html>  
