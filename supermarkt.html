@@ -22,7 +22,7 @@
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif; height:100vh; display:flex; flex-direction:column; overflow:hidden; }
 
-/* ── TOPBAR ── */
+/* TOPBAR */
 .topbar {
   height:54px; background:var(--surface);
   border-bottom:1px solid var(--border);
@@ -55,10 +55,10 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
   border-color:transparent;
 }
 
-/* ── MAIN LAYOUT ── */
+/* MAIN LAYOUT */
 .editor-layout { display:flex; flex:1; overflow:hidden; position:relative; }
 
-/* ── LEFT PANEL ── */
+/* LEFT PANEL */
 .palette {
   width:160px; flex-shrink:0;
   background:var(--surface);
@@ -89,35 +89,28 @@ body { background:var(--bg); color:var(--ink); font-family:'DM Sans',sans-serif;
 .pi-label { font-size:12px; font-weight:500; color:var(--ink); }
 .pi-sub { font-size:9px; color:var(--muted); margin-top:1px; }
 
-/* ── CANVAS ── */
+/* CANVAS */
 .canvas-wrap {
   flex:1; position:relative;
   overflow:auto;
-  background-color: #f9f2ea;
+  background-color:#f9f2ea;
   cursor:default;
 }
-
-#canvas-container {
-  position:relative;
-  transform-origin: 0 0;
-}
-
+#canvas-container { position:relative; transform-origin:0 0; }
 #supermarkt-canvas {
   position:absolute; top:0; left:0;
   touch-action: pan-x pan-y pinch-zoom;
   display:block;
 }
 
-/* Einkaufsmodus: Canvas und linke Palette sperren */
+/* Shopping mode lock */
 body.shopping-mode .palette,
 body.shopping-mode #canvas-wrap {
   pointer-events:none;
 }
-
 body.shopping-mode .shopping-panel {
   pointer-events:auto;
 }
-
 body.shopping-mode #supermarkt-canvas {
   cursor:default !important;
 }
@@ -137,7 +130,7 @@ body.shopping-mode #supermarkt-canvas {
 .toggle-left { left:8px; }
 .toggle-right { right:8px; }
 
-/* ── RIGHT PANEL ── */
+/* RIGHT PANEL */
 .shopping-panel {
   width:240px; flex-shrink:0;
   background:var(--surface); border-left:1px solid var(--border);
@@ -186,7 +179,7 @@ body.shopping-mode #supermarkt-canvas {
 .sp-progress-bar { height:100%; background:var(--accent2); border-radius:2px; transition:width 0.4s ease; }
 .sp-stats { font-size:11px; color:var(--muted); display:flex; justify-content:space-between; }
 
-/* ── PLACE HINT BANNER ── */
+/* PLACE BANNER */
 .place-banner {
   position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px);
   background:var(--accent); color:#fff;
@@ -199,7 +192,7 @@ body.shopping-mode #supermarkt-canvas {
 }
 .place-banner.show { transform:translateX(-50%) translateY(0); }
 
-/* ── CONTEXT MENU ── */
+/* CONTEXT MENU */
 .ctx-menu { position:fixed; z-index:500; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:6px; box-shadow:0 8px 32px var(--shadow); min-width:160px; opacity:0; pointer-events:none; transform:scale(0.95); transition:all 0.15s; }
 .ctx-menu.show { opacity:1; pointer-events:all; transform:scale(1); }
 .ctx-item { padding:12px 14px; border-radius:8px; cursor:pointer; font-size:14px; color:var(--ink); display:flex; align-items:center; gap:8px; transition:background 0.1s; min-height:44px; }
@@ -207,21 +200,48 @@ body.shopping-mode #supermarkt-canvas {
 .ctx-item:hover { background:var(--surface2); }
 .ctx-item.danger { color:var(--accent); }
 
-/* ── TEXT POPUP ── */
+/* TEXT POPUP */
 .text-popup { position:fixed; z-index:600; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px; box-shadow:0 8px 32px var(--shadow); display:none; gap:8px; align-items:center; min-width:280px; }
 .text-popup.show { display:flex; }
 .text-popup input { border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--ink); background:#fff; outline:none; flex:1; min-height:44px; }
 .text-popup input:focus { border-color:var(--accent); }
 
-/* ── MODAL ── */
+/* MODAL */
 .modal-overlay { position:fixed; inset:0; z-index:1000; background:rgba(45,31,26,0.5); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.25s; padding:20px; }
 .modal-overlay.show { opacity:1; pointer-events:all; }
-.modal-box { background:var(--surface); border-radius:20px; padding:24px; max-width:340px; width:100%; box-shadow:0 16px 48px rgba(0,0,0,0.15); }
+.modal-box { background:var(--surface); border-radius:20px; padding:24px; max-width:420px; width:100%; box-shadow:0 16px 48px rgba(0,0,0,0.15); }
 .modal-title { font-family:'Playfair Display',serif; font-size:20px; font-weight:700; margin-bottom:8px; }
 .modal-text { font-size:14px; color:var(--muted); line-height:1.6; margin-bottom:20px; }
-.modal-actions { display:flex; gap:8px; justify-content:flex-end; }
+.modal-actions { display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap; }
 
-/* ── TOAST ── */
+.load-list {
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-top:14px;
+}
+.load-slot {
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:12px;
+  background:#fff;
+  cursor:pointer;
+  text-align:left;
+  transition:all 0.15s;
+}
+.load-slot:hover { border-color:var(--accent); background:var(--surface2); }
+.load-slot-title { font-weight:700; font-size:14px; margin-bottom:4px; }
+.load-slot-sub { font-size:11px; color:var(--muted); line-height:1.4; }
+
+.slot-actions {
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  margin-top:10px;
+}
+.slot-actions .btn { padding:8px 10px; font-size:11px; }
+
+/* TOAST */
 .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(60px); background:var(--ink); color:#fff; padding:12px 20px; border-radius:50px; font-size:14px; z-index:2000; transition:transform 0.35s cubic-bezier(0.34,1.4,0.64,1); white-space:nowrap; box-shadow:0 4px 20px rgba(0,0,0,0.2); max-width:90%; text-align:center; }
 .toast.show { transform:translateX(-50%) translateY(0); }
 
@@ -232,22 +252,18 @@ body.shopping-mode #supermarkt-canvas {
 </head>
 <body>
 
-<!-- TOPBAR -->
 <div class="topbar">
   <div class="topbar-logo">Dr.<span>Buntspecht</span> <span style="color:var(--muted);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:400;">· Marktplaner</span></div>
   <input class="topbar-name" id="market-name" placeholder="Supermarkt…" maxlength="40">
   <div class="topbar-actions">
     <button class="btn btn-ghost mode-btn" id="btn-shopping-mode" onclick="toggleShoppingMode()">🛒 Einkaufsmodus</button>
     <button class="btn btn-ghost" id="btn-clear" onclick="confirmClear()" style="display:none">🗑</button>
-    <button class="btn btn-sage" id="btn-load" onclick="loadMap()" style="display:none">📂</button>
+    <button class="btn btn-sage" id="btn-load" onclick="loadMap()" style="display:none">📂 Laden</button>
     <button class="btn btn-primary" id="btn-save" onclick="saveMap()">💾</button>
   </div>
 </div>
 
-<!-- EDITOR -->
 <div class="editor-layout" id="editor-layout">
-
-  <!-- LEFT PANEL -->
   <div class="palette" id="palette">
     <div class="palette-title">Werkzeuge</div>
     <div class="palette-item selected-tool" data-tool="select" onclick="selectTool('select',this)">
@@ -288,18 +304,15 @@ body.shopping-mode #supermarkt-canvas {
     </div>
   </div>
 
-  <!-- TOGGLE BUTTONS -->
   <button class="toggle-btn toggle-left" id="toggle-left" onclick="toggleLeftPanel()">☰</button>
   <button class="toggle-btn toggle-right" id="toggle-right" onclick="toggleRightPanel()">🛒</button>
 
-  <!-- CANVAS WRAP -->
   <div class="canvas-wrap" id="canvas-wrap">
     <div id="canvas-container">
       <canvas id="supermarkt-canvas"></canvas>
     </div>
   </div>
 
-  <!-- RIGHT PANEL -->
   <div class="shopping-panel" id="shopping-panel">
     <div class="sp-header">
       <div class="sp-title">🛒 Einkaufsliste</div>
@@ -322,7 +335,6 @@ body.shopping-mode #supermarkt-canvas {
   </div>
 </div>
 
-<!-- LOGIN GATE -->
 <div id="login-gate" style="display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px;text-align:center;">
   <div style="font-size:48px;">🔒</div>
   <div style="font-family:'Playfair Display',serif;font-size:22px;color:var(--ink);">Bitte einloggen</div>
@@ -330,28 +342,25 @@ body.shopping-mode #supermarkt-canvas {
   <a href="index.html" class="btn btn-primary" style="margin-top:8px;padding:10px 18px;">← Zur Startseite</a>
 </div>
 
-<!-- PLACE BANNER -->
 <div class="place-banner" id="place-banner">📍 Tippe auf die Karte zum Platzieren · Esc = Abbrechen</div>
 
-<!-- CONTEXT MENU -->
 <div class="ctx-menu" id="ctx-menu">
   <div class="ctx-item" onclick="ctxEdit()">✏️ Text bearbeiten</div>
   <div class="ctx-item" onclick="ctxDuplicate()">📋 Duplizieren</div>
   <div class="ctx-item danger" onclick="ctxDelete()">🗑 Löschen</div>
 </div>
 
-<!-- TEXT POPUP -->
 <div class="text-popup" id="text-popup">
   <input id="text-popup-input" placeholder="Beschriftung…" onkeydown="if(event.key==='Enter')confirmTextEdit()">
   <button class="btn btn-primary" style="padding:8px 14px;" onclick="confirmTextEdit()">OK</button>
   <button class="btn btn-ghost" style="padding:8px 12px;" onclick="cancelTextEdit()">✕</button>
 </div>
 
-<!-- MODAL -->
 <div class="modal-overlay" id="modal">
-  <div class="modal-box">
+  <div class="modal-box" id="modal-box">
     <div class="modal-title" id="modal-title">Karte leeren?</div>
     <div class="modal-text" id="modal-text">Alle Blöcke werden entfernt.</div>
+    <div id="modal-content"></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal()">Abbrechen</button>
       <button class="btn btn-primary" id="modal-confirm-btn">Leeren</button>
@@ -361,11 +370,10 @@ body.shopping-mode #supermarkt-canvas {
 
 <div class="toast" id="toast"></div>
 
-<!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey: "AIzaSyCTSYRwq9G9inKW-bEnLC90I19J4oTTkp8",
@@ -390,22 +398,43 @@ onAuthStateChanged(auth, async user => {
     document.getElementById('palette').classList.add('collapsed');
     document.getElementById('shopping-panel').classList.add('collapsed');
     initCanvas();
-    const snap = await getDoc(doc(db, 'supermarkets', user.uid));
-    if (snap.exists()) { window._pendingLoad = snap.data(); showToast('📂 Gespeicherte Karte gefunden — klick 📂'); }
+    await refreshSaveSlotsCache();
   } else {
     document.getElementById('editor-layout').style.display = 'none';
     document.getElementById('login-gate').style.display = 'flex';
   }
 });
 
-window._saveToFirebase = async (data) => { if (!currentUser) return; await setDoc(doc(db,'supermarkets',currentUser.uid), data); };
-window._loadFromFirebase = async () => { if (!currentUser) return null; const s=await getDoc(doc(db,'supermarkets',currentUser.uid)); return s.exists()?s.data():null; };
+async function refreshSaveSlotsCache() {
+  if (!currentUser) return;
+  const colRef = collection(db, 'supermarkets', currentUser.uid, 'saves');
+  const snap = await getDocs(colRef);
+  window._marketSlots = [];
+  snap.forEach(d => window._marketSlots.push({ id: d.id, ...d.data() }));
+  window._marketSlots.sort((a,b) => (a.slot||0) - (b.slot||0));
+  if (window._marketSlots.length) showToast('📂 Gespeicherte Märkte gefunden');
+}
+
+window._refreshSaveSlotsCache = refreshSaveSlotsCache;
+
+window._saveToFirebase = async (slotId, data) => {
+  if (!currentUser) return;
+  await setDoc(doc(db,'supermarkets',currentUser.uid,'saves',slotId), data);
+};
+
+window._loadFromFirebase = async (slotId) => {
+  if (!currentUser) return null;
+  const s = await getDoc(doc(db,'supermarkets',currentUser.uid,'saves',slotId));
+  return s.exists() ? s.data() : null;
+};
+
+window._deleteSaveFromFirebase = async (slotId) => {
+  if (!currentUser) return;
+  await deleteDoc(doc(db,'supermarkets',currentUser.uid,'saves',slotId));
+};
 </script>
 
 <script>
-// ════════════════════════════════════════
-//  BLOCK DEFINITIONS
-// ════════════════════════════════════════
 const BLOCK_DEFS = {
   'regal':   { w:120, h:28,  color:'#a8e0a8', labelColor:'#2d5a8a' },
   'obst':    { w:70,  h:70,  color:'#f0c080', labelColor:'#2d5a8a' },
@@ -415,9 +444,6 @@ const BLOCK_DEFS = {
   'label':   { w:80,  h:28,  color:'rgba(212,114,106,0.12)', labelColor:'#2d5a8a', isLabel:true }
 };
 
-// ════════════════════════════════════════
-//  STATE
-// ════════════════════════════════════════
 let blocks = [], shoppingItems = [];
 let selectedBlock = null, placingItem = null, placingBlockType = null;
 let activeTool = 'select', ctxTarget = null, textEditTarget = null;
@@ -427,35 +453,29 @@ let nextId = 1;
 const CANVAS_W = 1400;
 const CANVAS_H = 1000;
 let shoppingMode = false;
+let loadPickerMode = false;
+let saveChoiceMode = false;
+let pendingSaveData = null;
+let pendingSaveName = null;
 
-// ════════════════════════════════════════
-//  CANVAS INIT
-// ════════════════════════════════════════
 function initCanvas() {
   canvas = document.getElementById('supermarkt-canvas');
   ctx = canvas.getContext('2d');
-
   canvas.width = CANVAS_W;
   canvas.height = CANVAS_H;
   document.getElementById('canvas-container').style.width = CANVAS_W + 'px';
   document.getElementById('canvas-container').style.height = CANVAS_H + 'px';
-
   canvas.addEventListener('mousedown', onMouseDown);
   canvas.addEventListener('mousemove', onMouseMove);
   canvas.addEventListener('mouseup', onMouseUp);
   canvas.addEventListener('contextmenu', e => e.preventDefault());
-
   canvas.addEventListener('touchstart', onTouchStart, {passive:true});
   canvas.addEventListener('touchend', onTouchEnd, {passive:true});
-
   render();
   updateShoppingUI();
   applyShoppingModeUI();
 }
 
-// ════════════════════════════════════════
-//  RENDER
-// ════════════════════════════════════════
 function render() {
   if (!ctx) return;
   ctx.clearRect(0,0,CANVAS_W,CANVAS_H);
@@ -593,9 +613,7 @@ function hitTest(x,y){
 function nearResize(b,x,y){return Math.hypot(x-(b.x+b.w),y-(b.y+b.h))<14;}
 function snap(v){return Math.round(v/15)*15;}
 
-// ════════════════════════════════════════
-//  BLOCK PLACEMENT
-// ════════════════════════════════════════
+// BLOCK PLACEMENT
 function selectBlockType(blockType,el){
   if(activeTool!=='select' || shoppingMode) return;
   placingBlockType=blockType;
@@ -639,9 +657,7 @@ function placingItemAt(x,y){
   showToast('📍 '+was.name+' platziert');
 }
 
-// ════════════════════════════════════════
-//  MOUSE
-// ════════════════════════════════════════
+// MOUSE
 function onMouseDown(e){
   if(e.button===2)return;
   closeCtxMenu(); closeTextPopup();
@@ -702,9 +718,7 @@ function onMouseMove(e){
 
 function onMouseUp(){ isDraggingBlock=false; }
 
-// ════════════════════════════════════════
-//  TOUCH
-// ════════════════════════════════════════
+// TOUCH
 let _touchStartX=0,_touchStartY=0,_touchStartTime=0,_touchMoved=false;
 let _lastTap=0, _touchDragBlock=null, _touchDragOffX=0, _touchDragOffY=0;
 
@@ -747,9 +761,7 @@ function _onTouchMoveInternal(e){
 
 function onTouchEnd(e){
   canvas.removeEventListener('touchmove',_onTouchMoveInternal);
-  const elapsed=Date.now()-_touchStartTime;
   _touchDragBlock=null;
-
   if(_touchMoved) return;
 
   const{x,y}={x:_touchStartX,y:_touchStartY};
@@ -792,9 +804,7 @@ function onTouchEnd(e){
   }
 }
 
-// ════════════════════════════════════════
-//  TOOLS
-// ════════════════════════════════════════
+// TOOLS
 function selectTool(tool,el){
   if(shoppingMode) return;
   activeTool=tool;
@@ -825,9 +835,7 @@ function toggleRightPanel(){
 }
 window.toggleRightPanel=toggleRightPanel;
 
-// ════════════════════════════════════════
-//  SHOPPING MODE
-// ════════════════════════════════════════
+// SHOPPING MODE
 function applyShoppingModeUI(){
   document.body.classList.toggle('shopping-mode', shoppingMode);
   const btn = document.getElementById('btn-shopping-mode');
@@ -858,9 +866,7 @@ function toggleShoppingMode(){
 }
 window.toggleShoppingMode = toggleShoppingMode;
 
-// ════════════════════════════════════════
-//  CONTEXT MENU
-// ════════════════════════════════════════
+// CONTEXT MENU
 function closeCtxMenu(){document.getElementById('ctx-menu').classList.remove('show');}
 window.closeCtxMenu=closeCtxMenu;
 window.ctxEdit=()=>{closeCtxMenu();if(ctxTarget)openTextEdit(ctxTarget,window.innerWidth/2,window.innerHeight*0.4);};
@@ -868,9 +874,7 @@ window.ctxDuplicate=()=>{closeCtxMenu();if(!ctxTarget)return;const c={...ctxTarg
 window.ctxDelete=()=>{closeCtxMenu();if(!ctxTarget)return;blocks=blocks.filter(b=>b.id!==ctxTarget.id);selectedBlock=null;render();};
 document.addEventListener('click',e=>{if(!e.target.closest('.ctx-menu'))closeCtxMenu();if(!e.target.closest('.text-popup')&&!e.target.closest('#supermarkt-canvas'))closeTextPopup();});
 
-// ════════════════════════════════════════
-//  TEXT EDIT
-// ════════════════════════════════════════
+// TEXT EDIT
 function openTextEdit(block,cx,cy){
   textEditTarget=block;
   const popup=document.getElementById('text-popup');
@@ -895,9 +899,7 @@ function cancelTextEdit(){closeTextPopup();}
 function closeTextPopup(){document.getElementById('text-popup').classList.remove('show');textEditTarget=null;}
 window.confirmTextEdit=confirmTextEdit;window.cancelTextEdit=cancelTextEdit;
 
-// ════════════════════════════════════════
-//  SHOPPING LIST
-// ════════════════════════════════════════
+// SHOPPING LIST
 const COLORS=['#d4726a','#7a9e8a','#c9a05a','#a070c0','#4090c0','#e08050'];
 let colorIdx=0;
 
@@ -963,52 +965,176 @@ window.removeItem=(id)=>{
   updateShoppingUI();
 };
 
-// ════════════════════════════════════════
-//  PLACE BANNER
-// ════════════════════════════════════════
+// PLACE BANNER
 function showPlaceBanner(msg){
   const b=document.getElementById('place-banner');
   b.textContent=msg; b.classList.add('show');
 }
 function hidePlaceBanner(){document.getElementById('place-banner').classList.remove('show');}
 
-// ════════════════════════════════════════
-//  SAVE / LOAD
-// ════════════════════════════════════════
+// SAVE / LOAD WITH 3 SLOTS
 function cleanForFirestore(obj){
   if(Array.isArray(obj))return obj.map(cleanForFirestore);
   if(obj!==null&&typeof obj==='object'){const out={};for(const[k,v]of Object.entries(obj)){if(v!==undefined)out[k]=cleanForFirestore(v);}return out;}
   return obj;
 }
 
-window.saveMap=async()=>{
+function sanitizeSlotName(name){
+  return (name||'').trim().replace(/[^\wäöüÄÖÜß\s\-_.]/g,'').slice(0,40);
+}
+
+function buildSaveData(){
+  const name=document.getElementById('market-name').value.trim();
+  return cleanForFirestore({name,blocks,shoppingItems,nextId,savedAt:new Date().toISOString()});
+}
+
+async function getSaveSlots(){
+  if (!window._marketSlots) await window._refreshSaveSlotsCache?.();
+  return Array.isArray(window._marketSlots) ? [...window._marketSlots].sort((a,b)=>(a.slot||0)-(b.slot||0)) : [];
+}
+
+function createSlotId(slotNum){
+  return `slot_${slotNum}`;
+}
+
+function slotLabel(slotNum){
+  return `Supermarkt ${slotNum}`;
+}
+
+async function saveMap(){
   const name=document.getElementById('market-name').value.trim();
   if(!name){showToast('⚠️ Namen eingeben');document.getElementById('market-name').focus();return;}
-  const data=cleanForFirestore({name,blocks,shoppingItems,nextId,savedAt:new Date().toISOString()});
+  const data=buildSaveData();
+  const slots=await getSaveSlots();
+  const existingBySlot = new Map(slots.map(s => [s.slot, s]));
+
+  let slotToUse = null;
+
+  if (slots.length < 3) {
+    const used = new Set(slots.map(s => s.slot));
+    for (let i=1;i<=3;i++) if (!used.has(i)) { slotToUse = i; break; }
+  } else {
+    openSlotChoiceModal('Speicherplatz wählen', 'Es sind bereits 3 Supermärkte gespeichert. Wähle aus, welchen Slot du überschreiben möchtest.', [
+      { text: 'Slot 1', action: async () => { closeModal(); await doSaveToSlot(1, data, name); } },
+      { text: 'Slot 2', action: async () => { closeModal(); await doSaveToSlot(2, data, name); } },
+      { text: 'Slot 3', action: async () => { closeModal(); await doSaveToSlot(3, data, name); } }
+    ]);
+    return;
+  }
+
+  if (slotToUse == null) {
+    showToast('⚠️ Kein freier Speicherplatz');
+    return;
+  }
+  await doSaveToSlot(slotToUse, data, name);
+}
+
+async function doSaveToSlot(slotNum, data, name){
   try{
-    if(window._saveToFirebase){await window._saveToFirebase(data);showToast('💾 "'+name+'" gespeichert!');}
-    else{localStorage.setItem('supermarkt_backup',JSON.stringify(data));showToast('💾 Lokal gespeichert');}
-  }catch(e){showToast('❌ '+e.message);}
-};
+    const slotId = createSlotId(slotNum);
+    const payload = {
+      ...data,
+      slot: slotNum,
+      slotId,
+      displayName: name,
+      savedAt: new Date().toISOString()
+    };
+    if(window._saveToFirebase){
+      await window._saveToFirebase(slotId, payload);
+      await window._refreshSaveSlotsCache?.();
+      showToast(`💾 "${name}" in Slot ${slotNum} gespeichert`);
+    } else {
+      const backup = await getSaveSlots();
+      localStorage.setItem('supermarkt_backup_slots', JSON.stringify([...backup, payload].slice(0,3)));
+      showToast(`💾 Lokal in Slot ${slotNum} gespeichert`);
+    }
+  }catch(e){
+    showToast('❌ '+e.message);
+  }
+}
 
-window.loadMap=async()=>{
-  let data=window._pendingLoad;
-  if(!data&&window._loadFromFirebase)data=await window._loadFromFirebase();
-  if(!data){showToast('Keine gespeicherte Karte');return;}
-  blocks=data.blocks||[];shoppingItems=data.shoppingItems||[];
-  nextId=data.nextId||blocks.length+1;
-  document.getElementById('market-name').value=data.name||'';
-  window._pendingLoad=null;
-  updateShoppingUI();render();
-  showToast('📂 "'+data.name+'" geladen!');
-};
+function openSlotChoiceModal(title, text, choices){
+  const modal = document.getElementById('modal');
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-text').textContent = text;
+  const content = document.getElementById('modal-content');
+  content.innerHTML = '';
+  const wrap = document.createElement('div');
+  wrap.className = 'slot-actions';
+  choices.forEach(choice => {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-sage';
+    btn.textContent = choice.text;
+    btn.onclick = choice.action;
+    wrap.appendChild(btn);
+  });
+  content.appendChild(wrap);
+  document.getElementById('modal-confirm-btn').style.display = 'none';
+  modal.classList.add('show');
+}
 
-// ════════════════════════════════════════
-//  CLEAR / MODAL / TOAST
-// ════════════════════════════════════════
+async function loadMap(){
+  const slots = await getSaveSlots();
+  if (!slots.length) { showToast('Keine gespeicherte Karte'); return; }
+
+  const content = document.getElementById('modal-content');
+  content.innerHTML = '';
+
+  document.getElementById('modal-title').textContent = 'Supermarkt laden';
+  document.getElementById('modal-text').textContent = 'Wähle einen deiner bis zu 3 gespeicherten Supermärkte aus.';
+  document.getElementById('modal-confirm-btn').style.display = 'none';
+
+  const list = document.createElement('div');
+  list.className = 'load-list';
+
+  slots.slice(0,3).forEach((slot, idx) => {
+    const row = document.createElement('div');
+    row.className = 'load-slot';
+    const slotNum = slot.slot || (idx+1);
+    row.innerHTML = `
+      <div class="load-slot-title">${slot.displayName || slot.name || slotLabel(slotNum)} · Slot ${slotNum}</div>
+      <div class="load-slot-sub">
+        Gespeichert: ${slot.savedAt ? new Date(slot.savedAt).toLocaleString('de-DE') : 'unbekannt'}<br>
+        ${Array.isArray(slot.blocks) ? slot.blocks.length : 0} Blöcke · ${Array.isArray(slot.shoppingItems) ? slot.shoppingItems.length : 0} Produkte
+      </div>
+    `;
+    row.onclick = async () => {
+      closeModal();
+      await loadSlot(slotNum);
+    };
+    list.appendChild(row);
+  });
+
+  content.appendChild(list);
+  modal.classList.add('show');
+}
+
+async function loadSlot(slotNum){
+  try{
+    let data = null;
+    const slotId = createSlotId(slotNum);
+    if(window._loadFromFirebase) data = await window._loadFromFirebase(slotId);
+    if(!data){ showToast('Keine gespeicherte Karte in diesem Slot'); return; }
+    blocks=data.blocks||[]; shoppingItems=data.shoppingItems||[];
+    nextId=data.nextId||blocks.length+1;
+    document.getElementById('market-name').value=data.name||'';
+    window._pendingLoad=null;
+    updateShoppingUI(); render();
+    showToast(`📂 "${data.name || slotLabel(slotNum)}" geladen`);
+  }catch(e){
+    showToast('❌ '+e.message);
+  }
+}
+
+window.saveMap = saveMap;
+window.loadMap = loadMap;
+
+// CLEAR / MODAL / TOAST
 window.confirmClear=()=>{
   document.getElementById('modal-title').textContent='Karte leeren?';
   document.getElementById('modal-text').textContent='Alle Blöcke und Produkte werden entfernt.';
+  document.getElementById('modal-content').innerHTML='';
+  document.getElementById('modal-confirm-btn').style.display='inline-flex';
   document.getElementById('modal-confirm-btn').onclick=()=>{blocks=[];selectedBlock=null;render();closeModal();showToast('🗑 Karte geleert');};
   document.getElementById('modal').classList.add('show');
 };
@@ -1023,9 +1149,7 @@ function showToast(msg){
 }
 window.showToast=showToast;
 
-// ════════════════════════════════════════
-//  KEYBOARD
-// ════════════════════════════════════════
+// KEYBOARD
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
     closeCtxMenu();closeTextPopup();
