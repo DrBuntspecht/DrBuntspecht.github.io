@@ -389,8 +389,7 @@ body.shopping-mode .sp-icon-btn {
 <body>  
   
 <!-- TOPBAR -->  
-<div class="topbar">
-  <button class="btn btn-ghost" id="btn-back-main" onclick="window.location.href='index.html'" style="margin-right:8px;">← Zurück</button>  
+<div class="topbar">  
   <div class="topbar-logo">Dr.<span>Buntspecht</span> <span style="color:var(--muted);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:400;">· Marktplaner</span></div>  
   <input class="topbar-name" id="market-name" placeholder="Supermarkt…" maxlength="40">  
   <!-- Desktop-Actions -->  
@@ -403,10 +402,7 @@ body.shopping-mode .sp-icon-btn {
   <!-- Mobile Dropdown -->  
   <div class="topbar-menu-mobile" id="topbar-menu-mobile">  
     <button class="btn btn-ghost mobile-menu-btn" id="btn-mobile-menu" onclick="toggleMobileMenu()">☰</button>  
-    <div class="mobile-dropdown" id="mobile-dropdown">
-     <button class="mobile-menu-item" onclick="window.location.href='index.html';">  
-       <span>← Zurück zur Website</span>  
-     </button>  
+    <div class="mobile-dropdown" id="mobile-dropdown">  
       <button class="mobile-menu-item" onclick="showHelpModal(); toggleMobileMenu();">  
         <span>ℹ️ Bedienungshinweise</span>  
       </button>  
